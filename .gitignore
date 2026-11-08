@@ -1,0 +1,87 @@
+# Unity-generated caches, local settings and build output
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Bb]uild/
+/[Bb]uilds/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+/[Tt]est[Rr]esults/
+/*.log
+/sysinfo.txt
+/crash.dmp
+
+# Generated IDE projects and per-user workspace state
+/.vs/
+/.vscode/
+/.idea/
+/.gradle/
+/.consulo/
+/*.csproj
+/*.unityproj
+/*.sln
+/*.slnx
+/*.suo
+/*.user
+/*.userprefs
+/*.pidb
+/*.booproj
+/*.svd
+/*.pdb
+/*.mdb
+/*.opendb
+/*.VC.db
+/*.DotSettings.user
+
+# Unity-generated asset directories and crash diagnostics
+/Assets/AssetStoreTools/
+/Assets/AssetStoreTools.meta
+/Assets/Plugins/Editor/JetBrains*
+/Assets/Plugins/Editor/JetBrains*.meta
+/Assets/StreamingAssets/aa/
+/Assets/StreamingAssets/aa.meta
+**/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+**/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*.meta
+**/[Aa]ddressable[Aa]ssets[Dd]ata/link.xml*
+**/[Aa]ddressables_[Bb]uild[Rr]eport.*
+**/[Bb]urst[Dd]ebug[Ii]nformation[Dd]o[Nn]ot[Ss]hip/
+**/[Bb]urst[Dd]ebug[Ii]nformation[Dd]o[Nn]ot[Ss]hip.meta
+
+# Local documentation, including Unity companion metadata
+**/[Dd]ocs/
+**/[Dd]ocs.meta
+**/[Dd]ocumentation/
+**/[Dd]ocumentation.meta
+**/\[Local\]Docs/
+**/\[Local\]Docs.meta
+*.md
+*.md.meta
+*.doc
+*.doc.meta
+*.docx
+*.docx.meta
+*.pdf
+*.pdf.meta
+*.ppt
+*.ppt.meta
+*.pptx
+*.pptx.meta
+*.odt
+*.odt.meta
+*.rst
+*.rst.meta
+
+# OS and editor temporary files
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+*~
+*.swp
+*.swo
+
+# Keep Assets and their .meta files, Packages (including packages-lock.json),
+# and ProjectSettings (including ProjectVersion.txt) under version control.
+# Native plugins and authored binary assets must also remain versioned.
