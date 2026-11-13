@@ -58,7 +58,7 @@ namespace DelayNoMore.LightPath
             rect.anchoredPosition = new Vector2(-24, 0);
             rect.sizeDelta = new Vector2(220, 192);
             _viewChoices = new Button[3];
-            string[] labels = { "2D 关注", "投影仪", "投影面板" };
+            string[] labels = { GameText.Get("View.World"), GameText.Get("View.Repair"), GameText.Get("View.Projection") };
             for (int i = 0; i < _views.Length; i++)
             {
                 var item = new GameObject(labels[i], typeof(RectTransform), typeof(Image), typeof(Button));

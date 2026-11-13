@@ -2446,3 +2446,18 @@ MonoBehaviour:
     NormalPlay: 0
     Component: TMP
     Value: "\u8df3\u8f6c\u5230\u6240\u9009\u623f\u95f4"
+  - Key: View.World
+    Screen: HUD
+    NormalPlay: 1
+    Component: TMP
+    Value: "2D \u5173\u6ce8"
+  - Key: View.Repair
+    Screen: HUD
+    NormalPlay: 1
+    Component: TMP
+    Value: "\u6295\u5f71\u4eea"
+  - Key: View.Projection
+    Screen: HUD
+    NormalPlay: 1
+    Component: TMP
+    Value: "\u6295\u5f71\u9762\u677f"
