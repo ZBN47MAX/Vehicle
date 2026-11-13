@@ -139,7 +139,7 @@ namespace DelayNoMore.LightPath.Editor
                 AssetDatabase.CreateAsset(level.Config, configPath);
                 created.Add(configPath);
                 LightRoomDefinition definition = CreateInstance<LightRoomDefinition>();
-                definition.Configure(System.IO.Path.GetFileNameWithoutExtension(path), "获得滤镜能力，利用投影与颜色找到出口", false);
+                definition.Configure(System.IO.Path.GetFileNameWithoutExtension(path), "获得滤镜能力，利用投影与颜色找到出口");
                 string rulesPath = AssetDatabase.GenerateUniqueAssetPath(System.IO.Path.ChangeExtension(path, null) + "-Room.asset");
                 AssetDatabase.CreateAsset(definition, rulesPath);
                 created.Add(rulesPath);
@@ -190,7 +190,7 @@ namespace DelayNoMore.LightPath.Editor
             GameObject spawn = Child(root, "出生点", new Vector3(-8, 1, 0));
             GameObject exit = CubeChild(root, "出口", new Vector3(8, 1, 0), new Vector3(.5f, 2, .2f), material);
             exit.AddComponent<LevelExit>();
-            room.Configure(definition, surface, null, new[] { platform }, spawn.transform, exit.transform, screen.GetComponent<Renderer>());
+            room.Configure(definition, surface, new[] { platform }, spawn.transform, exit.transform, screen.GetComponent<Renderer>());
             return room;
         }
         /** @brief 新建空白房间并加入当前关卡，共享本关参数。 */
@@ -218,7 +218,7 @@ namespace DelayNoMore.LightPath.Editor
             try
             {
                 LightRoomDefinition definition = CreateInstance<LightRoomDefinition>();
-                definition.Configure(System.IO.Path.GetFileNameWithoutExtension(path), "利用投影与颜色探索房间", false);
+                definition.Configure(System.IO.Path.GetFileNameWithoutExtension(path), "利用投影与颜色探索房间");
                 AssetDatabase.CreateAsset(definition, definitionPath);
                 definitionCreated = true;
                 LightRoom room = CreateBlankRoom(System.IO.Path.GetFileNameWithoutExtension(path), level.Config, definition, preview);

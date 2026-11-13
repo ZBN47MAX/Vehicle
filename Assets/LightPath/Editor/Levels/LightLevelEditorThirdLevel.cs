@@ -47,7 +47,7 @@ namespace DelayNoMore.LightPath.Editor
                 for (int index = 0; index < 7; index++)
                 {
                     var definition = CreateInstance<LightRoomDefinition>();
-                    definition.Configure(ThirdTitles[index], ThirdHints[index], false);
+                    definition.Configure(ThirdTitles[index], ThirdHints[index]);
                     var data = new SerializedObject(definition);
                     string titleKey = "Level3.Room" + index + ".Title", hintKey = "Level3.Room" + index + ".Hint";
                     data.FindProperty("_titleKey").stringValue = titleKey;
@@ -214,7 +214,7 @@ namespace DelayNoMore.LightPath.Editor
             checkpoint.GetComponent<ColorPlatform>().Configure(LightGameConfig.RedColorIndex);
             checkpoint.transform.localRotation = Quaternion.Euler(0, 0, 45);
             checkpoint.GetComponent<MeshRenderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/LightPath/Prefabs/Markers/Checkpoint.mat");
-            room.Configure(room.Definition, room.Surface, null, root.GetComponentsInChildren<ColorPlatform>(true), root.transform.Find("出生点"),
+            room.Configure(room.Definition, room.Surface, root.GetComponentsInChildren<ColorPlatform>(true), root.transform.Find("出生点"),
                 index == 6 ? root.transform.Find("出口") : null, root.transform.Find("幕布").GetComponent<Renderer>());
             var sources = new SerializedObject(room.Surface).FindProperty("_sources");
             ProjectionSource[] all = root.GetComponentsInChildren<ProjectionSource>(true);

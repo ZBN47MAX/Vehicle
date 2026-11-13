@@ -13,13 +13,16 @@ namespace DelayNoMore.LightPath
         private RepairLensDrag _lensDrag;
         /** @brief 是否正在显示整局维修视图。 */
         private bool RepairVisible => _ready && _started && !_paused && !_transitioning && _editing && _repairFocus && _repair != null;
-        /** @brief 验证配置并建立全新整局维修状态；未绑定时保留旧玩法。@return 是否初始化成功 */
+        /** @brief 验证配置并建立全新整局维修状态；未绑定时停止初始化。@return 是否初始化成功 */
         private bool InitializeRepair()
         {
             _repair = null;
             _repairDrag = -1;
             if (!_repairLayout)
-                return true;
+            {
+                Debug.LogError(GameText.Get("LightGameStage.InitializeStage.002"), this);
+                return false;
+            }
             if (!_repairLayout.TryValidate(out string error))
             {
                 Debug.LogError(GameText.Get("LightGameRepair.InitializeRepair.001") + error, this);
@@ -39,8 +42,6 @@ namespace DelayNoMore.LightPath
         {
             if (_repair != null)
                 _repair.Tick(seconds);
-            else
-                Room.Tick(seconds);
         }
         /** @brief 共用维修输入：折镜点击八向切换，透镜按住并瞄准连续角度。 */
         private void OperateRepair(int index, Vector2 point, bool valid)

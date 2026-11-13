@@ -22,7 +22,7 @@ namespace DelayNoMore.LightPath
         /** @brief 游戏唯一关卡入口，按顺序读取关卡文件。 */
         [SerializeField, InspectorName("关卡文件"), Tooltip("拖入ProjectionLevel关卡资产，按数组顺序游玩")] private ProjectionLevel[] _levels = new ProjectionLevel[0];
         /** @brief 整局共用的维修布局配置；运行时只读，动态状态由维修会话持有。 */
-        [SerializeField, InspectorName("维修光路配置"), Tooltip("拖入维修光路编辑器保存的 RepairLayout。绑定后整局共享计时、目标阶段与机关朝向，替代各房间的旧维修装置；不绑定则保留旧玩法。")]
+        [SerializeField, InspectorName("维修光路配置"), Tooltip("拖入维修光路编辑器保存的 RepairLayout。整局共享计时、目标阶段与机关朝向；运行必需。")]
         private RepairLayout _repairLayout;
         /** @brief 当前房间编号。 */
         private int _roomIndex;
