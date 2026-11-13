@@ -63,11 +63,10 @@ namespace DelayNoMore.LightPath.Tests
         {
             var panel = UnityEngine.Object.FindAnyObjectByType<LightDebugPanel>();
             panel.SetVisible(true);
-            TMP_Text label = Read<TMP_Text>(panel, "_blackoutLabel");
-            var button = label.GetComponentInParent<UnityEngine.UI.Button>();
+            var toggle = Read<UnityEngine.UI.Toggle>(panel, "_blackoutToggle");
             Assert.That(_game.DebugBlackout, Is.False);
             StageView view = _stage.View;
-            button.onClick.Invoke();
+            toggle.isOn = true;
             Assert.That(_game.DebugBlackout && _game.DebugPowerForced, Is.True);
             panel.SetVisible(false);
             yield return null;
@@ -80,6 +79,51 @@ namespace DelayNoMore.LightPath.Tests
             _game.DebugSetBlackout(true);
             _game.Restart();
             Assert.That(_game.DebugPowerForced, Is.False);
+        }
+        /** @brief 从暂停3D启用浮空后，实际UIS四向键移动角色，关闭面板或断光不吞输入。 */
+        [UnityTest] public IEnumerator Noclip_WasdMovesTransformInAllFourDirections()
+        {
+            InputSettings original = InputSystem.settings;
+            HideFlags flags = original.hideFlags;
+            InputSettings settings = UnityEngine.Object.Instantiate(original);
+            original.hideFlags = HideFlags.DontSave; settings.hideFlags = HideFlags.DontSave;
+            settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+#if UNITY_EDITOR
+            settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+#endif
+            InputSystem.settings = settings;
+            Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                Call(_game, "SetStageView", StageView.Projection, true);
+                _game.SetPaused(true);
+                _game.SetNoclip(true);
+                Assert.That(_stage.View, Is.EqualTo(StageView.World));
+                var panel = UnityEngine.Object.FindAnyObjectByType<LightDebugPanel>();
+                panel.SetVisible(true);
+                _game.DebugSetBlackout(true);
+                var keys = new[] { Key.W, Key.A, Key.S, Key.D };
+                var directions = new[] { Vector2.up, Vector2.left, Vector2.down, Vector2.right };
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    Vector2 start = _player.transform.position;
+                    InputSystem.QueueStateEvent(keyboard, new KeyboardState(keys[i]));
+                    yield return new WaitForSecondsRealtime(.15f);
+                    Assert.That(Vector2.Dot((Vector2)_player.transform.position - start, directions[i]), Is.GreaterThan(.05f), keys[i].ToString());
+                    InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                    yield return null;
+                }
+                panel.SetVisible(false);
+                Vector3 stopped = _player.transform.position;
+                yield return new WaitForSecondsRealtime(.1f);
+                Assert.That(_player.transform.position, Is.EqualTo(stopped));
+                Assert.That(_player.simulated, Is.False);
+            }
+            finally
+            {
+                InputSystem.RemoveDevice(keyboard); InputSystem.settings = original; original.hideFlags = flags;
+                UnityEngine.Object.Destroy(settings);
+            }
         }
         /** @brief 重生只重置复活房间，保留其他已访问房间的通路姿态。 */
         [UnityTest] public IEnumerator Respawn_PreservesOtherVisitedRoomPose()

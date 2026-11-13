@@ -39,6 +39,12 @@ namespace DelayNoMore.LightPath
             _jumpUntil = 0;
             _checkpointContacts.Clear();
             Physics2D.SyncTransforms();
+            if (enabled && _started)
+            {
+                if (_stage && _stage.Ready) SetStageView(StageView.World, true);
+                else { _editing = false; _repairFocus = false; }
+                SetPaused(false);
+            }
         }
         /** @brief 正常游戏重开或退出时清理调试浮空。 */
         private void ResetNoclip()
@@ -49,13 +55,14 @@ namespace DelayNoMore.LightPath
             _player.simulated = _noclipWasSimulated;
             _player.linearVelocity = Vector2.zero;
         }
-        /** @brief 在二维平面按统一UIS动作浮空，鼠标操作UI时停止移动。 */
+        /** @brief 在二维平面按统一UIS动作浮空；鼠标停在调试控件上不吞掉键盘输入。 */
         private void MoveNoclip()
         {
-            if (UnityEngine.EventSystems.EventSystem.current && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
             Vector2 movement = Action("DebugMove").ReadValue<Vector2>();
             float speed = _config.NoclipSpeed * (Action("DebugBoost").IsPressed() ? _config.NoclipBoost : 1);
-            _player.position += Vector2.ClampMagnitude(movement, 1) * (speed * Time.unscaledDeltaTime);
+            Vector2 position = (Vector2)_player.transform.position + Vector2.ClampMagnitude(movement, 1) * (speed * Time.unscaledDeltaTime);
+            _player.position = position;
+            _player.transform.position = new Vector3(position.x, position.y, _player.transform.position.z);
             Physics2D.SyncTransforms();
         }
         /** @brief 当前有效断光状态。 */
