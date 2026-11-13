@@ -130,26 +130,36 @@ namespace DelayNoMore.LightPath
             Room.gameObject.SetActive(true);
             _config = _levels[level].Config;
             _menu.BindConfig(_config, this);
+            _player.gravityScale = _config.GravityScale;
+            _player.position = Room.Spawn;
+            _stage.ConfigureProjection(Room.Surface);
+            Room.Surface.SetFocus(_player.position);
             if (!_visited[_roomIndex]) Room.ResetRoom();
             _visited[_roomIndex] = true;
             _selected = 0;
             _repairDrag = -1;
             _preview = false;
             _checkpointContacts.Clear();
-            _player.position = Room.Spawn;
             _player.linearVelocity = Vector2.zero;
+            if (_playerAnimation) _playerAnimation.ResetPose();
+            _jumpUntil = 0;
+            _groundedAt = -10;
             _roomTravelUntil = Time.unscaledTime + .3f;
             UpdateCamera();
-            if (_stage) _stage.ConfigureProjection(Room.Surface);
             Room.Surface.SetFocus(_player.position);
             Room.Surface.Invalidate();
             Room.Surface.Rebuild();
             Physics2D.SyncTransforms();
-            if (!Room.HasSpawn || !Room.Surface.Bounds.Contains(_player.position) || Room.Overlaps(_body.bounds, _color, false))
+            Bounds playerBounds = Noclip ? _noclipShape : _body.bounds;
+            if (Noclip) playerBounds.center += (Vector3)_player.position;
+            if (!Room.Powered || !Room.HasSpawn || !Room.Surface.Bounds.Contains(playerBounds.min) || !Room.Surface.Bounds.Contains(playerBounds.max) || Room.Overlaps(playerBounds, _color, false))
             {
                 SetNoclip(true);
                 if (!Room.Surface.Bounds.Contains(_player.position)) _player.position = Room.Surface.Bounds.center;
             }
+            Room.Surface.SetFocus(_player.position);
+            Room.Surface.Rebuild();
+            Physics2D.SyncTransforms();
             if (_stage) SetStageView(StageView.World, true);
             else { _editing = false; _repairFocus = false; }
             ApplyState();

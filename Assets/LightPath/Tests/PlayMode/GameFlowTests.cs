@@ -58,6 +58,28 @@ namespace DelayNoMore.LightPath.Tests
             _game.SetNoclip(false);
             return rooms[index].GetComponentInChildren<RoomCheckpoint>(true);
         }
+        /** @brief 无出生点和断光状态下反复跳房，角色仍可见，投影加载中心跟随目的地。 */
+        [UnityTest] public IEnumerator DebugJump_RestoresPlayerAndProjectionAcrossRooms()
+        {
+            _game.DebugSetBlackout(true);
+            _game.DebugJump(2, 1);
+            yield return null;
+            Assert.That(_game.Noclip, Is.True);
+            Assert.That(_game.Room.Surface.Bounds.Contains(_player.position), Is.True);
+            foreach (Renderer renderer in _player.GetComponentsInChildren<Renderer>())
+                Assert.That(renderer.enabled, Is.True);
+            _game.DebugSetBlackout(false);
+            for (int repeat = 0; repeat < 3; repeat++)
+            {
+                _game.DebugJump(0, 0);
+                _game.DebugJump(2, 1);
+                yield return null;
+                Assert.That(_game.Room.gameObject.activeInHierarchy, Is.True);
+                Assert.That(_game.Room.Surface.LoadedChunks, Is.GreaterThan(0));
+                Assert.That(_player.gravityScale, Is.EqualTo(Read<LightGameConfig>(_game, "_config").GravityScale));
+                Assert.That(_player.GetComponentInChildren<SpriteRenderer>().sprite, Is.Not.Null);
+            }
+        }
         /** @brief 调试断光可双向强制，关闭面板仍保持，重开清除且不改变视角。 */
         [UnityTest] public IEnumerator DebugBlackout_OverridesPowerUntilRestoredOrRestarted()
         {
