@@ -21,6 +21,8 @@ namespace DelayNoMore.LightPath
             public ProjectionMeshData Data;
             /** @brief 世界到模型变换。 */
             public Matrix4x4 Inverse;
+            /** @brief 正向矩阵供轮廓计算复用。 */
+            public Matrix4x4 Forward;
         }
         /** @brief 是否有模型；有模型时不可退化成简化Collider。 */
         public bool HasMeshes { get; private set; }
@@ -30,7 +32,7 @@ namespace DelayNoMore.LightPath
             Refresh();
             foreach (Part part in _parts)
             {
-                Matrix4x4 matrix = part.Inverse.inverse;
+                Matrix4x4 matrix = part.Forward;
                 foreach (Vector3 point in part.Data.Vertices)
                     yield return matrix.MultiplyPoint3x4(point);
             }
@@ -43,6 +45,34 @@ namespace DelayNoMore.LightPath
                     yield return bounds.center + Vector3.Scale(bounds.extents,
                         new Vector3((corner & 1) == 0 ? -1 : 1, (corner & 2) == 0 ? -1 : 1, (corner & 4) == 0 ? -1 : 1));
             }
+        }
+        /** @brief 投影轮廓缓存签名，不含颜色与房间裁剪。 */
+        private int _hullSignature;
+        /** @brief 最近姿态的真实单环轮廓；空值表示应回退。 */
+        private Vector2[] _hull;
+        /** @brief 失败轮廓也缓存，避免同一帧各分块重复检查复杂模型。 */
+        private bool _contourCached;
+        /** @brief 仅对单个闭合网格的简单投影轮廓提供精确快路径，其他形状回退原求解器。@param surface 投影面 @param hull 未裁剪轮廓 @return 是否适用 */
+        public bool TryProjectionContour(ProjectionSurface surface, out Vector2[] hull)
+        {
+            hull = null;
+            if (_parts.Count != 1 || MissingMeshes != 0) return false;
+            int signature = Signature ^ surface.ProjectionOrigin.GetHashCode() ^ surface.transform.position.z.GetHashCode();
+            if (_contourCached && signature == _hullSignature) { hull = _hull; return hull != null; }
+            _contourCached = true; _hullSignature = signature; _hull = null;
+            float depth = surface.transform.position.z - surface.ProjectionOrigin.z;
+            if (Mathf.Abs(depth) < .0001f) return false;
+            var points = new List<Vector2>();
+            foreach (Vector3 vertex in _parts[0].Data.Vertices)
+            {
+                Vector3 world = _parts[0].Forward.MultiplyPoint3x4(vertex);
+                float fraction = (world.z - surface.ProjectionOrigin.z) / depth;
+                if (fraction <= .0001f || fraction >= 1) return false;
+                points.Add(surface.ProjectPoint(world));
+            }
+            if (!_parts[0].Data.TrySilhouette(points.ToArray(), out Vector2[] candidate)) return false;
+            _hull = candidate; _hullSignature = signature;
+            hull = _hull; return hull.Length >= 3;
         }
         /** @brief 无法读取或不受支持的网格数量。 */
         public int MissingMeshes { get; private set; }
@@ -96,7 +126,7 @@ namespace DelayNoMore.LightPath
                     world.Encapsulate(matrix.MultiplyPoint3x4(local.center + Vector3.Scale(local.extents, new Vector3((corner & 1) == 0 ? -1 : 1, (corner & 2) == 0 ? -1 : 1, (corner & 4) == 0 ? -1 : 1))));
                 if (_parts.Count == 0) Bounds = world;
                 else { Bounds merged = Bounds; merged.Encapsulate(world); Bounds = merged; }
-                _parts.Add(new Part { Data = data, Inverse = matrix.inverse });
+                _parts.Add(new Part { Data = data, Inverse = matrix.inverse, Forward = matrix });
             }
             bool changed = hash != Signature;
             Signature = hash;

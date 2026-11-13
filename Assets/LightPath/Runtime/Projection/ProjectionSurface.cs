@@ -304,7 +304,7 @@ namespace DelayNoMore.LightPath
                     if (source && _sourceBounds[source].Overlaps(chunk.Bounds))
                         _candidates.Add(source);
                 chunk.Regions.Clear();
-                if (_candidates.Count > 0)
+                if (_candidates.Count > 0 && !TryBuildContourChunk(chunk))
                 {
                     float cell = _config.CellSize;
                     for (float y = chunk.Bounds.yMin; y < chunk.Bounds.yMax - .00001f; y += cell)
@@ -322,6 +322,42 @@ namespace DelayNoMore.LightPath
             Refresh(_selected, _preview, _powered);
             Physics2D.SyncTransforms();
             LastBuildMilliseconds = timer.Elapsed.TotalMilliseconds;
+        }
+        /** @brief 无重叠闭合网格直接裁剪真实单环投影轮廓，避免逐格光线与数千碰撞路径。@param chunk 脏块 @return 是否已精确构建 */
+        private bool TryBuildContourChunk(Chunk chunk)
+        {
+            var contours = new List<Vector2[]>();
+            var pieces = new List<List<Vector2[]>>();
+            for (int i = 0; i < _candidates.Count; i++)
+            {
+                ProjectionSource source = _candidates[i];
+                if (!source.gameObject.activeInHierarchy || !source.Definition || !source.Geometry.TryProjectionContour(this, out Vector2[] hull)) return false;
+                var sourcePieces = ProjectionContours.ConvexPieces(hull);
+                if (sourcePieces.Count == 0) return false;
+                pieces.Add(sourcePieces);
+                Vector2[] clipped = ProjectionContours.Clip(ProjectionContours.Hull(new List<Vector2>(hull)), chunk.Bounds);
+                for (int j = 0; j < i; j++) if (ProjectionContours.Overlaps(clipped, contours[j])) return false;
+                contours.Add(clipped);
+            }
+            for (int i = 0; i < _candidates.Count; i++)
+            {
+                ProjectionSource source = _candidates[i];
+                bool colored = source.Definition.Transmissive;
+                Color color = Color.black;
+                if (colored)
+                {
+                    float weight = source.Definition.Weight;
+                    color = (source.Definition.GetColor(_config).linear * weight / weight).gamma;
+                    color.a = 1;
+                }
+                var label = new ProjectionRegion(default, color, colored, colored && source.Definition.Portal ? source : null, true);
+                foreach (Vector2[] piece in pieces[i])
+                {
+                    Vector2[] polygon = ProjectionContours.Clip(piece, chunk.Bounds);
+                    if (polygon.Length >= 3) AddPolygon(chunk, label, polygon);
+                }
+            }
+            return true;
         }
         /** @brief 查询当前构建的XY点。 @param point 点 @return 标签 */
         private ProjectionRegion At(Vector2 point)

@@ -99,6 +99,7 @@ namespace DelayNoMore.LightPath
                 for (int i = 0; i < polygon.Length; i++)
                 {
                     Vector2 edge = polygon[(i + 1) % polygon.Length] - polygon[i];
+                    if (edge.sqrMagnitude < 1e-12f) continue;
                     Vector2 axis = new Vector2(-edge.y, edge.x).normalized;
                     float amin = float.PositiveInfinity, amax = float.NegativeInfinity, bmin = float.PositiveInfinity, bmax = float.NegativeInfinity;
                     foreach (Vector2 point in a) { float value = Vector2.Dot(point, axis); amin = Mathf.Min(amin, value); amax = Mathf.Max(amax, value); }
