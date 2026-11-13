@@ -458,7 +458,14 @@ namespace DelayNoMore.LightPath
             }
             Vector3 angles = rotation * (_config.RotationSpeed * Time.unscaledDeltaTime);
             Quaternion change = Quaternion.AngleAxis(angles.z, Vector3.forward) * Quaternion.AngleAxis(angles.y, Vector3.up) * Quaternion.AngleAxis(angles.x, Vector3.right);
-            source.SetWorldPose(target, change * source.transform.rotation);
+            Vector3 previousPosition = source.transform.position;
+            Quaternion previousRotation = source.transform.rotation;
+            source.SetWorldPose(target, change * previousRotation);
+            if (!CorrectProjectionClearance(source))
+            {
+                source.SetWorldPose(previousPosition, previousRotation);
+                Notify(GameText.Get("Projection.ClearanceBlocked"));
+            }
             Room.Surface.Invalidate(source);
             _keyboardProjectionDirty = true;
             if (Time.unscaledTime >= _projectionAt)

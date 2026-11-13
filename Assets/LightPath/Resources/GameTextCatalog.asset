@@ -2390,3 +2390,9 @@ MonoBehaviour:
     Location: "\u6E38\u620FHUD / \u89E3\u8C1C\u63D0\u793A"
     Parameters: 
     Value: 
+  - Key: Projection.ClearanceBlocked
+    Screen: HUD
+    NormalPlay: 1
+    Component: TMP
+    Title: Projection clearance
+    Value: "\u6295\u5f71\u8d85\u51fa\u53ef\u7528\u8303\u56f4"

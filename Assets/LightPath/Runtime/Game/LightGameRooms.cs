@@ -53,6 +53,47 @@ namespace DelayNoMore.LightPath
         }
         /** @brief 获取当前投影矩形。 @param room 房间 @return 世界平面范围 */
         private static Rect RoomRect(LightRoom room) => room.Surface.Bounds;
+        /** @brief 在合法移动范围内修正完整投影，失败由调用者恢复姿态。 @param source 操作对象 @return 是否满足相连边留空 */
+        private bool CorrectProjectionClearance(ProjectionSource source)
+        {
+            ProjectionLevel level = _levels[_roomLevels[_roomIndex]];
+            int local = _roomIndex - _levelFirst[_roomLevels[_roomIndex]];
+            Rect bounds = RoomRect(Room);
+            float margin = _body.bounds.size.y * _config.ConnectedEdgeClearance;
+            bool left = level.Edge(local, 0) == ProjectionLevel.EdgeBehavior.Move;
+            bool right = level.Edge(local, 1) == ProjectionLevel.EdgeBehavior.Move;
+            bool bottom = level.Edge(local, 2) == ProjectionLevel.EdgeBehavior.Move;
+            bool top = level.Edge(local, 3) == ProjectionLevel.EdgeBehavior.Move;
+            if (!left && !right && !bottom && !top)
+                return true;
+            Vector3 light = Room.Surface.ProjectionOrigin;
+            float depth = Room.Surface.transform.position.z - light.z;
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                Vector2 low = Vector2.one * float.NegativeInfinity;
+                Vector2 high = Vector2.one * float.PositiveInfinity;
+                bool found = false;
+                foreach (Vector3 vertex in source.Geometry.WorldVertices())
+                {
+                    float fraction = (vertex.z - light.z) / depth;
+                    if (fraction <= .0001f)
+                        return false;
+                    Vector2 projected = Room.Surface.ProjectPoint(vertex);
+                    if (left) low.x = Mathf.Max(low.x, (bounds.xMin + margin - projected.x) * fraction);
+                    if (right) high.x = Mathf.Min(high.x, (bounds.xMax - margin - projected.x) * fraction);
+                    if (bottom) low.y = Mathf.Max(low.y, (bounds.yMin + margin - projected.y) * fraction);
+                    if (top) high.y = Mathf.Min(high.y, (bounds.yMax - margin - projected.y) * fraction);
+                    found = true;
+                }
+                if (!found || low.x > high.x || low.y > high.y)
+                    return false;
+                Vector3 correction = new Vector3(Mathf.Clamp(0, low.x, high.x), Mathf.Clamp(0, low.y, high.y), 0);
+                if (correction.sqrMagnitude < .00000001f)
+                    return true;
+                source.SetWorldPose(source.transform.position + correction, source.transform.rotation);
+            }
+            return false;
+        }
         /** @brief 自动检测四向边界连接。 @return 是否已请求换房 */
         private bool TryBoundaryTravel()
         {

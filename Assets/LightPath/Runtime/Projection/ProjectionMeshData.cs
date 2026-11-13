@@ -10,6 +10,8 @@ namespace DelayNoMore.LightPath
     {
         /** @brief 本地顶点。 */
         private readonly Vector3[] _vertices;
+        /** @brief 只读顶点供完整投影边界计算复用。 */
+        public IReadOnlyList<Vector3> Vertices => _vertices;
         /** @brief 已按BVH排序的三角索引。 */
         private readonly int[] _triangles;
         /** @brief 空间树节点。 */

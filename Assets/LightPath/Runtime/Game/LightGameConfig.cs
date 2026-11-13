@@ -8,6 +8,8 @@ namespace DelayNoMore.LightPath
     {
         /** @brief 能力解锁通知的停留秒数。 */
         [Min(1)] public float UnlockNoticeSeconds = 6;
+        /** @brief 相连房间边缘保留的玩家高度倍数。 */
+        [Min(0)] public float ConnectedEdgeClearance = 1.2f;
         /** @brief 能力解锁通知的淡出秒数。 */
         [Min(.01f)] public float UnlockFadeSeconds = .4f;
         /** @brief 能力解锁通知颜色。 */

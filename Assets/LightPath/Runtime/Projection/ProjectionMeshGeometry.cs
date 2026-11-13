@@ -24,6 +24,17 @@ namespace DelayNoMore.LightPath
         }
         /** @brief 是否有模型；有模型时不可退化成简化Collider。 */
         public bool HasMeshes { get; private set; }
+        /** @brief 枚举实际网格的世界顶点。 @return 世界顶点序列 */
+        public IEnumerable<Vector3> WorldVertices()
+        {
+            Refresh();
+            foreach (Part part in _parts)
+            {
+                Matrix4x4 matrix = part.Inverse.inverse;
+                foreach (Vector3 point in part.Data.Vertices)
+                    yield return matrix.MultiplyPoint3x4(point);
+            }
+        }
         /** @brief 无法读取或不受支持的网格数量。 */
         public int MissingMeshes { get; private set; }
         /** @brief 实际模型世界包围。 */
