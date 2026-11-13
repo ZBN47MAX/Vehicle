@@ -53,16 +53,14 @@ namespace DelayNoMore.LightPath.Editor
         {
             minSize = new Vector2(1200, 700);
             SceneView.duringSceneGui += DrawScene;
-            Undo.undoRedoPerformed += RoomUndoChanged;
-            Undo.postprocessModifications += TrackRoomEdits;
+            Undo.undoRedoPerformed += Repaint;
             Refresh();
         }
         /** @brief 解绑场景绘制。 */
         private void OnDisable()
         {
             SceneView.duringSceneGui -= DrawScene;
-            Undo.undoRedoPerformed -= RoomUndoChanged;
-            Undo.postprocessModifications -= TrackRoomEdits;
+            Undo.undoRedoPerformed -= Repaint;
             ReleasePreview();
             ReleaseAuthoringResources();
         }
@@ -153,7 +151,6 @@ namespace DelayNoMore.LightPath.Editor
             try
             {
                 operation();
-                _roomWasEdited = true;
                 EditorSceneManager.MarkSceneDirty(_room.gameObject.scene);
                 Undo.CollapseUndoOperations(group);
             }
