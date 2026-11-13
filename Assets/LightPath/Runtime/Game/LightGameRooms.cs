@@ -161,6 +161,21 @@ namespace DelayNoMore.LightPath
             var source = portal.GetComponent<ProjectionSource>();
             return source ? source.Definition && source.Definition.Portal : portal.GetComponent<RoomPortalLink>() && portal.GetComponent<Collider2D>();
         }
+        /** @brief 查询合法门的单向或双向表现，包含反向连接。 @param portal 门对象 @return 是否双向 */
+        public bool PortalBidirectional(GameObject portal)
+        {
+            RoomPortalLink link = portal.GetComponent<RoomPortalLink>();
+            if (link && !link.ArrivalOnly) return !link.UseArrivalPosition && link.Bidirectional;
+            int first = _levelFirst[_roomLevels[_roomIndex]];
+            int local = _roomIndex - first;
+            int count = _levels[_roomLevels[_roomIndex]].RoomCount;
+            for (int i = first; i < first + count; i++)
+                foreach (RoomPortalLink incoming in _rooms[i].GetComponentsInChildren<RoomPortalLink>(true))
+                    if (!incoming.ArrivalOnly && !incoming.UseArrivalPosition && incoming.Bidirectional && incoming.TargetRoom == local && incoming.TargetPortal == portal.name)
+                        return true;
+            ProjectionSource source = portal.GetComponent<ProjectionSource>();
+            return !link && source && source.Partner;
+        }
         /** @brief 获取实际二维门位置。@param room 房间 @param portal 门 @return 位置 */
         private static Vector2 PortalPosition(LightRoom room, GameObject portal) => portal.GetComponent<ProjectionSource>() ? (Vector2)room.Surface.ProjectPoint(portal.transform.position) : (Vector2)portal.transform.position;
         /** @brief 供光、激活和颜色共同决定门是否有效。@param room 房间 @param portal 门 @return 是否可用 */

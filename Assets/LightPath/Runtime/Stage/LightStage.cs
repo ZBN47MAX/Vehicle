@@ -223,7 +223,7 @@ namespace DelayNoMore.LightPath
             return true;
         }
         /** @brief 绘制同一批模拟物件与顶面维修内容，仅提交给演示相机。@param layout 维修配置 @param repair 整局状态 */
-        public void Draw(RepairLayout layout, RepairSession repair, ProjectionSource selected = null)
+        public void Draw(RepairLayout layout, RepairSession repair, ProjectionSource selected = null, LightGame game = null)
         {
             foreach (Part part in _parts)
                 if (part.Filter && part.Renderer && part.Filter.gameObject.activeInHierarchy)
@@ -238,7 +238,7 @@ namespace DelayNoMore.LightPath
             if (_room)
             {
                 _objectMarkers ??= new ProjectionObjectMarkers();
-                _objectMarkers.Draw(_room, _mapping, _viewCamera, _capture, _config, _repairMaterial);
+                _objectMarkers.Draw(_room, _mapping, _viewCamera, _capture, _config, _repairMaterial, game);
             }
             if (layout && repair != null)
                 _repairMesh.Draw(layout, repair, _config, _repairFrame, _repairMaterial, _viewCamera);

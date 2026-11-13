@@ -147,7 +147,7 @@ namespace DelayNoMore.LightPath
             }
             _stage.Animate(_paused ? 0 : Time.unscaledDeltaTime);
             var sources = Room.Surface.Sources;
-            _stage.Draw(_repairLayout, _repair, sources != null && _selected >= 0 && _selected < sources.Count ? sources[_selected] : null);
+            _stage.Draw(_repairLayout, _repair, sources != null && _selected >= 0 && _selected < sources.Count ? sources[_selected] : null, this);
             _stage.ShowBlackout(!Room.Powered, GameText.Get("LightGameStage.LateUpdate.018", Label("Mode")), _menu.HudFont);
             ApplyState();
         }
