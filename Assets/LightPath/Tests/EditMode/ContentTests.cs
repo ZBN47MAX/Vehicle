@@ -26,7 +26,7 @@ namespace DelayNoMore.LightPath.Tests
                 if (count > 0) Assert.DoesNotThrow(() => string.Format(entry.Value, Enumerable.Repeat<object>(1, count).ToArray()), entry.Key);
             }
             foreach (string file in Directory.GetFiles("Assets/LightPath/Runtime", "*.cs", SearchOption.AllDirectories))
-                foreach (Match match in Regex.Matches(File.ReadAllText(file), "GameText\\.Get\\(\"([^\"]+)\""))
+                foreach (Match match in Regex.Matches(File.ReadAllText(file), "GameText\\.Get\\(\"([^\"]+)\"\\s*[,)]"))
                     Assert.That(catalog.Entries.Any(e => e.Key == match.Groups[1].Value), Is.True, match.Groups[1].Value);
             Assert.That(catalog.Entries.Single(e => e.Key == "LightGameStage.LateUpdate.018").NormalPlay, Is.True);
         }
@@ -61,16 +61,44 @@ namespace DelayNoMore.LightPath.Tests
                 {
                     float[] initial = layout.Devices.Select(device => device.OutputAngle).ToArray();
                     if (RepairPreviewSolver.TraceAngles(layout, initial).Matches(phase.Targets)) continue;
-                    int budget = 200000;
-                    Assert.That(Solve(layout, phase, new float[layout.Devices.Length], 0, ref budget), Is.True, layout.name + "/" + phase.Name);
+                    int budget = 2000000;
+                    bool[] assigned = layout.Devices.Select(device => device.Type == RepairLayout.Kind.Source || device.Type == RepairLayout.Kind.Exit).ToArray();
+                    Assert.That(Solve(layout, phase, initial, assigned, ref budget), Is.True, layout.name + "/" + phase.Name);
                 }
             }
         }
-        /** @brief 遍历允许的离散朝向，仅验证已交付的小型布局。@param layout 布局 @param phase 目标 @param directions 候选 @param index 深度 @return 是否存在解 */
-        private static bool Solve(RepairLayout layout, RepairLayout.Phase phase, float[] directions, int index, ref int budget)
+        /** @brief 只为光线实际经过的节点分配角度，未经过节点不影响当前结果。 */
+        private static bool Solve(RepairLayout layout, RepairLayout.Phase phase, float[] directions, bool[] assigned, ref int budget)
         {
             if (--budget < 0) Assert.Inconclusive(layout.name + "/" + phase.Name + " 超过自动求解搜索预算，请使用维修编辑器逐阶段验证；不代表无解。");
-            if (index == directions.Length) return RepairPreviewSolver.TraceAngles(layout, directions).Matches(phase.Targets);
+            var result = RepairPreviewSolver.TraceAngles(layout, directions);
+            if (result.Matches(phase.Targets)) return true;
+            int index = -1;
+            foreach (var segment in result.Segments)
+            {
+                Vector2 delta = segment.To - segment.From;
+                if (delta.sqrMagnitude < .000001f) continue;
+                for (int candidate = 0; candidate < layout.Devices.Length; candidate++)
+                {
+                    if (assigned[candidate]) continue;
+                    if (RepairPreviewSolver.HitNode(segment.From, delta.normalized, layout.Devices[candidate].Position, layout.NodeRadius, out float along)
+                        && Mathf.Abs(along - delta.magnitude) < .001f)
+                    {
+                        index = candidate;
+                        break;
+                    }
+                }
+                if (index >= 0) break;
+            }
+            if (index < 0) return false;
+            assigned[index] = true;
+            bool solved = SolveNode(layout, phase, directions, assigned, index, ref budget);
+            assigned[index] = false;
+            return solved;
+        }
+        /** @brief 遍历已命中节点的合法朝向，所有候选均通过正式追踪器验证。 */
+        private static bool SolveNode(RepairLayout layout, RepairLayout.Phase phase, float[] directions, bool[] assigned, int index, ref int budget)
+        {
             var device = layout.Devices[index];
             if (device.Type == RepairLayout.Kind.Lens)
             {
@@ -84,20 +112,54 @@ namespace DelayNoMore.LightPath.Tests
                 }
                 float[] sorted = candidates.Distinct().OrderBy(x => x).ToArray();
                 for (int i = 1; i < sorted.Length; i++) candidates.Add((sorted[i - 1] + sorted[i]) / 2);
-                foreach (float angle in candidates.Distinct())
+                foreach (float angle in candidates.Distinct().GroupBy(angle => OutgoingKey(layout, index, angle)).Select(group => group.First()))
                 {
-                    directions[index] = angle; if (Solve(layout, phase, directions, index + 1, ref budget)) return true;
+                    directions[index] = angle; if (Solve(layout, phase, directions, assigned, ref budget)) return true;
                 }
                 return false;
             }
             // 优先尝试策划初始朝向，随后遍历其余允许方向，避免在明显解之前耗尽预算。
+            var outgoing = new System.Collections.Generic.HashSet<string>();
             for (int offset = 0; offset < 8; offset++)
             {
                 int d = (device.Direction + offset) % 8;
                 if ((device.Allowed & (1 << d)) == 0 || ((device.Type == RepairLayout.Kind.Source || device.Type == RepairLayout.Kind.Exit) && d != device.Direction)) continue;
-                directions[index] = d * 45f; if (Solve(layout, phase, directions, index + 1, ref budget)) return true;
+                if (!outgoing.Add(OutgoingKey(layout, index, d * 45f))) continue;
+                directions[index] = d * 45f; if (Solve(layout, phase, directions, assigned, ref budget)) return true;
             }
             return false;
+        }
+        /** @brief 节点输出只取决于下一命中节点；相同命中组合的角度无需重复搜索。 */
+        private static string OutgoingKey(RepairLayout layout, int index, float angle)
+        {
+            string key = "";
+            int rays = layout.Devices[index].Type == RepairLayout.Kind.Splitter ? 2 : 1;
+            for (int ray = 0; ray < rays; ray++)
+            {
+                float radians = (angle + ray * 45) * Mathf.Deg2Rad;
+                Vector2 direction = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
+                Vector2 start = layout.Devices[index].Position;
+                float nearest = 1000;
+                for (int axis = 0; axis < 2; axis++)
+                {
+                    float min = axis == 0 ? layout.Area.xMin : layout.Area.yMin;
+                    float max = axis == 0 ? layout.Area.xMax : layout.Area.yMax;
+                    if (direction[axis] > .0001f) nearest = Mathf.Min(nearest, (max - start[axis]) / direction[axis]);
+                    if (direction[axis] < -.0001f) nearest = Mathf.Min(nearest, (min - start[axis]) / direction[axis]);
+                }
+                int hit = -1;
+                for (int candidate = 0; candidate < layout.Devices.Length; candidate++)
+                {
+                    if (candidate == index) continue;
+                    if (RepairPreviewSolver.HitNode(start, direction, layout.Devices[candidate].Position, layout.NodeRadius, out float distance) && distance < nearest)
+                    {
+                        nearest = distance;
+                        hit = candidate;
+                    }
+                }
+                key += hit + "/";
+            }
+            return key;
         }
         /** @brief 所有正式场景和预制体不得残留旧文字、丢失脚本或失效TMP引用。 */
         [Test] public void SceneAndPrefabReferences_AreIntact()
