@@ -5,8 +5,8 @@ namespace DelayNoMore.LightPath
     /** @brief 投影演示的相似变换，保持物件角度和长宽深比例。 */
     public static class LightStageMath
     {
-        /** @brief 构建模拟空间到演示空间的等比映射，不迁就旧光源位置。@param center 模拟屏幕画面中心 @param size 模拟画面宽高 @param origin 旧接口兼容参数，不参与映射 @param frame 演示屏幕无缩放坐标系 @param displaySize 演示有效宽高 @param lamp 旧接口兼容参数，不参与映射 @return 只有平移、旋转和等比缩放的矩阵 */
-        public static Matrix4x4 Mapping(Vector3 center, Vector2 size, Vector3 origin, Matrix4x4 frame, Vector2 displaySize, Vector3 lamp)
+        /** @brief 构建模拟空间到演示空间的等比映射，不迁就旧光源位置。@param center 模拟屏幕画面中心 @param size 模拟画面宽高 @param frame 演示屏幕无缩放坐标系 @param displaySize 演示有效宽高 @return 只有平移、旋转和等比缩放的矩阵 */
+        public static Matrix4x4 Mapping(Vector3 center, Vector2 size, Matrix4x4 frame, Vector2 displaySize)
         {
             float scale = displaySize.y / size.y;
             Quaternion rotation = Quaternion.LookRotation(frame.MultiplyVector(Vector3.forward), frame.MultiplyVector(Vector3.up));

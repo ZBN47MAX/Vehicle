@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -16,11 +16,11 @@ namespace DelayNoMore.LightPath.Tests
             try
             {
                 Check(config.TryValidate(out _), "默认舞台参数有效");
-                Vector3 center = new Vector3(7, 4, 2), origin = new Vector3(2, 3, -12);
+                Vector3 center = new Vector3(7, 4, 2);
                 Vector2 size = new Vector2(20, 12), display = new Vector2(50, 30);
                 Matrix4x4 frame = Matrix4x4.TRS(new Vector3(4, 25, 27), Quaternion.Euler(5, 12, -3), Vector3.one);
                 Vector3 lamp = new Vector3(1, 6, -37);
-                Matrix4x4 map = LightStageMath.Mapping(center, size, origin, frame, display, lamp);
+                Matrix4x4 map = LightStageMath.Mapping(center, size, frame, display);
                 Vector3 effectiveOrigin = map.inverse.MultiplyPoint3x4(lamp);
                 Near(map.MultiplyPoint3x4(effectiveOrigin), lamp, "真实舞台光源逆变换对应");
                 Vector3 axisX = map.MultiplyVector(Vector3.right), axisY = map.MultiplyVector(Vector3.up), axisZ = map.MultiplyVector(Vector3.forward);

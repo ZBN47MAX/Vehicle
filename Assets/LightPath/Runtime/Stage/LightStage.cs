@@ -66,7 +66,7 @@ namespace DelayNoMore.LightPath
             Vector3 center = SimulationCenter(surface);
             float height = surface.Configuration.CameraHalfHeight * 2;
             Matrix4x4 mapping = LightStageMath.Mapping(center, new Vector2(height * _config.TextureWidth / _config.TextureHeight, height),
-                Vector3.zero, Matrix4x4.TRS(_screenFrame.position, _screenFrame.rotation, Vector3.one), _config.ScreenSize, Vector3.zero);
+                Matrix4x4.TRS(_screenFrame.position, _screenFrame.rotation, Vector3.one), _config.ScreenSize);
             if (surface.SetStageOrigin(mapping.inverse.MultiplyPoint3x4(_lightOrigin.position)) && Application.isPlaying && surface.gameObject.activeInHierarchy)
                 surface.Rebuild();
             return mapping;
