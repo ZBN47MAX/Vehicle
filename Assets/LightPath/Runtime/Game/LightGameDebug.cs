@@ -113,7 +113,7 @@ namespace DelayNoMore.LightPath
             Room.Surface.Invalidate();
             Room.Surface.Rebuild();
             Physics2D.SyncTransforms();
-            if (!Room.GetComponentInChildren<RoomSpawnPoint>() || !Room.Surface.Bounds.Contains(_player.position) || Room.Overlaps(_body.bounds, _color, false))
+            if (!Room.HasSpawn || !Room.Surface.Bounds.Contains(_player.position) || Room.Overlaps(_body.bounds, _color, false))
             {
                 SetNoclip(true);
                 if (!Room.Surface.Bounds.Contains(_player.position)) _player.position = Room.Surface.Bounds.center;

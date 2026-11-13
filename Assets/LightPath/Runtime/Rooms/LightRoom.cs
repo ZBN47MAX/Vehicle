@@ -52,6 +52,8 @@ namespace DelayNoMore.LightPath
         public RefractionRig Rig => _rig;
         /** @brief 获取安全出生点。 */
         public Vector2 Spawn => _spawn ? (Vector2)_spawn.position : (Vector2)transform.position + Vector2.up;
+        /** @brief 是否绑定有效出生点，兼容未挂出生标记组件的旧房间。 */
+        public bool HasSpawn => _spawn && _spawn.gameObject.activeInHierarchy;
         /** @brief 获取出口。 */
         public Vector2 Exit => _exit ? (Vector2)_exit.position : new Vector2(float.PositiveInfinity, float.PositiveInfinity);
         /** @brief 获取收集点。 */
