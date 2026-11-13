@@ -270,10 +270,10 @@ namespace DelayNoMore.LightPath
             }
             if (Time.unscaledTime < _noticeUntil)
                 status = _notice;
-            if (Noclip) status = GameText.Get("Debug.NoclipActive") + "\n" + status;
             string unlock = UnlockNotice();
             if (unlock.Length > 0)
                 status = unlock;
+            if (Noclip) status = GameText.Get("Debug.NoclipActive") + "\n" + status;
             if (_repair != null)
                 status += "\n" + RepairStatus();
             if (_repair == null && Room.Warning && Room.Rig)
@@ -786,7 +786,11 @@ namespace DelayNoMore.LightPath
             _noticeUntil = Time.unscaledTime + seconds;
         }
         /** @brief 禁用会话时隐藏兼容维修 UI。 */
-        private void OnDisable() => _repairPanel.SetVisible(false);
+        private void OnDisable()
+        {
+            ResetNoclip();
+            _repairPanel.SetVisible(false);
+        }
         /** @brief 清理输入与时间。 */
         private void OnDestroy()
         {
