@@ -264,9 +264,6 @@ namespace DelayNoMore.LightPath
                 int pointed = _menu.PointedColor(Action("Pointer").ReadValue<Vector2>());
                 if (pointed >= 0 && IsUnlocked(pointed))
                     _candidate = pointed;
-                for (int i = 0; i < 4; i++)
-                    if (Action("Color" + i).WasPressedThisFrame() && IsUnlocked(i))
-                        _candidate = i;
             }
             else if (_preview)
             {
