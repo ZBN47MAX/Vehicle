@@ -11,8 +11,6 @@ namespace DelayNoMore.LightPath
         private int _repairDrag = -1;
         /** @brief 当前指针绕节点的拖动状态。 */
         private RepairLensDrag _lensDrag;
-        /** @brief 仅包含运行时 UI 表现的兼容维修视图。 */
-        private readonly RepairPanel _repairPanel = new RepairPanel();
         /** @brief 是否正在显示整局维修视图。 */
         private bool RepairVisible => _ready && _started && !_paused && !_transitioning && _editing && _repairFocus && _repair != null;
         /** @brief 验证配置并建立全新整局维修状态；未绑定时保留旧玩法。@return 是否初始化成功 */
@@ -43,12 +41,6 @@ namespace DelayNoMore.LightPath
                 _repair.Tick(seconds);
             else
                 Room.Tick(seconds);
-        }
-        /** @brief 从统一动作数据读取点击，并仅修改本局机关朝向。 */
-        private void EditRepair()
-        {
-            Vector2 pointer = Action("Pointer").ReadValue<Vector2>();
-            OperateRepair(_repairPanel.Pick(_repairLayout, pointer, _repair), _repairPanel.BoardPoint(_repairLayout, pointer), true);
         }
         /** @brief 共用维修输入：折镜点击八向切换，透镜按住并瞄准连续角度。 */
         private void OperateRepair(int index, Vector2 point, bool valid)
@@ -89,13 +81,10 @@ namespace DelayNoMore.LightPath
                     targets += (targets.Length == 0 ? "" : "、") + device.DisplayName;
             return (_repair.Warning ? GameText.Get("LightGameRepair.RepairStatus.005") : GameText.Get("LightGameRepair.RepairStatus.006")) + GameText.Get("LightGameRepair.RepairStatus.007", _repair.RemainingSeconds, next, targets);
         }
-        /** @brief 刷新兼容维修 UI；输入仍由统一 UIS 处理。 */
-        private void UpdateRepairPanel()
+        /** @brief 松开或离开维修状态时释放调角。 */
+        private void ReleaseRepairDrag()
         {
             if (!RepairVisible || !Action("Drag").IsPressed()) _repairDrag = -1;
-            _repairPanel.SetVisible(!_stage && RepairVisible);
-            if (!_stage && RepairVisible)
-                _repairPanel.Draw(_repairLayout, _repair, GameText.Get("LightGameRepair.OnGUI.008", Label("Drag"), Label("Focus"), Label("Mode"), Label("Pause")));
         }
     }
 }

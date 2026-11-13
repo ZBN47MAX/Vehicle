@@ -6,7 +6,7 @@ namespace DelayNoMore.LightPath
     /** @brief 将四视角舞台接入现有游玩状态、输入和安全检查。 */
     public sealed partial class LightGame
     {
-        /** @brief 用户手动组装的舞台；为空时兼容旧演示。 */
+        /** @brief 用户手动组装的舞台；运行必需。 */
         [SerializeField, InspectorName("四视角舞台"), Tooltip("绑定手动拼装的LightStage。启用后左键进入关注区，Tab返回3D总览。")] private LightStage _stage;
         /** @brief 是否启用四视角模式。 */
         public bool StageMode => _stage;
@@ -40,7 +40,10 @@ namespace DelayNoMore.LightPath
         private bool InitializeStage()
         {
             if (!_stage)
-                return true;
+            {
+                Debug.LogError(GameText.Get("LightGame.Start.002"), this);
+                return false;
+            }
             if (_repair == null)
             {
                 Debug.LogError(GameText.Get("LightGameStage.InitializeStage.002"), this);
@@ -136,7 +139,7 @@ namespace DelayNoMore.LightPath
             ObserveTelemetry(true);
             if (_ready && _playerAnimation)
                 _playerAnimation.UpdateMotion(_player.linearVelocity, Grounded(), Time.timeScale > 0);
-            UpdateRepairPanel();
+            ReleaseRepairDrag();
             if (!_ready || !_stage || !_stage.Ready)
                 return;
             if (!_stage.Sync(Room))

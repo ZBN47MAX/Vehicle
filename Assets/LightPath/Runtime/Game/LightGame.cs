@@ -34,8 +34,6 @@ namespace DelayNoMore.LightPath
         private int _selected;
         /** @brief 模型当前旋转轴。 */
         private readonly DevicePointerController _pointer = new DevicePointerController();
-        /** @brief 连续地图观看中心。 */
-        private Vector3 _viewCenter;
         /** @brief 缓存角色表现。 */
         private Renderer[] _playerRenderers;
         /** @brief 角色序列帧表现；旧主角未安装此组件时保持兼容。 */
@@ -160,7 +158,6 @@ namespace DelayNoMore.LightPath
             _body = _player.GetComponent<Collider2D>();
             _playerRenderers = _player.GetComponentsInChildren<Renderer>(true);
             _playerAnimation = _player.GetComponentInChildren<LightPlayerAnimation>(true);
-            _viewCenter = new Vector3(_player.position.x, 3.7f, 0);
             _player.gravityScale = _config.GravityScale;
             if (!InitializeStage())
             {
@@ -253,15 +250,11 @@ namespace DelayNoMore.LightPath
                 EditDevice();
             ApplyState();
             UpdateCamera();
-            string mode = _editing ? (_repairFocus ? GameText.Get("LightGame.Update.006") : GameText.Get("LightGame.Update.007")) : GameText.Get("LightGame.Update.008");
-            if (_stage)
-                mode = _stage.View == StageView.Overview ? GameText.Get("LightGame.Update.009") : _stage.View == StageView.Projection ? GameText.Get("LightGame.Update.010") : _stage.View == StageView.Repair ? GameText.Get("LightGame.Update.011") : GameText.Get("LightGame.Update.012");
+            string mode = _stage.View == StageView.Overview ? GameText.Get("LightGame.Update.009") : _stage.View == StageView.Projection ? GameText.Get("LightGame.Update.010") : _stage.View == StageView.Repair ? GameText.Get("LightGame.Update.011") : GameText.Get("LightGame.Update.012");
             string status = Room.Definition.Hint;
             if (_stage && _stage.View == StageView.Overview)
                 status = _stageHover;
-            if (_repair == null && _editing && _repairFocus && Room.Rig)
-                status = GameText.Get("LightGame.Update.013") + (Room.Rig.Selected + 1) + " · " + (Room.Powered ? GameText.Get("LightGame.Update.014") : GameText.Get("LightGame.Update.015"));
-            else if (_editing && !_repairFocus && (!_stage || _stage.View == StageView.Projection) && Room.Surface.Sources.Count > 0)
+            if (_editing && !_repairFocus && (!_stage || _stage.View == StageView.Projection) && Room.Surface.Sources.Count > 0)
             {
                 ProjectionSource source = Room.Surface.Sources[_selected];
                 status = GameText.Get("LightGame.Update.016") + source.name + GameText.Get("LightGame.Update.017") + (source.Definition.Movable ? GameText.Get("LightGame.Update.018") : GameText.Get("LightGame.Update.019"));
@@ -274,8 +267,6 @@ namespace DelayNoMore.LightPath
             if (Noclip) status = GameText.Get("Debug.NoclipActive") + "\n" + status;
             if (_repair != null)
                 status += "\n" + RepairStatus();
-            if (_repair == null && Room.Warning && Room.Rig)
-                status += GameText.Get("LightGame.Update.020") + Room.Rig.NextDescription;
             _menu.UpdateGame(mode, $"Level{_roomLevels[_roomIndex] + 1}Room{_roomIndex - _levelFirst[_roomLevels[_roomIndex]]}", status, BuildHelp(), _preview, CanSwitch(), _candidate, _color, UnlockedCount(), _roomLevels[_roomIndex] + 1, _levels.Length, _playSeconds);
         }
         /** @brief 读取轮盘并在松开时提交。 */
@@ -303,115 +294,19 @@ namespace DelayNoMore.LightPath
             }
         }
         /** @brief 生成使用当前输入数据的帮助。 @return 绑定提示 */
-        private string BuildHelp()
-        {
-            if (_stage)
-                return StageHelp();
-            if (_editing && _repair != null && _repairFocus)
-                return GameText.Get("LightGame.BuildHelp.021", Label("Drag"), Label("Mode"), Label("Focus"), Label("Pause"));
-            if (!Room.Powered && !_editing)
-                return GameText.Get("LightGame.BuildHelp.022", Label("Mode"), Label("Pause"));
-            if (_editing && !_repairFocus)
-                return GameText.Get("LightGame.BuildHelp.023", Label("Mode"), Label("Focus"), AbilityHelp(ProjectionAbility.MoveX, "DeviceHorizontal"), AbilityHelp(ProjectionAbility.MoveY, "DeviceVertical"), AbilityHelp(ProjectionAbility.MoveZ, "DeviceDepth"), AbilityHelp(ProjectionAbility.RotateX, "DeviceRotationX"), AbilityHelp(ProjectionAbility.RotateY, "DeviceRotationY"), AbilityHelp(ProjectionAbility.RotateZ, "DeviceRotation"));
-            if (_editing)
-                return GameText.Get("LightGame.BuildHelp.024", Label("Mode"), Label("Focus"), Label("Drag"), Label("Scroll"), Label("PointerRotate"));
-            return GameText.Get("LightGame.BuildHelp.025", Label("Move"), Label("Jump"), Label("Palette"), Label("Mode"), Label("Interact"), Label("Pause"));
-        }
+        private string BuildHelp() => StageHelp();
         /** @brief 获取动作展示文本。 @param name 动作名 @return 当前绑定 */
         private string Label(string name) => Action(name).GetBindingDisplayString();
         /** @brief 切换模式，返回前检验全部有效实体。 */
         public void ToggleMode()
         {
-            if (_stage)
-            {
-                if (_ready && _started && !_paused && !_transitioning && !_stage.Moving && _stage.View != StageView.Overview)
-                    SetStageView(StageView.Overview);
-                return;
-            }
-            _pointer.Cancel();
-            _preview = false;
-            _jumpUntil = 0;
-            if (_editing)
-            {
-                Room.Surface.Rebuild();
-                if (Room.Powered && Room.Overlaps(_body.bounds, _color, false))
-                {
-                    Notify(GameText.Get("LightGame.ToggleMode.026"));
-                    return;
-                }
-                _editing = false;
-            }
-            else if (Grounded() || !Room.Powered)
-            {
-                _editing = true;
-                _repairFocus = !Room.Powered;
-                float closest = float.PositiveInfinity;
-                for (int i = 0; i < Room.Surface.Sources.Count; i++)
-                {
-                    ProjectionSource source = Room.Surface.Sources[i];
-                    if (!source)
-                        continue;
-                    float distance = Vector2.Distance(_player.position, Room.Surface.ProjectPoint(source.transform.position));
-                    if (distance < closest)
-                    {
-                        closest = distance;
-                        _selected = i;
-                    }
-                }
-            }
-            else
-                Notify(GameText.Get("LightGame.ToggleMode.027"));
-            ApplyState();
+            if (_ready && _started && !_paused && !_transitioning && !_stage.Moving && _stage.View != StageView.Overview)
+                SetStageView(StageView.Overview);
         }
-        /** @brief 操作模型和折射节点。 */
+        /** @brief 在已确认的四视角方案中处理装置操作。 */
         private void EditDevice()
         {
-            if (_stage)
-            {
-                if (!_preview)
-                    EditStage();
-                return;
-            }
-            if ((_repair != null || Room.Rig) && Action("Focus").WasPressedThisFrame())
-            {
-                _pointer.Cancel();
-                _repairFocus = !_repairFocus;
-            }
-            if (_preview)
-                return;
-            if (!_repairFocus)
-            {
-                EditProjectionKeyboard();
-                return;
-            }
-            if (_repair != null)
-            {
-                EditRepair();
-                return;
-            }
-            if (!Room.Rig)
-                return;
-            bool changed = _pointer.Tick(_actions, _camera, Room, true, _config);
-            if (!_repairFocus && _pointer.Captured)
-                _selected = _pointer.Selected;
-            if (changed)
-            {
-                if (_repairFocus)
-                {
-                    if (Room.Repair())
-                        Notify(GameText.Get("LightGame.EditDevice.028"));
-                }
-                else
-                {
-                    _selected = _pointer.Selected;
-                    Room.Surface.Invalidate(Room.Surface.Sources[_selected]);
-                    if (Time.unscaledTime >= _projectionAt || !_pointer.Captured)
-                    {
-                        Room.Surface.Rebuild();
-                        _projectionAt = Time.unscaledTime + .06f;
-                    }
-                }
-            }
+            if (!_preview) EditStage();
         }
         /** @brief 键盘操作后尚待刷新的投影。 */
         private bool _keyboardProjectionDirty;
@@ -430,22 +325,8 @@ namespace DelayNoMore.LightPath
             }
             if (Action("Drag").WasPressedThisFrame() && !(UnityEngine.EventSystems.EventSystem.current && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()))
             {
-                if (_stage)
-                {
-                    int picked = _stage.PickProjectionObject(Action("Pointer").ReadValue<Vector2>(), Room, _color);
-                    if (picked >= 0) { _selected = picked; RecordTelemetry("对象选择", TelemetryObject(sources[picked].transform), "鼠标"); }
-                }
-                else
-                {
-                    Ray ray = _camera.ScreenPointToRay(Action("Pointer").ReadValue<Vector2>());
-                    float nearest = float.PositiveInfinity;
-                    for (int i = 0; i < sources.Count; i++)
-                        if (sources[i] && sources[i].Definition && sources[i].Definition.Movable && sources[i].TryHit(ray, out float distance) && distance < nearest)
-                        {
-                            _selected = i;
-                            nearest = distance;
-                        }
-                }
+                int picked = _stage.PickProjectionObject(Action("Pointer").ReadValue<Vector2>(), Room, _color);
+                if (picked >= 0) { _selected = picked; RecordTelemetry("对象选择", TelemetryObject(sources[picked].transform), "鼠标"); }
             }
             _selected = Mathf.Clamp(_selected, 0, sources.Count - 1);
             ProjectionSource source = sources[_selected];
@@ -735,7 +616,7 @@ namespace DelayNoMore.LightPath
                 return;
             Time.timeScale = !_started || _paused || _editing || _transitioning || !Room.Powered || (_stage && _stage.Moving) ? 0 : _preview ? _config.SlowMotion : 1;
             RefreshProjectionKeys(Room);
-            Room.Refresh(_config, _color, _preview, !_stage && _editing && !(_repair != null && _repairFocus), _selected);
+            Room.Refresh(_config, _color, _preview, false, _selected);
             foreach (Renderer renderer in _playerRenderers)
                 if (renderer)
                     renderer.enabled = Room.Powered || Noclip;
@@ -743,30 +624,9 @@ namespace DelayNoMore.LightPath
         /** @brief 更新观看与装置相机。 */
         private void UpdateCamera()
         {
-            Vector3 center = Room.transform.position;
-            if (_stage)
-            {
-                _camera.orthographic = true;
-                _camera.orthographicSize = _config.CameraHalfHeight;
-                _camera.transform.SetPositionAndRotation(center + new Vector3(0, 3.7f, -22), Quaternion.identity);
-                return;
-            }
-            bool deviceCamera = _editing && !(_repair != null && _repairFocus);
-            Vector3 position = deviceCamera ? center + new Vector3(8, _repairFocus ? 13 : 8, -24) : center + new Vector3(0, 3.7f, -22);
-            Quaternion rotation = deviceCamera ? Quaternion.LookRotation(center + new Vector3(0, _repairFocus ? 12 : 3, -4) - position) : Quaternion.identity;
-            if (deviceCamera)
-            {
-                Vector3 target = _repairFocus && Room.Rig ? Room.Rig.transform.position : Room.Surface.Sources.Count > 0 ? Room.Surface.Sources[_selected].transform.position : center;
-                position = target + new Vector3(8, 5, -20);
-                rotation = Quaternion.LookRotation(target - position);
-            }
-            _camera.orthographic = !deviceCamera;
+            _camera.orthographic = true;
             _camera.orthographicSize = _config.CameraHalfHeight;
-            _camera.fieldOfView = 48;
-            if (_pointer.Captured)
-                return;
-            _camera.transform.position = Vector3.Lerp(_camera.transform.position, position, 1 - Mathf.Exp(-8 * Time.unscaledDeltaTime));
-            _camera.transform.rotation = Quaternion.Slerp(_camera.transform.rotation, rotation, 1 - Mathf.Exp(-8 * Time.unscaledDeltaTime));
+            _camera.transform.SetPositionAndRotation(Room.transform.position + new Vector3(0, 3.7f, -22), Quaternion.identity);
         }
         /** @brief 显示短时反馈。 @param message 内容 @param seconds 持续秒数 */
         private void Notify(string message, float seconds = 3)
@@ -774,18 +634,16 @@ namespace DelayNoMore.LightPath
             _notice = message;
             _noticeUntil = Time.unscaledTime + seconds;
         }
-        /** @brief 禁用会话时隐藏兼容维修 UI。 */
+        /** @brief 禁用会话时释放记录绑定与调试状态。 */
         private void OnDisable()
         {
             DetachTelemetry();
             ResetNoclip();
-            _repairPanel.SetVisible(false);
         }
         /** @brief 清理输入与时间。 */
         private void OnDestroy()
         {
             ResetNoclip();
-            _repairPanel.Dispose();
             if (_stage && _ownsStage)
                 _stage.Release();
             if (_actions)
