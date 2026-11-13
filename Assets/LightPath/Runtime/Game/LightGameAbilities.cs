@@ -42,6 +42,12 @@ namespace DelayNoMore.LightPath
                 room.Surface.Rebuild();
         }
         /** @brief 为HUD组合当前键位及锁定状态。 @param ability 能力 @param action 动作 @return 提示 */
-        private string AbilityHelp(ProjectionAbility ability, string action) => Label(action) + " " + ProjectionAbilityState.Label(ability) + (_projectionAbilities.Has(ability) ? "" : GameText.Get("LightGameAbilities.AbilityHelp.003"));
+        private string AbilityHelp(ProjectionAbility ability, string action)
+        {
+            bool unlocked = HasProjectionAbility(ability);
+            string color = unlocked ? "8DE4AC" : "FFFFFF";
+            return "<color=#" + color + ">" + Label(action) + " " + ProjectionAbilityState.Label(ability)
+                + (unlocked ? "" : GameText.Get("LightGameAbilities.AbilityHelp.003")) + "</color>";
+        }
     }
 }
