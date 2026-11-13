@@ -132,7 +132,7 @@ namespace DelayNoMore.LightPath.Editor
             {
                 RepairLayout.Device device = _layout.Devices[i];
                 Vector2 p = Point(device.Position, area);
-                Rect hit = new Rect(p - Vector2.one * 12, Vector2.one * 24);
+                Rect hit = new Rect(p - Vector2.one * (_layout.NodeRadius * _zoom), Vector2.one * (_layout.NodeRadius * _zoom * 2));
                 EditorGUI.DrawRect(hit, i == _selected ? Color.cyan : result.Lit.Contains(device.Id) ? Color.green : Color.gray);
                 float direction = _trial == null ? device.OutputAngle : _trial[i];
                 float angle = direction * Mathf.Deg2Rad;
@@ -209,13 +209,13 @@ namespace DelayNoMore.LightPath.Editor
             bool randomOrder = EditorGUILayout.Toggle("阶段随机循环（每轮不重复）", _layout.RandomPhaseOrder);
             float warning = EditorGUILayout.FloatField("预警秒数", _layout.WarningSeconds);
             Rect bounds = EditorGUILayout.RectField("操作范围", _layout.Area);
-            float radius = EditorGUILayout.FloatField("节点命中半径", _layout.HitRadius);
+            float radius = EditorGUILayout.FloatField("节点边框半宽（同时用于命中）", _layout.NodeRadius);
             if (EditorGUI.EndChangeCheck())
             {
                 Edit(); _layout.WarningSeconds = Mathf.Max(.1f, warning);
                 _layout.RandomPhaseOrder = randomOrder;
                 _layout.Interval = new Vector2(Mathf.Max(_layout.WarningSeconds + .1f, interval.x), Mathf.Max(_layout.WarningSeconds + .1f, interval.x, interval.y));
-                bounds.width = Mathf.Max(1, bounds.width); bounds.height = Mathf.Max(1, bounds.height); _layout.Area = bounds; _layout.HitRadius = Mathf.Max(.01f, radius);
+                bounds.width = Mathf.Max(1, bounds.width); bounds.height = Mathf.Max(1, bounds.height); _layout.Area = bounds; _layout.NodeRadius = Mathf.Max(.01f, radius);
             }
             if (GUILayout.Button("增加目标阶段")) { Edit(); var phases = _layout.Phases.ToList(); phases.Add(new RepairLayout.Phase()); _layout.Phases = phases.ToArray(); _phase = phases.Count - 1; }
             if (_layout.Phases.Length > 0)
@@ -236,7 +236,7 @@ namespace DelayNoMore.LightPath.Editor
             if (_layout.Phases.Length == 0 || _layout.Phases.Any(x => x.Targets.Length == 0)) EditorGUILayout.HelpBox("每个阶段至少选择一个目标出口。", MessageType.Warning);
             if (!_layout.TryValidate(out string error)) EditorGUILayout.HelpBox(error, MessageType.Warning);
             for (int i = 0; i < _layout.Devices.Length; i++)
-                if (_layout.Devices.Skip(i + 1).Any(x => Vector2.Distance(x.Position, _layout.Devices[i].Position) <= _layout.HitRadius * 2)) { EditorGUILayout.HelpBox("机关存在重叠，请分开放置。", MessageType.Warning); break; }
+                if (_layout.Devices.Skip(i + 1).Any(x => Vector2.Distance(x.Position, _layout.Devices[i].Position) <= _layout.NodeRadius * 2)) { EditorGUILayout.HelpBox("机关存在重叠，请分开放置。", MessageType.Warning); break; }
         }
         /** @brief 固定右栏编辑选中机关。 */
         private void Inspector()

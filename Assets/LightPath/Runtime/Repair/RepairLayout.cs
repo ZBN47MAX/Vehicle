@@ -59,8 +59,10 @@ namespace DelayNoMore.LightPath
         public float WarningSeconds = 8;
         /** @brief 操作空间。 */
         public Rect Area = new Rect(-10, -6, 20, 12);
-        /** @brief 命中节点的容差。 */
-        public float HitRadius = .25f;
+        /** @brief 兼容旧调用方，命中与显示始终使用同一半宽。 */
+        public float HitRadius { get => NodeRadius; set => NodeRadius = value; }
+        /** @brief 节点可见方形边框的半宽，同时用于射线命中和编辑器预览。 */
+        [Min(.01f)] public float NodeRadius = .45f;
         /** @brief 验证运行所需内容，不修改配置。@param error 首个错误 @return 内容可用于运行时为真；不保证谜题可解 */
         public bool TryValidate(out string error)
         {

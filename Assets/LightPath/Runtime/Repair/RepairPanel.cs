@@ -150,10 +150,10 @@ namespace DelayNoMore.LightPath
                 Vector2 point = Point(layout, device.Position);
                 bool target = session.IsTarget(device.Id);
                 bool lit = session.Result.Lit.Contains(device.Id);
-                if (target)
-                    Fill(new Rect(point.x - 15, point.y - 15, 30, 30), new Color(1, .55f, .15f));
+                float radius = layout.NodeRadius * Mathf.Min(BoardRect.width / layout.Area.width, BoardRect.height / layout.Area.height);
+                Fill(new Rect(point.x - radius, point.y - radius, radius * 2, radius * 2), target ? new Color(1, .55f, .15f) : Color.white);
                 Color color = device.Type == RepairLayout.Kind.Source ? Color.yellow : lit ? Color.green : new Color(.25f, .65f, .85f);
-                Fill(new Rect(point.x - 11, point.y - 11, 22, 22), color);
+                Fill(new Rect(point.x - radius * .8f, point.y - radius * .8f, radius * 1.6f, radius * 1.6f), color);
                 float angle = session.Angle(i) * Mathf.Deg2Rad;
                 if (device.Type != RepairLayout.Kind.Exit)
                     Line(point, point + new Vector2(Mathf.Cos(angle), -Mathf.Sin(angle)) * 20, Color.white, 2);

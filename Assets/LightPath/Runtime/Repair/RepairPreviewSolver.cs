@@ -32,6 +32,26 @@ namespace DelayNoMore.LightPath
         /** @brief 将目标角限制到透镜自身基准方向附近的允许区间。 */
         public static float ClampLensAngle(RepairLayout.Device device, float degrees) => device.Direction * 45f
             + Mathf.Clamp(Mathf.DeltaAngle(device.Direction * 45f, degrees), device.AngleRange.x, device.AngleRange.y);
+        /** @brief 求射线首次接触节点方框的位置，包含擦边。 @param start 起点 @param direction 单位方向 @param center 节点中心 @param radius 半宽 @param distance 接触距离 @return 是否相交 */
+        public static bool HitNode(Vector2 start, Vector2 direction, Vector2 center, float radius, out float distance)
+        {
+            float near = 0, far = float.PositiveInfinity;
+            for (int axis = 0; axis < 2; axis++)
+            {
+                float offset = start[axis] - center[axis];
+                if (Mathf.Abs(direction[axis]) < .000001f)
+                {
+                    if (Mathf.Abs(offset) > radius + .000001f) { distance = 0; return false; }
+                    continue;
+                }
+                float a = (-radius - offset) / direction[axis];
+                float b = (radius - offset) / direction[axis];
+                near = Mathf.Max(near, Mathf.Min(a, b));
+                far = Mathf.Min(far, Mathf.Max(a, b));
+            }
+            distance = near;
+            return far >= near && far > .0001f;
+        }
         /** @brief 根据布局与试玩朝向追踪光路。 @param layout 配置 @param directions 可选试玩朝向 @return 光路 */
         public static Result Trace(RepairLayout layout, int[] directions)
         {
@@ -68,9 +88,7 @@ namespace DelayNoMore.LightPath
                 for (int i = 0; i < layout.Devices.Length; i++)
                 {
                     if (i == ray.node) continue;
-                    Vector2 delta = layout.Devices[i].Position - start;
-                    float along = Vector2.Dot(delta, direction);
-                    if (along > .001f && along < distance && (delta - direction * along).magnitude <= layout.HitRadius)
+                    if (HitNode(start, direction, layout.Devices[i].Position, layout.NodeRadius, out float along) && along < distance)
                     { hit = i; distance = along; }
                 }
                 result.Segments.Add(new Segment { From = start, To = start + direction * Mathf.Max(0, distance) });

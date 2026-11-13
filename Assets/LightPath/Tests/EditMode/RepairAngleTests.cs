@@ -5,6 +5,13 @@ namespace DelayNoMore.LightPath.Tests
     /** @brief 验证八向折镜、连续透镜、循环和会话状态，不组装场景。 */
     public sealed class RepairAngleTests
     {
+        /** @brief 接触边框即可命中，越过边框则不命中。 */
+        [Test] public void NodeBoundary_IncludesTangentAndExcludesOutside()
+        {
+            Assert.That(RepairPreviewSolver.HitNode(new Vector2(-2, .45f), Vector2.right, Vector2.zero, .45f, out float distance), Is.True);
+            Assert.That(distance, Is.EqualTo(1.55f).Within(.0001f));
+            Assert.That(RepairPreviewSolver.HitNode(new Vector2(-2, .451f), Vector2.right, Vector2.zero, .45f, out _), Is.False);
+        }
         /** @brief 独立内存布局。 */
         private RepairLayout _layout;
         /** @brief 创建光源、透镜和12度目标，命中容差很小以排除八向近似。 */

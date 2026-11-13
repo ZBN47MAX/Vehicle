@@ -29,32 +29,32 @@ namespace DelayNoMore.LightPath
                 _phase = session.PhaseIndex;
                 _warning = session.Warning;
                 _vertices.Clear(); _indices.Clear(); _colors.Clear();
-                foreach (var node in layout.Devices) AddDirections(node, config);
+                foreach (var node in layout.Devices) AddDirections(node, layout, config);
                 foreach (RepairPreviewSolver.Segment segment in session.Result.Segments)
                     AddLine(segment.From, segment.To, config.BeamWidth, Color.yellow);
                 for (int i = 0; i < layout.Devices.Length; i++)
                 {
                     RepairLayout.Device node = layout.Devices[i];
-                    if (session.IsTarget(node.Id, session.Warning))
-                        AddSquare(node.Position, config.NodeRadius * 1.4f, new Color(1, .5f, .1f));
+                    AddSquare(node.Position, layout.NodeRadius, session.IsTarget(node.Id, session.Warning) ? new Color(1, .5f, .1f) : Color.white);
+                    AddSquare(node.Position, layout.NodeRadius * .9f, new Color(.08f, .12f, .16f));
                     Color color = session.Result.Lit.Contains(node.Id) ? Color.green : node.Type == RepairLayout.Kind.Source ? Color.yellow : Color.cyan;
                     if (node.Type == RepairLayout.Kind.Lens)
                     {
-                        Vector2 a = Unit(node.Direction * 45) * config.NodeRadius;
+                        Vector2 a = Unit(node.Direction * 45) * layout.NodeRadius * .8f;
                         Vector2 side = new Vector2(-a.y, a.x);
                         AddQuad(node.Position + a, node.Position - a + side, node.Position - a - side, node.Position + a, color);
                     }
                     else if (node.Type == RepairLayout.Kind.Mirror)
                     {
                         for (int edge = 0; edge < 8; edge++)
-                            AddQuad(node.Position, node.Position + Unit(edge * 45 + 22.5f) * config.NodeRadius,
-                                node.Position + Unit((edge + 1) * 45 + 22.5f) * config.NodeRadius, node.Position, color);
+                            AddQuad(node.Position, node.Position + Unit(edge * 45 + 22.5f) * layout.NodeRadius * .8f,
+                                node.Position + Unit((edge + 1) * 45 + 22.5f) * layout.NodeRadius * .8f, node.Position, color);
                     }
-                    else AddSquare(node.Position, config.NodeRadius, color);
+                    else AddSquare(node.Position, layout.NodeRadius * .8f, color);
                     if (node.Type != RepairLayout.Kind.Exit)
                     {
                         float angle = session.Angle(i) * Mathf.Deg2Rad;
-                        AddLine(node.Position, node.Position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * config.NodeRadius * 2, config.BeamWidth, Color.white);
+                        AddLine(node.Position, node.Position + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * layout.NodeRadius * 2, config.BeamWidth, Color.white);
                     }
                 }
                 _mesh.Clear();
@@ -70,7 +70,7 @@ namespace DelayNoMore.LightPath
         /** @brief 将角度转换为单位方向。 */
         private static Vector2 Unit(float degrees) => new Vector2(Mathf.Cos(degrees * Mathf.Deg2Rad), Mathf.Sin(degrees * Mathf.Deg2Rad));
         /** @brief 绘制短虚线与范围弧，仅表示可选方向，不参与光路计算。 */
-        private void AddDirections(RepairLayout.Device node, LightStageConfig config)
+        private void AddDirections(RepairLayout.Device node, RepairLayout layout, LightStageConfig config)
         {
             if (node.Type != RepairLayout.Kind.Mirror && node.Type != RepairLayout.Kind.Lens) return;
             Color color = new Color(.35f, .45f, .5f);
@@ -79,22 +79,22 @@ namespace DelayNoMore.LightPath
             {
                 if (node.Type == RepairLayout.Kind.Mirror && (node.Allowed & (1 << i)) == 0) continue;
                 float angle = node.Type == RepairLayout.Kind.Mirror ? i * 45 : node.Direction * 45 + Mathf.Lerp(node.AngleRange.x, node.AngleRange.y, i / 4f);
-                Vector2 direction = Unit(angle) * config.NodeRadius;
+                Vector2 direction = Unit(angle) * layout.NodeRadius * .8f;
                 for (float t = 1.5f; t < 3.5f; t += .6f)
                     AddLine(node.Position + direction * t, node.Position + direction * (t + .3f), config.BeamWidth * .5f, color);
             }
             if (node.Type != RepairLayout.Kind.Lens) return;
             for (int i = 0; i < 24; i++)
-                AddLine(node.Position + Unit(node.Direction * 45 + Mathf.Lerp(node.AngleRange.x, node.AngleRange.y, i / 24f)) * config.NodeRadius * 3.5f,
-                    node.Position + Unit(node.Direction * 45 + Mathf.Lerp(node.AngleRange.x, node.AngleRange.y, (i + 1) / 24f)) * config.NodeRadius * 3.5f, config.BeamWidth * .5f, color);
+                AddLine(node.Position + Unit(node.Direction * 45 + Mathf.Lerp(node.AngleRange.x, node.AngleRange.y, i / 24f)) * layout.NodeRadius * 3.5f,
+                    node.Position + Unit(node.Direction * 45 + Mathf.Lerp(node.AngleRange.x, node.AngleRange.y, (i + 1) / 24f)) * layout.NodeRadius * 3.5f, config.BeamWidth * .5f, color);
         }
         /** @brief 获取包含边界节点的等比缩放。@param layout 布局 @param config 参数 @return 世界缩放 */
-        private static float Scale(RepairLayout layout, LightStageConfig config) => Mathf.Min(config.RepairSize.x / (layout.Area.width + config.NodeRadius * 4), config.RepairSize.y / (layout.Area.height + config.NodeRadius * 4));
+        private static float Scale(RepairLayout layout, LightStageConfig config) => Mathf.Min(config.RepairSize.x / (layout.Area.width + layout.NodeRadius * 4), config.RepairSize.y / (layout.Area.height + layout.NodeRadius * 4));
         /** @brief 在顶面射线命中点寻找可旋转节点。@param layout 布局 @param config 参数 @param frame 顶面坐标系 @param ray 世界射线 @return 索引或负一 */
         public static int Pick(RepairLayout layout, LightStageConfig config, Transform frame, Ray ray)
         {
             if (!TryPoint(layout, config, frame, ray, out Vector2 point)) return -1;
-            float nearest = config.NodeRadius * 1.8f;
+            float nearest = layout.NodeRadius * 1.8f;
             int result = -1;
             for (int i = 0; i < layout.Devices.Length; i++)
             {
