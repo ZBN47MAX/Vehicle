@@ -59,6 +59,10 @@ namespace DelayNoMore.LightPath
         }
         /** @brief 获取可选关卡数量。 */
         public int DebugLevelCount => _levels.Length;
+        /** @brief 当前关卡索引。 */
+        public int DebugCurrentLevel => _ready ? _roomLevels[_roomIndex] : 0;
+        /** @brief 当前关卡内房间索引。 */
+        public int DebugCurrentRoom => _ready ? _roomIndex - _levelFirst[_roomLevels[_roomIndex]] : 0;
         /** @brief 获取关卡房间数量。 @param level 关卡索引 @return 房间数 */
         public int DebugRoomCount(int level) => level >= 0 && level < _levels.Length ? _levels[level].RoomCount : 0;
         /** @brief 设置调试能力覆盖。 @param index 六轴后接四色 @param value 是否启用 */
@@ -129,7 +133,7 @@ namespace DelayNoMore.LightPath
             string[] filterKeys = { "LightMenu._names.001", "LightMenu._names.002", "LightMenu._names.003", "LightMenu._names.004" };
             string filter = _color < 0 ? none : GameText.Get(filterKeys[_color]);
             string axes = "";
-            for (int i = 0; i < 6; i++) if (_projectionAbilities.Has((ProjectionAbility)i)) axes += (axes.Length == 0 ? "" : " / ") + ProjectionAbilityState.Label((ProjectionAbility)i);
+            for (int i = 0; i < 6; i++) if (HasProjectionAbility((ProjectionAbility)i)) axes += (axes.Length == 0 ? "" : " / ") + ProjectionAbilityState.Label((ProjectionAbility)i);
             string selected = _stage && _stage.View == StageView.Projection && _selected >= 0 && _selected < Room.Surface.Sources.Count && Room.Surface.Sources[_selected] ? Room.Surface.Sources[_selected].name : none;
             string snapshot = GameText.Get("Debug.Snapshot", _roomIndex + 1, _rooms.Length, Room.name.Replace("(Clone)", ""), view, state,
                 _player.position.x, _player.position.y, _player.linearVelocity.x, _player.linearVelocity.y,

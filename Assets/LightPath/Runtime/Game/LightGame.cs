@@ -110,8 +110,8 @@ namespace DelayNoMore.LightPath
         private int UnlockedCount()
         {
             int count = 0;
-            foreach (bool value in _unlocked)
-                if (value)
+            for (int i = 0; i < _unlocked.Length; i++)
+                if (IsUnlocked(i))
                     count++;
             return count;
         }

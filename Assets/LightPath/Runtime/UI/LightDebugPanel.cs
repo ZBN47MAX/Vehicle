@@ -121,6 +121,11 @@ namespace DelayNoMore.LightPath
         /** @brief 显示或隐藏，不改变游戏暂停、视角或鼠标状态。@param visible 是否显示 */
         public void SetVisible(bool visible)
         {
+            if (visible && !Visible && _game)
+            {
+                _level = _game.DebugCurrentLevel;
+                _room = _game.DebugCurrentRoom;
+            }
             Visible = visible;
             if (_tools) _tools.SetActive(visible);
             if (_group) _group.alpha = visible ? 1 : 0;
