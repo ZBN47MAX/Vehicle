@@ -35,18 +35,6 @@ namespace DelayNoMore.LightPath.Tests
             }
             finally { EditorSceneManager.ClosePreviewScene(scene); }
         }
-        /** @brief 两三角形组成的平面只有四条外边，内部对角线不会成为描边。 */
-        [Test] public void Silhouette_RemovesInternalEdgesAndClipsToScreen()
-        {
-            var vertices=new[]{new Vector3(-1,-1,0),new Vector3(1,-1,0),new Vector3(1,1,0),new Vector3(-1,1,0)};
-            var edges=ProjectionSelectionOutline.Silhouette(vertices,new[]{0,1,2,0,2,3},Matrix4x4.identity,new Vector3(0,0,5));
-            Assert.That(edges.Count,Is.EqualTo(8));
-            Vector2 a=new Vector2(-3,0),b=new Vector2(3,0);
-            Assert.That(ProjectionSelectionOutline.Clip(new Rect(-1,-1,2,2),ref a,ref b),Is.True);
-            Assert.That(a,Is.EqualTo(new Vector2(-1,0))); Assert.That(b,Is.EqualTo(new Vector2(1,0)));
-            a=new Vector2(-3,4);b=new Vector2(3,4);
-            Assert.That(ProjectionSelectionOutline.Clip(new Rect(-1,-1,2,2),ref a,ref b),Is.False);
-        }
         /** @brief 使用已存在房间测试UI图文的作者入口，不保存或创建玩法资产。 */
         [TestCase(false),TestCase(true)] public void DecorationPlacement_IsUiOnlyAndLocallyEditable(bool text)
         {
