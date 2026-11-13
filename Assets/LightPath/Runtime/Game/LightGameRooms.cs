@@ -338,6 +338,7 @@ namespace DelayNoMore.LightPath
             next.transform.position = old.transform.position + new Vector3(direction.x * width, direction.y * height, 0);
             next.gameObject.SetActive(true);
             if (_stage) _stage.ConfigureProjection(next.Surface);
+            next.Surface.SetFocus(next.Surface.Bounds.center);
             if (!_visited[target])
             {
                 next.ResetRoom();
