@@ -194,7 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0f1458e0cd9b87409abec0985a08816, type: 3}
   m_Name: 
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.GameTextLabel
-  Key: 
+  Key: Checkpoint.Label
 --- !u!1 &4583394122193183919
 GameObject:
   m_ObjectHideFlags: 0

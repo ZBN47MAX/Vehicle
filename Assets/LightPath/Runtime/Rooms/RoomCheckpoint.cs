@@ -18,7 +18,7 @@ namespace DelayNoMore.LightPath
                 _label = item.AddComponent<TMPro.TextMeshPro>();
             }
             GameText.ApplyFont(_label);
-            _label.text = "Checkpoint";
+            _label.text = GameText.Get("Checkpoint.Label");
             _label.fontSize = 3;
             _label.alignment = TMPro.TextAlignmentOptions.Center;
             _label.color = Color.white;
