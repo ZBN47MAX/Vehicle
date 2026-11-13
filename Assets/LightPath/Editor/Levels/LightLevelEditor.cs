@@ -116,7 +116,7 @@ namespace DelayNoMore.LightPath.Editor
                 FrameMap();
                 BuildPreview();
             }
-            EditorGUILayout.HelpBox("选择房间后在右侧2D画布编辑。滚轮缩放、中键平移，左键选择拖动。可创建平台、放置模板、点击两门配对。", MessageType.Info);
+            EditorGUILayout.HelpBox("选择房间后在右侧2D画布编辑。滚轮缩放、中键平移，左键选择拖动。可创建平台、放置模板、在属性栏配置传送门连接。", MessageType.Info);
             DrawCatalog();
             _brush = (GameObject)EditorGUILayout.ObjectField("放置预制体", _brush, typeof(GameObject), false);
             _grid = Mathf.Max(.05f, EditorGUILayout.FloatField("房间内网格（米）", _grid));
@@ -126,10 +126,6 @@ namespace DelayNoMore.LightPath.Editor
                 _placing = EditorGUILayout.Toggle("Scene点击放置", _placing);
                 if (GUILayout.Button("将选中对象登记到房间"))
                     RegisterSelection();
-                if (GUILayout.Button("配对选中的两个传送源"))
-                    Pair();
-                if (GUILayout.Button("解除选中传送源的互相配对"))
-                    Unpair();
                 EditorGUILayout.Space();
                 _config = (LightGameConfig)EditorGUILayout.ObjectField("关卡参数", _config, typeof(LightGameConfig), false);
                 _size = EditorGUILayout.Vector2Field("地图宽高", _size);
@@ -208,12 +204,6 @@ namespace DelayNoMore.LightPath.Editor
                 _report = "请选择房间内的平台或投影源物件。";
                 return;
             }
-            foreach (ProjectionSource source in root.GetComponentsInChildren<ProjectionSource>(true))
-                if (source.Partner && !source.Partner.transform.IsChildOf(root.transform))
-                {
-                    _report = "门目标位于模板之外。请先解除配对，或选择同时包含门对的父对象。";
-                    return;
-                }
             string path = EditorUtility.SaveFilePanelInProject("另存玩法模板", root.name, "prefab", "选择新的模板路径", "Assets/LightPath/Prefabs");
             if (string.IsNullOrEmpty(path))
                 return;
@@ -231,39 +221,6 @@ namespace DelayNoMore.LightPath.Editor
         {
             foreach (GameObject root in Selection.gameObjects)
                 Register(root);
-        });
-        /** @brief 修改门引用并记录预制体实例覆盖。 @param source 源 @param partner 目标 */
-        private static void SetPartner(ProjectionSource source, ProjectionSource partner)
-        {
-            var serialized = new SerializedObject(source);
-            serialized.FindProperty("_partner").objectReferenceValue = partner;
-            serialized.ApplyModifiedProperties();
-        }
-        /** @brief 配对同房间两扇未配对门。 */
-        private void Pair() => Edit("配对传送门", () =>
-        {
-            ProjectionSource[] sources = Selection.gameObjects.Select(x => x.GetComponent<ProjectionSource>()).Where(x => x).Distinct().ToArray();
-            if (sources.Length != 2 || sources.Any(x => !x.Definition || !x.Definition.Portal || !x.Definition.Transmissive
-                || x.GetComponent<RoomPortalLink>() || x.GetComponent<ProjectionAbilityKey>() || x.GetComponent<ColorAbilityKey>() || x.GetComponent<LevelExit>() || x.GetComponentInParent<LightRoom>() != _room || (x.Partner && !sources.Contains(x.Partner))))
-                throw new System.InvalidOperationException("请选择同一房间两扇透光传送源，已有连接请先移除；单向或跨房间连接请使用右侧目标选择。");
-            Register(sources[0].gameObject);
-            Register(sources[1].gameObject);
-            SetPartner(sources[0], sources[1]);
-            SetPartner(sources[1], sources[0]);
-        });
-        /** @brief 解除本房间选中源的配对及原目标反向引用。 */
-        private void Unpair() => Edit("解除传送门", () =>
-        {
-            foreach (GameObject root in Selection.gameObjects)
-            {
-                ProjectionSource source = root.GetComponent<ProjectionSource>();
-                if (!source || source.GetComponentInParent<LightRoom>() != _room)
-                    continue;
-                ProjectionSource partner = source.Partner;
-                if (partner && partner.GetComponentInParent<LightRoom>() == _room && partner.Partner == source)
-                    SetPartner(partner, null);
-                SetPartner(source, null);
-            }
         });
         /** @brief 调整投影范围和共享配置的镜头参数。 */
         private void Resize() => Edit("配置房间范围", () =>
@@ -306,12 +263,6 @@ namespace DelayNoMore.LightPath.Editor
         {
             if (!Editable())
                 return;
-            foreach (ProjectionSource source in _room.GetComponentsInChildren<ProjectionSource>(true))
-                if (source.Partner)
-                {
-                    Handles.color = Color.magenta;
-                    Handles.DrawDottedLine(source.transform.position, source.Partner.transform.position, 5);
-                }
             if (!_placing || !CanPlaceTemplate(_brush) || !PrefabUtility.IsPartOfPrefabAsset(_brush))
                 return;
             Event current = Event.current;

@@ -173,8 +173,7 @@ namespace DelayNoMore.LightPath
                 foreach (RoomPortalLink incoming in _rooms[i].GetComponentsInChildren<RoomPortalLink>(true))
                     if (!incoming.ArrivalOnly && !incoming.UseArrivalPosition && incoming.Bidirectional && incoming.TargetRoom == local && incoming.TargetPortal == portal.name)
                         return true;
-            ProjectionSource source = portal.GetComponent<ProjectionSource>();
-            return !link && source && source.Partner;
+            return false;
         }
         /** @brief 获取实际二维门位置。@param room 房间 @param portal 门 @return 位置 */
         private static Vector2 PortalPosition(LightRoom room, GameObject portal) => portal.GetComponent<ProjectionSource>() ? (Vector2)room.Surface.ProjectPoint(portal.transform.position) : (Vector2)portal.transform.position;

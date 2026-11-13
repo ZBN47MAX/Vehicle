@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEditor;
 using UnityEngine;
 namespace DelayNoMore.LightPath.Editor
@@ -61,7 +61,6 @@ namespace DelayNoMore.LightPath.Editor
                     SaveLevel();
             }
             ReleasePreview();
-            _firstPortal = null;
             _dragging = null;
             PrefabUtility.UnloadPrefabContents(_levelContents);
             _levelContents = null;

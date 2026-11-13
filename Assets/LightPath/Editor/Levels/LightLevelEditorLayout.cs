@@ -265,7 +265,7 @@ namespace DelayNoMore.LightPath.Editor
                 if (incoming == 1)
                     return "";
             }
-            return source.GetComponent<ProjectionSource>() && source.GetComponent<ProjectionSource>().Partner ? "" : "未配置出口（若作为单向到达端可忽略）";
+            return "未配置出口（若作为单向到达端可忽略）";
         }
         /** @brief 从房间和门列表配置独立传送连接。 @param source 当前投影门 */
         private void DrawPortalConnection(GameObject source)
@@ -273,12 +273,8 @@ namespace DelayNoMore.LightPath.Editor
             if (!_level || source.GetComponent<LevelExit>() || source.GetComponent<ColorAbilityKey>() || source.GetComponent<ProjectionAbilityKey>())
                 return;
             RoomPortalLink link = source.GetComponent<RoomPortalLink>();
-            var projection = source.GetComponent<ProjectionSource>();
             if (!link && GUILayout.Button("配置传送门目标"))
             {
-                if (projection && projection.Partner && projection.Partner.Partner == projection)
-                    SetPartner(projection.Partner, null);
-                if (projection) SetPartner(projection, null);
                 link = Undo.AddComponent<RoomPortalLink>(source);
             }
             if (!link)
@@ -324,8 +320,6 @@ namespace DelayNoMore.LightPath.Editor
             string issue = PortalConnectionIssue(source);
             if (!string.IsNullOrEmpty(issue))
                 EditorGUILayout.HelpBox(issue, MessageType.Warning);
-            if (projection && projection.Partner)
-                EditorGUILayout.HelpBox("此连接优先于旧Partner。建议解除旧配对，避免残留反向通路。", MessageType.Warning);
             if (portals.GroupBy(x => x.name).Any(x => x.Count() > 1))
                 EditorGUILayout.HelpBox("目标房间有同名门，请重命名为唯一名称后保存。", MessageType.Error);
             if (!usePosition.boolValue && selected == 0 && !string.IsNullOrEmpty(oldName))

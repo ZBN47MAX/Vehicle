@@ -17,7 +17,6 @@ namespace DelayNoMore.LightPath.Editor
         /** @brief 当前选择对象。 */
         private GameObject _picked;
         /** @brief 等待配对的首个门。 */
-        private ProjectionSource _firstPortal;
         /** @brief 拖动中的对象。 */
         private GameObject _dragging;
         /** @brief 拖动抓取偏移。 */
@@ -109,7 +108,7 @@ namespace DelayNoMore.LightPath.Editor
             }
             using (new EditorGUI.DisabledScope(!Editable()))
             {
-                _tool = GUILayout.Toolbar(_tool, new[] { "选择/移动", "放模板", "连传送门", "背景图", "背景字" });
+                _tool = GUILayout.Toolbar(_tool, new[] { "选择/移动", "放模板", "背景图", "背景字" });
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("全图"))
                     FrameMap();
@@ -307,11 +306,6 @@ namespace DelayNoMore.LightPath.Editor
                     GUI.Label(new Rect(point.x + 9, point.y - 8, 160, 20), root.name, EditorStyles.whiteMiniLabel);
                 if (outline != null ? PointInOutline(mouse, outline) : box.Contains(mouse))
                     hit = root;
-                if (_previewGuides && source && source.Partner)
-                {
-                    Handles.color = Color.magenta;
-                    Handles.DrawDottedLine(point, ToCanvas(DisplayPosition(source.Partner.gameObject), local), 5);
-                }
             }
             Handles.EndGUI();
             HandleCanvasEvent(local, hit);
@@ -375,7 +369,6 @@ namespace DelayNoMore.LightPath.Editor
                 if (_dragging)
                     Undo.RevertAllDownToGroup(_dragGroup);
                 _dragging = null;
-                _firstPortal = null;
                 GUIUtility.hotControl = 0;
                 e.Use();
             }
@@ -411,12 +404,10 @@ namespace DelayNoMore.LightPath.Editor
             if (e.type != EventType.MouseDown || e.button != 0)
                 return;
             GUI.FocusControl(null);
-            if (_tool == 3 || _tool == 4)
-                PlaceDecoration(Snap(target), _tool == 4);
+            if (_tool == 2 || _tool == 3)
+                PlaceDecoration(Snap(target), _tool == 3);
             else if (_tool == 1)
                 PlaceTemplate(Snap(target));
-            else if (_tool == 2)
-                ConnectPortal(hit);
             else
             {
                 _picked = hit;
@@ -452,28 +443,7 @@ namespace DelayNoMore.LightPath.Editor
             _picked = root;
             _inspectTemplate = false;
         });
-        /** @brief 两次点击设置同房间门对。 @param hit 点击对象 */
-        private void ConnectPortal(GameObject hit)
-        {
-            ProjectionSource source = hit ? hit.GetComponent<ProjectionSource>() : null;
-            if (!source || !source.Definition || !source.Definition.Portal || !source.Definition.Transmissive || source.GetComponent<ProjectionAbilityKey>() || source.GetComponent<ColorAbilityKey>() || source.GetComponent<LevelExit>())
-            {
-                _report = "请点击透光传送门标记。";
-                return;
-            }
-            if (!_firstPortal)
-            {
-                _firstPortal = source;
-                _report = "已选择 " + source.name + "，请点击目标门。";
-                return;
-            }
-            if (_firstPortal == source)
-                return;
-            Selection.objects = new Object[] { _firstPortal.gameObject, source.gameObject };
-            Pair();
-            _firstPortal = null;
-        }
-        /** @brief 复制当前物件，清空复制出的外部门配对并登记。 */
+        /** @brief 复制当前物件，并登记。 */
         private void DuplicatePicked()
         {
             if (!_picked || _picked.GetComponentInParent<LightRoom>() != _room)
@@ -484,9 +454,6 @@ namespace DelayNoMore.LightPath.Editor
                 Undo.RegisterCreatedObjectUndo(copy, "复制关卡对象");
                 copy.name = _picked.name + " Copy";
                 copy.transform.position += Vector3.right * _grid;
-                foreach (ProjectionSource source in copy.GetComponentsInChildren<ProjectionSource>(true))
-                    if (source.Partner && !source.Partner.transform.IsChildOf(copy.transform))
-                        SetPartner(source, null);
                 Register(copy);
                 _picked = copy;
                 Selection.activeGameObject = copy;
@@ -500,9 +467,6 @@ namespace DelayNoMore.LightPath.Editor
             GameObject target = _picked;
             Edit("删除关卡对象", () =>
             {
-                foreach (ProjectionSource source in _room.GetComponentsInChildren<ProjectionSource>(true))
-                    if (source.Partner && source.Partner.transform.IsChildOf(target.transform))
-                        SetPartner(source, null);
                 CleanReferences(_room, target, new[] { "_platforms", "_shards", "_worldPresentation", "_spawn", "_exit" });
                 if (_room.Surface)
                     CleanReferences(_room.Surface, target, new[] { "_sources" });

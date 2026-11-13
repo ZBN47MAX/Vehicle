@@ -588,27 +588,6 @@ namespace DelayNoMore.LightPath
             ProjectionSource portal = Room.Surface.FindPortal(_body.bounds, _color);
             if (portal && !portal.GetComponent<LevelExit>() && !portal.GetComponent<ColorAbilityKey>() && !portal.GetComponent<ProjectionAbilityKey>() && Time.time >= _portalUntil && TryPortalTravel(portal))
                 return;
-            if (portal && !portal.GetComponent<LevelExit>() && !portal.GetComponent<ColorAbilityKey>() && !portal.GetComponent<ProjectionAbilityKey>() && portal.Partner && Time.time >= _portalUntil && Room.Surface.PortalActive(portal.Partner, _color))
-            {
-                Vector3 target = Room.Surface.ProjectPoint(portal.Partner.transform.position);
-                Bounds destination = _body.bounds;
-                destination.center += (Vector3)((Vector2)target - _player.position);
-                Room.Surface.SetFocus(target);
-                if (!Room.Overlaps(destination, _color, false))
-                {
-                    RecordTelemetry("传送成功", TelemetryObject(portal.transform), "同房间配对门=" + TelemetryObject(portal.Partner.transform));
-                    _player.position = target;
-                    _portalUntil = Time.time + _config.PortalCooldown;
-                    Notify(GameText.Get("LightGame.CollectAndTravel.031"));
-                }
-                else
-                {
-                    Room.Surface.SetFocus(_player.position);
-                    RecordTelemetry("传送失败", TelemetryObject(portal.transform), "目标位置被阻挡");
-                    Notify(GameText.Get("LightGame.CollectAndTravel.032"));
-                }
-                return;
-            }
             LevelExit[] exits = Room.GetComponentsInChildren<LevelExit>(true);
             bool canExit = false;
             foreach (LevelExit exit in exits)

@@ -82,8 +82,8 @@ namespace DelayNoMore.LightPath.Editor
                 new[] { 0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 12, 13 });
             using (new EditorGUI.DisabledScope(!Editable()))
             {
-                if (GUILayout.Button("放置背景图片")) _tool = 3;
-                if (GUILayout.Button("放置背景文字")) _tool = 4;
+                if (GUILayout.Button("放置背景图片")) _tool = 2;
+                if (GUILayout.Button("放置背景文字")) _tool = 3;
             }
             _search = EditorGUILayout.TextField("搜索模板", _search);
             if (GUILayout.Button("刷新模板库"))
@@ -468,7 +468,7 @@ namespace DelayNoMore.LightPath.Editor
         private bool PreviewBidirectional(ProjectionSource source)
         {
             RoomPortalLink link = source.GetComponent<RoomPortalLink>();
-            if (!link) return source.Partner;
+            if (!link) return false;
             if (!link.ArrivalOnly) return !link.UseArrivalPosition && link.Bidirectional;
             if (!_level || !source.GetComponentInParent<LightRoom>()) return false;
             for (int i = 0; i < _level.RoomCount; i++)

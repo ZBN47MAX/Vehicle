@@ -7,8 +7,6 @@ namespace DelayNoMore.LightPath
     {
         /** @brief 光学和操作配置。 */
         [SerializeField, Tooltip("模型投影配置 SO")] private ProjectionDefinition _definition;
-        /** @brief 传送目标模型。 */
-        [SerializeField, Tooltip("同房间配对的传送模型")] private ProjectionSource _partner;
         /** @brief 投影采样使用的所有模型碰撞。 */
         private Collider[] _shapes;
         /** @brief 与编辑器共用的真实模型投影几何。 */
@@ -37,8 +35,6 @@ namespace DelayNoMore.LightPath
         private bool _initialized;
         /** @brief 获取定义。 */
         public ProjectionDefinition Definition => _definition;
-        /** @brief 获取配对目标。 */
-        public ProjectionSource Partner => _partner;
         /** @brief 查询鼠标射线的最近模型表面。 @param ray 鼠标射线 @param distance 最近距离 @return 是否命中 */
         public bool TryHit(Ray ray, out float distance)
         {
@@ -61,11 +57,10 @@ namespace DelayNoMore.LightPath
             transform.localPosition = _initialPosition + new Vector3(Mathf.Clamp(offset.x, -range.x, range.x), Mathf.Clamp(offset.y, -range.y, range.y), Mathf.Clamp(offset.z, -range.z, range.z));
             transform.rotation = rotation;
         }
-        /** @brief 初始化配置。 @param definition 定义 @param partner 配对 */
-        public void Configure(ProjectionDefinition definition, ProjectionSource partner = null)
+        /** @brief 初始化配置。 @param definition 定义 */
+        public void Configure(ProjectionDefinition definition)
         {
             _definition = definition;
-            _partner = partner;
         }
         /** @brief 缓存形状和重置状态。 */
         public void Initialize()
