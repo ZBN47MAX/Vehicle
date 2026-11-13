@@ -108,7 +108,8 @@ namespace DelayNoMore.LightPath.Editor
             }
             using (new EditorGUI.DisabledScope(!Editable()))
             {
-                _tool = GUILayout.Toolbar(_tool, new[] { "选择/移动", "放模板", "背景图", "背景字" });
+                int tool = GUILayout.Toolbar(_tool < 2 ? _tool : -1, new[] { "选择/移动", "放模板" });
+                if (tool >= 0) _tool = tool;
                 EditorGUILayout.BeginHorizontal();
                 if (GUILayout.Button("全图"))
                     FrameMap();
