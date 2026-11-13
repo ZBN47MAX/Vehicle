@@ -8,6 +8,78 @@ namespace DelayNoMore.LightPath.Tests
     /** @brief 真实模型投影回归，仅读取已有预制体或建立内存网格，不搭建场景对象。 */
     public sealed class ProjectionMeshTests
     {
+        /** @brief 使用正式圆门网格核对精确轮廓与独立逐三角射线，包括存在轮廓折叠的门。@param x 模型横坐标 */
+        [TestCase(1.08f)] [TestCase(2.58f)]
+        public void SphereSilhouette_MatchesTriangleOracle(float x)
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/LightPath/Prefabs/Props/Gate.prefab");
+            var data = new ProjectionMeshData(prefab.GetComponentInChildren<MeshFilter>().sharedMesh);
+            Vector3 lamp = new Vector3(-1.34f, -4.96f, -27.69f);
+            Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(x, .52f, -13.845f), Quaternion.identity, new Vector3(1, 1, .2f));
+            var projected = new System.Collections.Generic.List<Vector2>();
+            foreach (Vector3 vertex in data.Vertices)
+            {
+                Vector3 world = matrix.MultiplyPoint3x4(vertex), delta = world - lamp;
+                projected.Add(lamp + delta * (-lamp.z / delta.z));
+            }
+            Assert.That(data.TrySilhouette(projected.ToArray(), out Vector2[] outline), Is.True);
+            var pieces = ProjectionContours.ConvexPieces(outline);
+            Assert.That(pieces.Count, Is.InRange(1, 100));
+            Vector2 min = outline[0], max = outline[0];
+            foreach (Vector2 point in outline) { min = Vector2.Min(min, point); max = Vector2.Max(max, point); }
+            var random = new System.Random(713);
+            for (int i = 0; i < 10000; i++)
+            {
+                Vector2 point = new Vector2(Mathf.Lerp(min.x - .03f, max.x + .03f, (float)random.NextDouble()), Mathf.Lerp(min.y - .03f, max.y + .03f, (float)random.NextDouble()));
+                Vector3 delta = (Vector3)point - lamp;
+                bool exact = data.Intersects(new Ray(lamp, delta.normalized), matrix.inverse, delta.magnitude);
+                bool contour = pieces.Exists(piece => InsideConvex(point, piece));
+                Assert.That(contour, Is.EqualTo(exact), $"投影点 {point:R}");
+            }
+        }
+        /** @brief 开放孔洞模型必须保留原求解；凹轮廓分片不得填平凹口。 */
+        [Test] public void ContourFallback_PreservesHolesAndConcavity()
+        {
+            Mesh mesh = Ring();
+            try
+            {
+                var data = new ProjectionMeshData(mesh);
+                var points = new System.Collections.Generic.List<Vector2>();
+                foreach (Vector3 vertex in data.Vertices) points.Add(vertex);
+                Assert.That(data.TrySilhouette(points.ToArray(), out _), Is.False);
+            }
+            finally { Object.DestroyImmediate(mesh); }
+            Vector2[] notch = { new Vector2(0, 0), new Vector2(3, 0), new Vector2(3, 1), new Vector2(1, 1), new Vector2(1, 3), new Vector2(0, 3) };
+            var pieces = ProjectionContours.ConvexPieces(notch);
+            Assert.That(pieces.Exists(piece => InsideConvex(new Vector2(2, 2), piece)), Is.False);
+            Assert.That(pieces.Exists(piece => InsideConvex(new Vector2(.5f, 2), piece)), Is.True);
+        }
+        /** @brief 凸多边形点包含，独立于角色碰撞的收缩容差。 */
+        private static bool InsideConvex(Vector2 point, Vector2[] polygon)
+        {
+            for (int i = 0; i < polygon.Length; i++)
+                if (ProjectionContours.Cross(polygon[(i + 1) % polygon.Length] - polygon[i], point - polygon[i]) < -1e-7f) return false;
+            return true;
+        }
+        /** @brief 固定门的编辑预览取真实圆模型轮廓，不取BoxCollider2D的方形包围。 */
+        [Test] public void FixedPortalPreview_UsesRoundModelOutline()
+        {
+            var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/LightPath/Prefabs/Props/2DGate.prefab");
+            var shape = prefab.GetComponent<Collider2D>();
+            Assert.That(shape, Is.Not.Null);
+            var points = new System.Collections.Generic.List<Vector2>();
+            foreach (Vector3 point in ProjectionObjectMarkers.FixedPortalOutline(shape)) points.Add(point);
+            Assert.That(ProjectionContours.Hull(points).Length, Is.GreaterThan(12), "圆门不应只有四个方框顶点");
+        }
+        /** @brief 裁剪产生重复顶点时仍须检测真实重叠，接触边不触发混色回退。 */
+        [Test] public void ContourOverlap_IgnoresDuplicateEdgesButPreservesOverlap()
+        {
+            Vector2[] a = { Vector2.zero, Vector2.right * 2, Vector2.one * 2, Vector2.up * 2, Vector2.up * 2 };
+            Vector2[] b = { Vector2.one, new Vector2(3, 1), Vector2.one * 3, new Vector2(1, 3) };
+            Vector2[] touching = { new Vector2(2, 0), new Vector2(4, 0), new Vector2(4, 2), new Vector2(2, 2) };
+            Assert.That(ProjectionContours.Overlaps(a, b), Is.True);
+            Assert.That(ProjectionContours.Overlaps(a, touching), Is.False);
+        }
         /** @brief 在现有模型的未保存编辑副本验证换网格、旋转和碰撞器不填孔，不创建玩法对象。 */
         [Test] public void ExistingSource_MeshReplacementAndTransformRefresh()
         {

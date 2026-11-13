@@ -432,14 +432,14 @@ namespace DelayNoMore.LightPath
                 }
                 else
                 {
-                Ray ray = _camera.ScreenPointToRay(Action("Pointer").ReadValue<Vector2>());
-                float nearest = float.PositiveInfinity;
-                for (int i = 0; i < sources.Count; i++)
-                    if (sources[i] && sources[i].Definition && sources[i].Definition.Movable && sources[i].TryHit(ray, out float distance) && distance < nearest)
-                    {
-                        _selected = i;
-                        nearest = distance;
-                    }
+                    Ray ray = _camera.ScreenPointToRay(Action("Pointer").ReadValue<Vector2>());
+                    float nearest = float.PositiveInfinity;
+                    for (int i = 0; i < sources.Count; i++)
+                        if (sources[i] && sources[i].Definition && sources[i].Definition.Movable && sources[i].TryHit(ray, out float distance) && distance < nearest)
+                        {
+                            _selected = i;
+                            nearest = distance;
+                        }
                 }
             }
             _selected = Mathf.Clamp(_selected, 0, sources.Count - 1);

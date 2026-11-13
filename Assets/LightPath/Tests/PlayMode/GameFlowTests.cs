@@ -125,6 +125,70 @@ namespace DelayNoMore.LightPath.Tests
                 UnityEngine.Object.Destroy(settings);
             }
         }
+        /** @brief 在正式第二关圆门房间记录连续移动重建成本，不改配置资产。 */
+        [UnityTest] public IEnumerator PortalMovement_Profile()
+        {
+            _game.DebugJump(1, 1); _game.SetPaused(true);
+            ProjectionSource source = _game.Room.Surface.Sources.First(item => item.Definition.Movable);
+            Vector3 initial = source.transform.position;
+            var times = new System.Collections.Generic.List<double>();
+            int samples = 0, regions = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                source.SetWorldPose(initial + Vector3.right * (.015f * (i + 1)), source.transform.rotation);
+                _game.Room.Surface.Invalidate(source);
+                _game.Room.Surface.Rebuild();
+                times.Add(_game.Room.Surface.LastBuildMilliseconds);
+                samples += _game.Room.Surface.LastSampleCount;
+                regions += _game.Room.Surface.Regions.Count;
+                yield return null;
+            }
+            string result = $"mean_ms={times.Average():F3}; max_ms={times.Max():F3}; mean_samples={samples / 8}; mean_regions={regions / 8}";
+            System.IO.File.WriteAllText(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../../Docs/Reports/PortalMovementProfile.txt")), result);
+            Assert.That(samples / 8, Is.LessThan(1000), "圆门移动应走真实轮廓快路径");
+            Assert.That(regions / 8, Is.LessThan(200), "避免重新生成数千个碰撞碎片");
+            Debug.Log(result);
+        }
+        /** @brief 正式房间中的3D实体与最终投影都可点选，同色后投影标识与选区一起消失。 */
+        [UnityTest] public IEnumerator ProjectionPicking_UsesBothViewsAndHidesColorMarkers()
+        {
+            _game.DebugJump(1, 1); _game.SetPaused(false); _game.DebugAllAbilities(true);
+            Call(_game, "SetStageView", StageView.Projection, true);
+            typeof(LightGame).GetField("_color", _flags).SetValue(_game, -1);
+            Call(_game, "ApplyState");
+            yield return null; yield return null;
+            ProjectionSurface surface = _game.Room.Surface;
+            var camera = Read<Camera>(_stage, "_viewCamera");
+            var capture = Read<Camera>(_stage, "_capture");
+            var frame = Read<Transform>(_stage, "_screenFrame");
+            var config = Read<LightStageConfig>(_stage, "_config");
+            Matrix4x4 mapping = Read<Matrix4x4>(_stage, "_mapping");
+            Physics.SyncTransforms();
+            for (int i = 0; i < surface.Sources.Count; i++)
+            {
+                ProjectionSource source = surface.Sources[i];
+                if (!source.Definition.Movable) continue;
+                Vector3 original = source.transform.position; Quaternion rotation = source.transform.rotation;
+                Vector2 pointer3D = camera.WorldToScreenPoint(mapping.MultiplyPoint3x4(original));
+                Assert.That(_stage.PickProjectionObject(pointer3D, _game.Room, -1), Is.EqualTo(i), "3D实体点击");
+                Vector3 projected = surface.ProjectPoint(original);
+                Vector3 uv = capture.WorldToViewportPoint(projected);
+                Vector3 onScreen = frame.position + frame.rotation * new Vector3((uv.x - .5f) * config.ScreenSize.x, (uv.y - .5f) * config.ScreenSize.y, 0);
+                Vector2 pointer2D = camera.WorldToScreenPoint(onScreen);
+                Assert.That(_stage.PickProjectionObject(pointer2D, _game.Room, -1), Is.EqualTo(i), "最终投影点击");
+                Assert.That(source.transform.position, Is.EqualTo(original));
+                Assert.That(source.transform.rotation, Is.EqualTo(rotation));
+            }
+            var markers = Read<ProjectionObjectMarkers>(_stage, "_objectMarkers");
+            Assert.That(Read<Mesh>(markers, "_world").vertexCount, Is.GreaterThan(0));
+            Color color = surface.Sources[0].Definition.GetColor(surface.Configuration);
+            int selected = Enumerable.Range(0, 4).First(index => surface.Configuration.Matches(color, index));
+            typeof(LightGame).GetField("_color", _flags).SetValue(_game, selected);
+            Call(_game, "ApplyState"); yield return null; yield return null;
+            foreach (ProjectionSource source in surface.Sources)
+                Assert.That(surface.PickSource(surface.ProjectPoint(source.transform.position), selected), Is.EqualTo(-1));
+            Assert.That(Read<Mesh>(markers, "_world").vertexCount, Is.Zero, "同色门的箭头和外轮廓都隐藏");
+        }
         /** @brief 重生只重置复活房间，保留其他已访问房间的通路姿态。 */
         [UnityTest] public IEnumerator Respawn_PreservesOtherVisitedRoomPose()
         {
