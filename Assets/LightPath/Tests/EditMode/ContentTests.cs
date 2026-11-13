@@ -59,7 +59,9 @@ namespace DelayNoMore.LightPath.Tests
                 Assert.That(layout.TryValidate(out string error), Is.True, error);
                 foreach (var phase in layout.Phases)
                 {
-                    int budget = 20000;
+                    float[] initial = layout.Devices.Select(device => device.OutputAngle).ToArray();
+                    if (RepairPreviewSolver.TraceAngles(layout, initial).Matches(phase.Targets)) continue;
+                    int budget = 200000;
                     Assert.That(Solve(layout, phase, new float[layout.Devices.Length], 0, ref budget), Is.True, layout.name + "/" + phase.Name);
                 }
             }
@@ -88,8 +90,10 @@ namespace DelayNoMore.LightPath.Tests
                 }
                 return false;
             }
-            for (int d = 0; d < 8; d++)
+            // 优先尝试策划初始朝向，随后遍历其余允许方向，避免在明显解之前耗尽预算。
+            for (int offset = 0; offset < 8; offset++)
             {
+                int d = (device.Direction + offset) % 8;
                 if ((device.Allowed & (1 << d)) == 0 || ((device.Type == RepairLayout.Kind.Source || device.Type == RepairLayout.Kind.Exit) && d != device.Direction)) continue;
                 directions[index] = d * 45f; if (Solve(layout, phase, directions, index + 1, ref budget)) return true;
             }

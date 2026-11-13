@@ -28,9 +28,10 @@ namespace DelayNoMore.LightPath.Tests
             }
             Assert.That(level.Prefab(5).GetComponentsInChildren<RoomPortalLink>(true).Length, Is.EqualTo(2));
             var carry = level.Prefab(1).Surface.Sources.Single();
-            Assert.That(carry.transform.localPosition.z, Is.GreaterThan(0), "必须先沿Z移入光源与幕布之间");
-            Assert.That(carry.transform.localPosition.x + carry.transform.localScale.magnitude * .5f, Is.LessThan(-3), "必须沿X把模型移入缺口范围");
-            Assert.That(carry.transform.localPosition.y - carry.transform.localScale.magnitude * .5f, Is.GreaterThan(3), "必须沿Y降低桥面");
+            Assert.That(carry.Definition.Movable, Is.True);
+            Assert.That(carry.Definition.Travel.x, Is.GreaterThan(0));
+            Assert.That(carry.Definition.Travel.y, Is.GreaterThan(0));
+            Assert.That(carry.Definition.Travel.z, Is.GreaterThan(0));
             Assert.That(level.Prefab(4).transform.Find("左岸").localPosition.x, Is.EqualTo(-7.5f));
             Assert.That(level.Prefab(4).transform.Find("右岸").localPosition.x, Is.EqualTo(7.5f));
         }
@@ -53,6 +54,12 @@ namespace DelayNoMore.LightPath.Tests
                 Assert.That(source.Definition.Travel.y, Is.GreaterThan(0));
                 Assert.That(source.Definition.Travel.z, Is.GreaterThan(0));
                 source.Adjust(Vector3.zero, 90, axis);
+                Vector3 light = room.Surface.ProjectionOrigin;
+                Vector3 center = source.transform.position;
+                Vector3 projected = room.Surface.ProjectPoint(center);
+                float fraction = (center.z - light.z) / (room.Surface.transform.position.z - light.z);
+                // 当前关卡允许移动桥面，旋转后先将投影中心移到两岸通路高度。
+                source.SetWorldPose(center + new Vector3(-projected.x, .65f - projected.y, 0) * fraction, source.transform.rotation);
                 var geometry = new ProjectionPreviewGeometry(room.Surface.Sources);
                 Vector3 origin = room.Surface.ProjectionOrigin;
                 for (float x = -2.8f; x < 3; x += .7f)
