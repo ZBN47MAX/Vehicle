@@ -7,7 +7,9 @@ namespace DelayNoMore.LightPath
         /** @brief 六轴能力锁的本局状态。 */
         private readonly ProjectionAbilityState _projectionAbilities = new ProjectionAbilityState();
         /** @brief 查询已获得的投影能力。 @param ability 能力 @return 是否已解锁 */
-        public bool HasProjectionAbility(ProjectionAbility ability) => _projectionAbilities.Has(ability);
+        public bool HasProjectionAbility(ProjectionAbility ability) => (int)ability >= 0 && (int)ability < 6 && (_debugAxes[(int)ability] ?? _projectionAbilities.Has(ability));
+        /** @brief 使用玩家实际能力或调试覆盖过滤轴输入。 @param ability 能力 @param value 输入 @return 有效输入 */
+        private float AbilityInput(ProjectionAbility ability, float value) => HasProjectionAbility(ability) ? value : 0;
         /** @brief 收集可接触的投影操作钥匙。 */
         private void CollectProjectionAbilities()
         {

@@ -116,7 +116,7 @@ namespace DelayNoMore.LightPath
             return count;
         }
         /** @brief 获取滤镜获取状态。 @param index 编号 @return 是否已获得 */
-        public bool IsUnlocked(int index) => LightGameConfig.IsManualColor(index) && _unlocked[index];
+        public bool IsUnlocked(int index) => LightGameConfig.IsManualColor(index) && (_debugColors[index] ?? _unlocked[index]);
         /** @brief 场景装配入口。 @param config 配置 @param actions 输入 @param player 角色 @param camera 相机 @param menu 界面 @param levels 关卡文件 */
         public void Configure(LightGameConfig config, InputActionAsset actions, Rigidbody2D player, Camera camera, LightMenu menu, ProjectionLevel[] levels)
         {
@@ -436,13 +436,13 @@ namespace DelayNoMore.LightPath
             if (!source || !source.Definition || !source.Definition.Movable || !source.gameObject.activeInHierarchy)
                 return;
             Vector3 movement = new Vector3(
-                _projectionAbilities.Filter(ProjectionAbility.MoveX, Action("DeviceHorizontal").ReadValue<float>()),
-                _projectionAbilities.Filter(ProjectionAbility.MoveY, Action("DeviceVertical").ReadValue<float>()),
-                _projectionAbilities.Filter(ProjectionAbility.MoveZ, Action("DeviceDepth").ReadValue<float>()));
+                AbilityInput(ProjectionAbility.MoveX, Action("DeviceHorizontal").ReadValue<float>()),
+                AbilityInput(ProjectionAbility.MoveY, Action("DeviceVertical").ReadValue<float>()),
+                AbilityInput(ProjectionAbility.MoveZ, Action("DeviceDepth").ReadValue<float>()));
             Vector3 rotation = new Vector3(
-                _projectionAbilities.Filter(ProjectionAbility.RotateX, Action("DeviceRotationX").ReadValue<float>()),
-                _projectionAbilities.Filter(ProjectionAbility.RotateY, Action("DeviceRotationY").ReadValue<float>()),
-                _projectionAbilities.Filter(ProjectionAbility.RotateZ, Action("DeviceRotation").ReadValue<float>()));
+                AbilityInput(ProjectionAbility.RotateX, Action("DeviceRotationX").ReadValue<float>()),
+                AbilityInput(ProjectionAbility.RotateY, Action("DeviceRotationY").ReadValue<float>()),
+                AbilityInput(ProjectionAbility.RotateZ, Action("DeviceRotation").ReadValue<float>()));
             if (movement == Vector3.zero && rotation == Vector3.zero)
             {
                 if (_keyboardProjectionDirty)
@@ -684,6 +684,7 @@ namespace DelayNoMore.LightPath
             _color = -1;
             _candidate = -1;
             _projectionAbilities.Reset();
+            DebugRestoreAbilities();
             foreach (LightRoom room in _rooms)
                 foreach (ProjectionAbilityKey key in room.GetComponentsInChildren<ProjectionAbilityKey>(true))
                     key.SetCollected(false);
