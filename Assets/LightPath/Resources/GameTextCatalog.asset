@@ -157,7 +157,7 @@ MonoBehaviour:
     Purpose: "HUD\u9009\u4E2D\u6A21\u578B\u4FE1\u606F\u4E2D\u7684\u64CD\u4F5C\u8BF4\u660E\u7247\u6BB5\u3002"
     Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.Update / \u7528\u9014\uFF1A \xB7 \u9F20\u6807\u62D6\u52A8/\u65CB\u8F6C \xB7 "
     Parameters: 
-    Value: " \u00b7 \u70b9\u51fb\u9009\u62e9\u7269\u4ef6\uff0c\u4f7f\u7528\u5df2\u89e3\u9501\u7684\u952e\u4f4d\u8c03\u6574 \u00b7 "
+    Value: " \xB7 \u70B9\u51FB\u9009\u62E9\u7269\u4EF6\uFF0C\u4F7F\u7528\u5DF2\u89E3\u9501\u7684\u952E\u4F4D\u8C03\u6574 \xB7 "
   - Key: LightGame.Update.018
     Screen: "\u6295\u5F71\u8C03\u6574"
     NormalPlay: 1
@@ -535,7 +535,7 @@ MonoBehaviour:
     Purpose: "\u5E95\u90E8\u663E\u793A\u65CB\u8F6C\u673A\u5173\u548C\u8FD4\u56DE3D\u603B\u89C8\u7684\u5B9E\u9645\u8F93\u5165\u7ED1\u5B9A\u3002"
     Location: "HUD\u5E95\u90E8 / \u5F53\u524D\u6A21\u5F0F\u64CD\u4F5C\u5E2E\u52A9\u53CA\u80FD\u529B\u89E3\u9501\u63D0\u793A / LightGameStage.StageHelp"
     Parameters: '{0} = Label("Drag"); {1} = Label("Mode")'
-    Value: "{0} \u70b9\u51fb\u6298\u955c/\u516b\u5411\u955c\u6362\u6863\uff1b\u6309\u4f4f\u900f\u955c\u8282\u70b9\u6216\u89d2\u5ea6\u7ebf\uff0c\u7ed5\u8282\u70b9\u62d6\u52a8\u8c03\u89d2  \u00b7  {1} \u8fd4\u56de3D\u603b\u89c8"
+    Value: "{0} \u70B9\u51FB\u6298\u955C/\u516B\u5411\u955C\u6362\u6863\uFF1B\u6309\u4F4F\u900F\u955C\u8282\u70B9\u6216\u89D2\u5EA6\u7EBF\uFF0C\u7ED5\u8282\u70B9\u62D6\u52A8\u8C03\u89D2  \xB7  {1} \u8FD4\u56DE3D\u603B\u89C8"
   - Key: LightGameStage.StageHelp.014
     Screen: "\u6295\u5F71\u8C03\u6574"
     NormalPlay: 1
@@ -994,7 +994,7 @@ MonoBehaviour:
     Purpose: "\u7EF4\u4FEE\u914D\u7F6E\u6821\u9A8C\u5931\u8D25\u65F6\u62FC\u63A5\u6216\u8F93\u51FA\u6B64\u4FE1\u606F\uFF1B\u7531\u8C03\u7528\u65B9\u663E\u793A\u9519\u8BEF\uFF0C\u6B63\u5E38\u6E38\u620F\u4E0D\u663E\u793A\u3002"
     Location: "\u8FD0\u884C\u4F9D\u8D56\u68C0\u67E5 / \u9519\u8BEF\u8BF4\u660E\uFF08\u6B63\u5E38\u6E38\u73A9\u65F6\u4E0D\u663E\u793A\uFF09 / RepairLayout.TryValidate"
     Parameters: 
-    Value: "\u7ef4\u4fee\u5e03\u5c40\u8303\u56f4\u3001\u8282\u70b9\u8fb9\u6846\u6216\u900f\u955c\u62d6\u52a8\u901f\u5ea6\u65e0\u6548"
+    Value: "\u7EF4\u4FEE\u5E03\u5C40\u8303\u56F4\u3001\u8282\u70B9\u8FB9\u6846\u6216\u900F\u955C\u62D6\u52A8\u901F\u5EA6\u65E0\u6548"
   - Key: RepairLayout.TryValidate.007
     Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
     NormalPlay: 0
@@ -2332,353 +2332,412 @@ MonoBehaviour:
     NormalPlay: 1
     Component: TMP
     Title: Projection clearance
-    Value: "\u6295\u5f71\u8d85\u51fa\u53ef\u7528\u8303\u56f4"
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u6295\u5F71\u8D85\u51FA\u53EF\u7528\u8303\u56F4"
   - Key: Debug.NoclipBlocked
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u8bf7\u5148\u79fb\u52a8\u5230\u623f\u95f4\u5185\u7684\u7a7a\u5904\uff0c\u518d\u5173\u95ed Noclip"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u8BF7\u5148\u79FB\u52A8\u5230\u623F\u95F4\u5185\u7684\u7A7A\u5904\uFF0C\u518D\u5173\u95ED Noclip"
   - Key: Debug.NoclipActive
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "Debug \u00b7 Noclip \u6d6e\u7a7a\u7a7f\u5899"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "Debug \xB7 Noclip \u6D6E\u7A7A\u7A7F\u5899"
   - Key: Debug.Tools.AllOn
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u5168\u90e8\u5f00\u542f"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u5168\u90E8\u5F00\u542F"
   - Key: Debug.Tools.AllOff
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u5168\u90e8\u5173\u95ed"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u5168\u90E8\u5173\u95ED"
   - Key: Debug.Tools.Restore
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u6062\u590d\u8fdb\u5ea6"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u6062\u590D\u8FDB\u5EA6"
   - Key: Debug.Tools.PrevLevel
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u4e0a\u4e00\u5173"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u4E0A\u4E00\u5173"
   - Key: Debug.Tools.NextLevel
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u4e0b\u4e00\u5173"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u4E0B\u4E00\u5173"
   - Key: Debug.Tools.PrevRoom
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u4e0a\u4e00\u623f\u95f4"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u4E0A\u4E00\u623F\u95F4"
   - Key: Debug.Tools.NextRoom
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u4e0b\u4e00\u623f\u95f4"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u4E0B\u4E00\u623F\u95F4"
   - Key: Debug.Tools.Jump
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Value: "\u8df3\u8f6c\u5230\u6240\u9009\u623f\u95f4"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u8DF3\u8F6C\u5230\u6240\u9009\u623F\u95F4"
   - Key: View.World
     Screen: HUD
     NormalPlay: 1
     Component: TMP
-    Value: "2D \u5173\u6ce8"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "2D \u5173\u6CE8"
   - Key: View.Repair
     Screen: HUD
     NormalPlay: 1
     Component: TMP
-    Value: "\u6295\u5f71\u4eea"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u6295\u5F71\u4EEA"
   - Key: View.Projection
     Screen: HUD
     NormalPlay: 1
     Component: TMP
-    Value: "\u6295\u5f71\u9762\u677f"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u6295\u5F71\u9762\u677F"
   - Key: Debug.PowerForcedOn
     Screen: Debug
     NormalPlay: 0
     Component: LightDebugPanel
-    Title: "Debug\uff1a\u5f3a\u5236\u4f9b\u5149"
+    Title: "Debug\uFF1A\u5F3A\u5236\u4F9B\u5149"
     Purpose: Debug
     Location: DebugTools
-    Parameters:
-    Value: "Debug\uff1a\u5f3a\u5236\u4f9b\u5149"
+    Parameters: 
+    Value: "Debug\uFF1A\u5F3A\u5236\u4F9B\u5149"
   - Key: Debug.PowerForcedOff
     Screen: Debug
     NormalPlay: 0
     Component: LightDebugPanel
-    Title: "Debug\uff1a\u5f3a\u5236\u65ad\u5149"
+    Title: "Debug\uFF1A\u5F3A\u5236\u65AD\u5149"
     Purpose: Debug
     Location: DebugTools
-    Parameters:
-    Value: "Debug\uff1a\u5f3a\u5236\u65ad\u5149"
+    Parameters: 
+    Value: "Debug\uFF1A\u5F3A\u5236\u65AD\u5149"
   - Key: Debug.Tools.Blackout
     Screen: Debug
     NormalPlay: 0
     Component: Toggle
-    Value: "\u65ad\u5149"
+    Title: 
+    Purpose: 
+    Location: 
+    Parameters: 
+    Value: "\u65AD\u5149"
   - Key: Debug.Tools.RecordSession
     Screen: Debug
     NormalPlay: 0
     Component: Toggle
-    Title: "本次会话记录"
-    Purpose: "仅当前启动有效，关闭放弃采集，退出导出"
+    Title: "\u672C\u6B21\u4F1A\u8BDD\u8BB0\u5F55"
+    Purpose: "\u4EC5\u5F53\u524D\u542F\u52A8\u6709\u6548\uFF0C\u5173\u95ED\u653E\u5F03\u91C7\u96C6\uFF0C\u9000\u51FA\u5BFC\u51FA"
     Location: DebugTools
-    Parameters:
-    Value: "记录本次（退出时导出）"
+    Parameters: 
+    Value: "\u8BB0\u5F55\u672C\u6B21\uFF08\u9000\u51FA\u65F6\u5BFC\u51FA\uFF09"
   - Key: Room.Level1.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level1"
+    Component: LightRoomDefinition
+    Title: "Level1 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level1
   - Key: Room.Level1.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level1 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2"
+    Component: LightRoomDefinition
+    Title: "Level2 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2
   - Key: Room.Level2.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level1Room1.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room1 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level1Room1"
+    Component: LightRoomDefinition
+    Title: "Level1Room1 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level1Room1
   - Key: Room.Level1Room1.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room1 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level1Room1 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level1Room2.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room2 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level1Room2"
+    Component: LightRoomDefinition
+    Title: "Level1Room2 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level1Room2
   - Key: Room.Level1Room2.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room2 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level1Room2 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level1Room3.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room3 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level1Room3"
+    Component: LightRoomDefinition
+    Title: "Level1Room3 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level1Room3
   - Key: Room.Level1Room3.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room3 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level1Room3 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level1Room4.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room4 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level1Room4"
+    Component: LightRoomDefinition
+    Title: "Level1Room4 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level1Room4
   - Key: Room.Level1Room4.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room4 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level1Room4 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level1Room5.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room5 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level1Room5"
+    Component: LightRoomDefinition
+    Title: "Level1Room5 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level1Room5
   - Key: Room.Level1Room5.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level1Room5 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level1Room5 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2Room1.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room1 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2Room1"
+    Component: LightRoomDefinition
+    Title: "Level2Room1 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2Room1
   - Key: Room.Level2Room1.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room1 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2Room1 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2Room2.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room2 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2Room2"
+    Component: LightRoomDefinition
+    Title: "Level2Room2 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2Room2
   - Key: Room.Level2Room2.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room2 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2Room2 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2Room3.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room3 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2Room3"
+    Component: LightRoomDefinition
+    Title: "Level2Room3 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2Room3
   - Key: Room.Level2Room3.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room3 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2Room3 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2Room4.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room4 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2Room4"
+    Component: LightRoomDefinition
+    Title: "Level2Room4 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2Room4
   - Key: Room.Level2Room4.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room4 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2Room4 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2Room5.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room5 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2Room5"
+    Component: LightRoomDefinition
+    Title: "Level2Room5 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2Room5
   - Key: Room.Level2Room5.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room5 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2Room5 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Level2Room6.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room6 标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "Level2Room6"
+    Component: LightRoomDefinition
+    Title: "Level2Room6 \u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: Level2Room6
   - Key: Room.Level2Room6.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "Level2Room6 提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "Level2Room6 \u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 
   - Key: Room.Default.Title
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "新房间默认标题"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: "新房间"
+    Component: LightRoomDefinition
+    Title: "\u65B0\u623F\u95F4\u9ED8\u8BA4\u6807\u9898"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: "\u65B0\u623F\u95F4"
   - Key: Room.Default.Hint
-    Screen: "房间提示"
+    Screen: "\u623F\u95F4\u63D0\u793A"
     NormalPlay: 1
-    Component: "LightRoomDefinition"
-    Title: "新房间默认提示"
-    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
-    Location: "HUD状态说明"
-    Parameters: ""
-    Value: ""
+    Component: LightRoomDefinition
+    Title: "\u65B0\u623F\u95F4\u9ED8\u8BA4\u63D0\u793A"
+    Purpose: "\u623F\u95F4\u5185\u5BB9\u7EDF\u4E00\u4ECE\u6587\u6848\u8868\u8BFB\u53D6\uFF0C\u4FDD\u7559\u8FC1\u79FB\u524D\u663E\u793A\u5185\u5BB9\u3002"
+    Location: "HUD\u72B6\u6001\u8BF4\u660E"
+    Parameters: 
+    Value: 

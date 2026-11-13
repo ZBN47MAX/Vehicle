@@ -209,7 +209,7 @@ MonoBehaviour:
     - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
     - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
   RandomPhaseOrder: 1
-  Interval: {x: 60, y: 120}
+  Interval: {x: 45, y: 90}
   WarningSeconds: 5
   Area:
     serializedVersion: 2
@@ -217,4 +217,5 @@ MonoBehaviour:
     y: -6
     width: 20
     height: 12
-  HitRadius: 0.25
+  NodeRadius: 0.45
+  LensDragSensitivity: 0.5

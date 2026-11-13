@@ -12,6 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dec309212c83a64297a9ac25777664c, type: 3}
   m_Name: Level1-Config
   m_EditorClassIdentifier: Assembly-CSharp::DelayNoMore.LightPath.LightGameConfig
+  UnlockNoticeSeconds: 6
+  ConnectedEdgeClearance: 1.2
+  NoclipSpeed: 6
+  NoclipBoost: 3
+  UnlockFadeSeconds: 0.4
+  UnlockNoticeColor: {r: 1, g: 0.88, b: 0.63, a: 1}
   _speed: 5
   _jumpSpeed: 9
   _slowMotion: 0.15
@@ -47,4 +53,4 @@ MonoBehaviour:
     height: 0
   _chunkSize: 8
   _activeRadius: 24
-  _edgeRefinement: 2
+  _edgeRefinement: 3

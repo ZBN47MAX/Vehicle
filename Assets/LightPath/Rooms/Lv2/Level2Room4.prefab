@@ -286,7 +286,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.LightRoom
   _definition: {fileID: 11400000, guid: f5fcd1df9bf53a143be84c12eed6ec44, type: 2}
   _surface: {fileID: 701030868602341624}
-  _rig: {fileID: 0}
   _platforms:
   - {fileID: 4603607307842630916}
   - {fileID: 7414946886301984999}
@@ -295,7 +294,6 @@ MonoBehaviour:
   - {fileID: 6743392360650818995}
   _spawn: {fileID: 0}
   _exit: {fileID: 0}
-  _shards: []
   _screen: {fileID: 2003208796187700137}
   _worldPresentation:
   - {fileID: 5433386085851476733}
@@ -548,6 +546,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2429592741933806632}
     m_Modifications:
+    - target: {fileID: 880003, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}
+      propertyPath: m_renderer
+      value: 
+      objectReference: {fileID: 5310294679364678618}
+    - target: {fileID: 880003, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 880003, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}
+      propertyPath: m_ActiveFontFeatures.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 204552299918060709, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -569,6 +579,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}
+--- !u!23 &5310294679364678618 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 880002, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}
+  m_PrefabInstance: {fileID: 5310294679363837528}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5433386085851476733 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 204552299918060709, guid: 36ffde82af2746a4eb9a8155a03f25b1, type: 3}

@@ -213,7 +213,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.LightRoom
   _definition: {fileID: 11400000, guid: 02389717747e6ff47bf2ae77ad88c650, type: 2}
   _surface: {fileID: 677266566949521960}
-  _rig: {fileID: 0}
   _platforms:
   - {fileID: 2380598127427714789}
   - {fileID: 908256421012810882}
@@ -226,7 +225,6 @@ MonoBehaviour:
   - {fileID: 6688635141676541452}
   _spawn: {fileID: 1701155551756475702}
   _exit: {fileID: 7387110777822509491}
-  _shards: []
   _screen: {fileID: 1447337822893938824}
   _worldPresentation: []
 --- !u!1 &5094273562776550715

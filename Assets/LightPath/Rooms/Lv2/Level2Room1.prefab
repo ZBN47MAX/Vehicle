@@ -500,7 +500,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.ProjectionSource
   _definition: {fileID: 11400000, guid: 76d320b5e222faf4da31b0a7d3f68552, type: 2}
-  _partner: {fileID: 0}
 --- !u!114 &1238740406448642890
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -719,7 +718,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.LightRoom
   _definition: {fileID: 11400000, guid: a96df237913bf29439469640ef1b52b8, type: 2}
   _surface: {fileID: 6481258146074349684}
-  _rig: {fileID: 0}
   _platforms:
   - {fileID: 1338128928899638864}
   - {fileID: 736065465337928299}
@@ -729,7 +727,6 @@ MonoBehaviour:
   - {fileID: 8807030783072329320}
   _spawn: {fileID: 6029172472485400168}
   _exit: {fileID: 0}
-  _shards: []
   _screen: {fileID: 5700024012449815109}
   _worldPresentation: []
 --- !u!1 &7817258598447157490
