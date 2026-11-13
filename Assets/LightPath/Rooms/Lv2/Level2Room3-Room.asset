@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Level2Room3-Room
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.LightRoomDefinition
   _title: Level2Room3
-  _hint: "\u5229\u7528\u6295\u5F71\u4E0E\u989C\u8272\u63A2\u7D22\u623F\u95F4"
+  _hint: ""
   _cycleSeconds: 40
   _warningSeconds: 8
   _opticsEnabled: 0

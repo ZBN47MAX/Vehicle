@@ -275,7 +275,7 @@ namespace DelayNoMore.LightPath
                 status += "\n" + RepairStatus();
             if (_repair == null && Room.Warning && Room.Rig)
                 status += GameText.Get("LightGame.Update.020") + Room.Rig.NextDescription;
-            _menu.UpdateGame(mode, Room.Definition.Title, status, BuildHelp(), _preview, CanSwitch(), _candidate, _color, UnlockedCount(), _roomLevels[_roomIndex] + 1, _levels.Length, _playSeconds);
+            _menu.UpdateGame(mode, $"Level{_roomLevels[_roomIndex] + 1}Room{_roomIndex - _levelFirst[_roomLevels[_roomIndex]]}", status, BuildHelp(), _preview, CanSwitch(), _candidate, _color, UnlockedCount(), _roomLevels[_roomIndex] + 1, _levels.Length, _playSeconds);
         }
         /** @brief 读取轮盘并在松开时提交。 */
         private void ReadPalette()
