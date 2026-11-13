@@ -42,6 +42,95 @@ namespace DelayNoMore.LightPath.Tests
         private static object Call(object target, string name, params object[] args) => target.GetType().GetMethod(name, _flags).Invoke(target, args);
         /** @brief 将已有角色移动到指定位置并同步物理。@param position 世界位置 */
         private void Place(Vector2 position) { _player.position = position; _player.linearVelocity = Vector2.zero; Physics2D.SyncTransforms(); }
+        /** @brief 按正式配置跳到指定全局房间索引。@param index 全局索引 */
+        private void JumpToRoom(int index)
+        {
+            int level = Read<int[]>(_game, "_roomLevels")[index];
+            _game.DebugJump(level, index - Read<int[]>(_game, "_levelFirst")[level]);
+        }
+        /** @brief 查找正式场景已有存档点并进入其房间，不假设主房间放有存档点。@return 存档点 */
+        private RoomCheckpoint EnterCheckpointRoom()
+        {
+            var rooms = Read<LightRoom[]>(_game, "_rooms");
+            int index = Array.FindIndex(rooms, room => room.GetComponentInChildren<RoomCheckpoint>(true));
+            Assert.That(index, Is.GreaterThanOrEqualTo(0), "正式场景应有存档点");
+            JumpToRoom(index);
+            _game.SetNoclip(false);
+            return rooms[index].GetComponentInChildren<RoomCheckpoint>(true);
+        }
+        /** @brief 重生只重置复活房间，保留其他已访问房间的通路姿态。 */
+        [UnityTest] public IEnumerator Respawn_PreservesOtherVisitedRoomPose()
+        {
+            _game.DebugJump(2, 1);
+            ProjectionSource source = _game.Room.Surface.Sources.First(item => item.Definition.Movable);
+            source.SetWorldPose(source.transform.position + Vector3.right * .25f, source.transform.rotation);
+            Vector3 expected = source.transform.localPosition;
+            _game.DebugJump(2, 2);
+            _game.Respawn(false);
+            Assert.That(source.transform.localPosition, Is.EqualTo(expected));
+            yield return null;
+        }
+        /** @brief 正式场景验证调试覆盖、浮空、鼠标视角入口及第三关移动权限。 */
+        [UnityTest] public IEnumerator PlaytestControls_AbilitiesNoclipAndMouseViews()
+        {
+            _game.DebugAllAbilities(true);
+            for (int i = 0; i < 10; i++) Assert.That(_game.DebugAbility(i), Is.True);
+            _game.DebugSetAbility(0, false);
+            Assert.That(_game.HasProjectionAbility(ProjectionAbility.MoveX), Is.False);
+            _game.DebugRestoreAbilities();
+            Assert.That(_game.HasProjectionAbility(ProjectionAbility.RotateX), Is.False);
+            _game.DebugAllAbilities(true);
+            _game.DebugJump(2, 2);
+            Assert.That(_game.Room.name, Does.StartWith("Level3Room2"));
+            ProjectionSource bridge = _game.Room.Surface.Sources.First(source => source.Definition.Movable);
+            Assert.That(bridge.Definition.Travel.x, Is.GreaterThan(0));
+            Assert.That(bridge.Definition.Travel.y, Is.GreaterThan(0));
+            Assert.That(bridge.Definition.Travel.z, Is.GreaterThan(0));
+            for (int axis = 0; axis < 3; axis++) Assert.That(bridge.Definition.AllowsRotation(axis), Is.True);
+            _game.SetNoclip(true);
+            Assert.That(_game.Noclip, Is.True);
+            Assert.That(_player.simulated, Is.False);
+            _game.SetPaused(false);
+            Call(_game, "SetStageView", StageView.Overview, true);
+            yield return null;
+            var menu = Read<LightMenu>(_game, "_menu");
+            Transform controls = menu.transform.Find("ViewButtons");
+            Assert.That(controls && controls.gameObject.activeInHierarchy, Is.True);
+            var buttons = controls.GetComponentsInChildren<UnityEngine.UI.Button>();
+            Assert.That(buttons.Length, Is.EqualTo(3));
+            buttons[1].onClick.Invoke();
+            Assert.That(_stage.View, Is.EqualTo(StageView.Repair));
+            yield return new WaitForSecondsRealtime(1);
+            buttons[2].onClick.Invoke();
+            Assert.That(_stage.View, Is.EqualTo(StageView.Projection));
+            yield return new WaitForSecondsRealtime(1);
+            Assert.That(controls.gameObject.activeInHierarchy, Is.True);
+            var panel = UnityEngine.Object.FindAnyObjectByType<LightDebugPanel>();
+            panel.SetVisible(true);
+            yield return null;
+            Assert.That(UnityEngine.Object.FindObjectsByType<Canvas>()
+                .Any(canvas => canvas.transform.Find("DebugTools") && canvas.GetComponent<UnityEngine.UI.GraphicRaycaster>()), Is.True);
+            ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../../Docs/Reports/playtest-controls.png")));
+            yield return new WaitForSecondsRealtime(.5f);
+            panel.SetVisible(false);
+            buttons[0].onClick.Invoke();
+            Assert.That(_stage.View, Is.EqualTo(StageView.World));
+            yield return null;
+            Assert.That(controls.gameObject.activeSelf, Is.False);
+            _game.Restart();
+            Assert.That(_game.Noclip, Is.False);
+            Assert.That(_player.simulated, Is.True);
+            _game.DebugJump(1, 1);
+            Call(_game, "SetStageView", StageView.Projection, true);
+            _game.SetPaused(false);
+            yield return null;
+            ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../../Docs/Reports/playtest-portals.png")));
+            yield return new WaitForSecondsRealtime(.5f);
+            Call(_game, "SetStageView", StageView.Repair, true);
+            yield return null;
+            ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../../Docs/Reports/playtest-repair.png")));
+            yield return new WaitForSecondsRealtime(.5f);
+        }
         /** @brief 使用正式第三关实例验证逐房间推进、实际拾取X/Y钥匙及终局解法。维修供光依赖仅在本用例运行实例中隔离。 */
         [UnityTest] public IEnumerator ThirdLevel_ProgressionUnlocksBothRotationsAndBuildsBridges()
         {
@@ -56,7 +145,7 @@ namespace DelayNoMore.LightPath.Tests
             foreach (var ability in new[] { ProjectionAbility.MoveX, ProjectionAbility.MoveY, ProjectionAbility.MoveZ, ProjectionAbility.RotateZ }) abilities.Unlock(ability);
             Assert.That(abilities.Has(ProjectionAbility.RotateX), Is.False);
             Assert.That(abilities.Has(ProjectionAbility.RotateY), Is.False);
-            for (int i = first; i < first + 7; i++) rooms[i].BindRepair(null);
+            for (int i = first; i < first + 7; i++) rooms[i].BindRepair(Read<RepairSession>(_game, "_repair"));
             rooms[first].gameObject.SetActive(true); rooms[first].ResetRoom();
             Call(_game, "SetStageView", StageView.World, true);
             for (int index = 0; index < 7; index++)
@@ -105,7 +194,7 @@ namespace DelayNoMore.LightPath.Tests
                     Assert.That(_game.Room, Is.SameAs(rooms[first + 6]), "固定二维门进入终局");
                     continue;
                 }
-                Place((Vector2)room.transform.position + new Vector2(8.6f, .6f));
+                Place((Vector2)room.transform.position + new Vector2(8.6f, 1.2f));
                 typeof(LightGame).GetField("_color", _flags).SetValue(_game, -1);
                 yield return _game.StartCoroutine((IEnumerator)Call(_game, "ChangeRoom", first + index + 1, Vector2.right, null));
             }
@@ -119,10 +208,10 @@ namespace DelayNoMore.LightPath.Tests
             _game.Room.gameObject.SetActive(false);
             typeof(LightGame).GetField("_roomIndex", _flags).SetValue(_game, 3);
             typeof(LightGame).GetField("_color", _flags).SetValue(_game, -1);
-            rooms[3].BindRepair(null); rooms[4].BindRepair(null);
+            rooms[3].BindRepair(Read<RepairSession>(_game, "_repair")); rooms[4].BindRepair(Read<RepairSession>(_game, "_repair"));
             rooms[3].gameObject.SetActive(true); rooms[3].ResetRoom();
             Call(_game, "SetStageView", StageView.World, true);
-            Vector2 arrival = new Vector2(0, 7);
+            Vector2 arrival = new Vector2(8, 6.6f);
             yield return _game.StartCoroutine((IEnumerator)Call(_game, "ChangeRoomTo", 4, Vector2.zero, null, (Vector2?)arrival));
             Assert.That(_game.Room, Is.SameAs(rooms[4]));
             Assert.That(Vector2.Distance(_player.position, (Vector2)rooms[4].transform.position + arrival), Is.LessThan(.001f));
@@ -180,7 +269,7 @@ namespace DelayNoMore.LightPath.Tests
             _game.Room.gameObject.SetActive(false);
             typeof(LightGame).GetField("_roomIndex", _flags).SetValue(_game, 3);
             typeof(LightGame).GetField("_color", _flags).SetValue(_game, -1);
-            rooms[3].BindRepair(null); rooms[4].BindRepair(null);
+            rooms[3].BindRepair(Read<RepairSession>(_game, "_repair")); rooms[4].BindRepair(Read<RepairSession>(_game, "_repair"));
             rooms[3].gameObject.SetActive(true);
             rooms[3].ResetRoom();
             Read<bool[]>(_game, "_visited")[3] = true;
@@ -256,7 +345,7 @@ namespace DelayNoMore.LightPath.Tests
         /** @brief 已有存档点通过正式接触逻辑激活，死亡重试回该点，新局清空。 */
         [UnityTest] public IEnumerator Checkpoint_ContactRespawnAndNewGameReset()
         {
-            var checkpoint = _game.Room.GetComponentInChildren<RoomCheckpoint>(); Assert.That(checkpoint, Is.Not.Null);
+            var checkpoint = EnterCheckpointRoom();
             Place(checkpoint.transform.position); Call(_game, "CollectCheckpoints"); Assert.That(_game.ActiveCheckpoint, Is.EqualTo(checkpoint));
             Place(_player.position + Vector2.right * 2); _game.RetryCheckpoint();
             Assert.That(Vector2.Distance(_player.position, checkpoint.Spawn), Is.LessThan(.001f));
@@ -268,7 +357,7 @@ namespace DelayNoMore.LightPath.Tests
         /** @brief 停用存档点后回退到本关出生点。 */
         [UnityTest] public IEnumerator DisabledCheckpoint_FallsBackToSpawn()
         {
-            var checkpoint = _game.Room.GetComponentInChildren<RoomCheckpoint>(); Assert.That(checkpoint, Is.Not.Null);
+            var checkpoint = EnterCheckpointRoom();
             Place(checkpoint.transform.position); Call(_game, "CollectCheckpoints"); checkpoint.enabled = false;
             _game.Respawn(); Assert.That(_game.ActiveCheckpoint, Is.Null);
             Assert.That(Vector2.Distance(_player.position, _game.Room.Spawn), Is.LessThan(.001f));
@@ -278,15 +367,17 @@ namespace DelayNoMore.LightPath.Tests
         [UnityTest] public IEnumerator RoomTravel_PreservesColorRepairAndCheckpoint()
         {
             var rooms = Read<LightRoom[]>(_game, "_rooms"); Assert.That(rooms.Length, Is.GreaterThanOrEqualTo(2));
-            var checkpoint = rooms[0].GetComponentInChildren<RoomCheckpoint>(); Assert.That(checkpoint, Is.Not.Null);
+            var checkpoint = EnterCheckpointRoom();
+            LightRoom origin = _game.Room;
+            int destination = Array.IndexOf(rooms, origin) + 1;
             Place(checkpoint.transform.position); Call(_game, "CollectCheckpoints");
             typeof(LightGame).GetField("_color", _flags).SetValue(_game, 0);
             var repair = Read<RepairSession>(_game, "_repair"); float seconds = repair.RemainingSeconds;
-            Place(rooms[0].Spawn);
-            yield return _game.StartCoroutine((IEnumerator)Call(_game, "ChangeRoom", 1, Vector2.right, null));
-            Assert.That(_game.Room, Is.EqualTo(rooms[1])); Assert.That(_game.SelectedColor, Is.Zero);
+            Place(origin.Spawn);
+            yield return _game.StartCoroutine((IEnumerator)Call(_game, "ChangeRoomTo", destination, Vector2.zero, null, (Vector2?)(rooms[destination].Spawn - (Vector2)rooms[destination].transform.position)));
+            Assert.That(_game.Room, Is.EqualTo(rooms[destination])); Assert.That(_game.SelectedColor, Is.Zero);
             Assert.That(Read<RepairSession>(_game, "_repair"), Is.SameAs(repair)); Assert.That(repair.RemainingSeconds, Is.EqualTo(seconds));
-            _game.Respawn(); Assert.That(_game.Room, Is.EqualTo(rooms[0])); Assert.That(_game.SelectedColor, Is.Zero);
+            _game.Respawn(); Assert.That(_game.Room, Is.EqualTo(origin)); Assert.That(_game.SelectedColor, Is.Zero);
             Assert.That(Vector2.Distance(_player.position, checkpoint.Spawn), Is.LessThan(.001f));
             Assert.That(rooms.Count(room => room.gameObject.activeSelf), Is.EqualTo(1));
         }
@@ -296,7 +387,7 @@ namespace DelayNoMore.LightPath.Tests
             var rooms = Read<LightRoom[]>(_game, "_rooms");
             int target = Array.FindIndex(rooms, room => room.Surface.Sources.Count > 0);
             Assert.That(target, Is.GreaterThanOrEqualTo(0), "样例必须包含投影源房间");
-            if (_game.Room != rooms[target]) yield return _game.StartCoroutine((IEnumerator)Call(_game, "ChangeRoom", target, Vector2.right, null));
+            if (_game.Room != rooms[target]) JumpToRoom(target);
             var surface = _game.Room.Surface; surface.Rebuild();
             Assert.That(surface.Regions.Count, Is.GreaterThan(0)); Assert.That(surface.Regions.Any(r => r.Exists), Is.True);
             var capture = Read<Camera>(_game, "_camera"); var texture = Read<RenderTexture>(_stage, "_worldTexture");
@@ -361,17 +452,19 @@ namespace DelayNoMore.LightPath.Tests
             }
             finally { InputSystem.RemoveDevice(keyboard); InputSystem.settings = originalSettings; originalSettings.hideFlags = originalFlags; UnityEngine.Object.Destroy(settings); }
         }
-        /** @brief 正常断光后顶面拾取对应可旋转节点，修好仍保持维修视角。 */
+        /** @brief 初始解法中拾取并转动已有折镜，循环恢复后仍保持维修视角。 */
         [UnityTest] public IEnumerator RepairPicking_RestoresPowerWithoutForcedViewChange()
         {
-            var session = Read<RepairSession>(_game, "_repair"); Call(_game, "TickRepair", session.RemainingSeconds + .01f);
+            var session = Read<RepairSession>(_game, "_repair");
+            Assert.That(session.Powered, Is.True, "正式布局初始应连通");
             Call(_game, "SetStageView", StageView.Repair, true); yield return null;
             var layout = _game.RepairLayout; var config = Read<LightStageConfig>(_stage, "_config"); var frame = Read<Transform>(_stage, "_repairFrame");
             int index = Array.FindIndex(layout.Devices, d => d.Type == RepairLayout.Kind.Mirror); Assert.That(index, Is.GreaterThanOrEqualTo(0));
-            float scale = Mathf.Min(config.RepairSize.x / (layout.Area.width + config.NodeRadius * 4), config.RepairSize.y / (layout.Area.height + config.NodeRadius * 4));
+            float scale = Mathf.Min(config.RepairSize.x / (layout.Area.width + layout.NodeRadius * 4), config.RepairSize.y / (layout.Area.height + layout.NodeRadius * 4));
             Vector3 point = frame.position + frame.rotation * (Vector3)((layout.Devices[index].Position - layout.Area.center) * scale);
             Vector2 pointer = Read<Camera>(_stage, "_viewCamera").WorldToScreenPoint(point);
             Assert.That(_stage.PickRepair(layout, pointer), Is.EqualTo(index));
+            session.Rotate(index);
             for (int i = 0; i < 8 && !session.Powered; i++) session.Rotate(index);
             Assert.That(session.Powered, Is.True); Assert.That(_stage.View, Is.EqualTo(StageView.Repair));
         }
@@ -427,7 +520,10 @@ namespace DelayNoMore.LightPath.Tests
                 Assert.That(panel.Visible, Is.True); Assert.That(Time.timeScale, Is.Zero);
                 var text = panel.GetComponentInChildren<TMP_Text>(); Assert.That(text.text, Does.Contain(GameText.Get("Debug.Paused"))); Assert.That(text.font, Is.EqualTo(GameText.Font));
                 InputSystem.QueueStateEvent(keyboard, new KeyboardState()); yield return null;
-                var session = Read<RepairSession>(_game, "_repair"); Call(_game, "TickRepair", session.RemainingSeconds + .01f); _game.SetPaused(false);
+                var session = Read<RepairSession>(_game, "_repair");
+                for (int phase = 0; phase <= _game.RepairLayout.Phases.Length && session.Powered; phase++)
+                    Call(_game, "TickRepair", session.RemainingSeconds + .01f);
+                _game.SetPaused(false);
                 yield return new WaitForSecondsRealtime(.3f);
                 Assert.That(text.text, Does.Contain(GameText.Get("Debug.Blackout"))); Assert.That(_stage.View, Is.EqualTo(StageView.World));
                 text.ForceMeshUpdate(); Assert.That(text.isTextOverflowing, Is.False, "当前快照必须容纳于固定面板");
