@@ -12,8 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1046b113add0b640bfa476cddb5e48d, type: 3}
   m_Name: Level3Room5-Room
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.LightRoomDefinition
-  _title: "\u53CC\u5C42\u4E2D\u8F6C"
-  _hint: "\u628A\u6295\u5F71\u95E8\u79FB\u5230\u53EF\u8FBE\u4F4D\u7F6E\u3002\u5B83\u9001\u4F60\u5230\u4E0A\u5C42\uFF0C\u56FA\u5B9A\u95E8\u518D\u9001\u5F80\u7EC8\u70B9\u623F\u95F4\u3002"
   _cycleSeconds: 40
   _warningSeconds: 8
   _opticsEnabled: 0

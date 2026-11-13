@@ -139,7 +139,7 @@ namespace DelayNoMore.LightPath.Editor
                 AssetDatabase.CreateAsset(level.Config, configPath);
                 created.Add(configPath);
                 LightRoomDefinition definition = CreateInstance<LightRoomDefinition>();
-                definition.Configure(System.IO.Path.GetFileNameWithoutExtension(path), "获得滤镜能力，利用投影与颜色找到出口");
+                definition.Configure("Room.Default.Title", "Room.Default.Hint");
                 string rulesPath = AssetDatabase.GenerateUniqueAssetPath(System.IO.Path.ChangeExtension(path, null) + "-Room.asset");
                 AssetDatabase.CreateAsset(definition, rulesPath);
                 created.Add(rulesPath);
@@ -218,7 +218,7 @@ namespace DelayNoMore.LightPath.Editor
             try
             {
                 LightRoomDefinition definition = CreateInstance<LightRoomDefinition>();
-                definition.Configure(System.IO.Path.GetFileNameWithoutExtension(path), "利用投影与颜色探索房间");
+                definition.Configure("Room.Default.Title", "Room.Default.Hint");
                 AssetDatabase.CreateAsset(definition, definitionPath);
                 definitionCreated = true;
                 LightRoom room = CreateBlankRoom(System.IO.Path.GetFileNameWithoutExtension(path), level.Config, definition, preview);

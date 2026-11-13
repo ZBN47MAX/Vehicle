@@ -12,11 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e1046b113add0b640bfa476cddb5e48d, type: 3}
   m_Name: Level1Room5-Room
   m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.LightRoomDefinition
-  _title: Level1Room5
-  _hint: ""
   _cycleSeconds: 40
   _warningSeconds: 8
   _opticsEnabled: 0
   _requiredShards: 2
-  _titleKey: 
-  _hintKey: 
+  _titleKey: Room.Level1Room5.Title
+  _hintKey: Room.Level1Room5.Hint

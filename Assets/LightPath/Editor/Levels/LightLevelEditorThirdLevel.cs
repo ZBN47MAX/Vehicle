@@ -47,12 +47,8 @@ namespace DelayNoMore.LightPath.Editor
                 for (int index = 0; index < 7; index++)
                 {
                     var definition = CreateInstance<LightRoomDefinition>();
-                    definition.Configure(ThirdTitles[index], ThirdHints[index]);
-                    var data = new SerializedObject(definition);
                     string titleKey = "Level3.Room" + index + ".Title", hintKey = "Level3.Room" + index + ".Hint";
-                    data.FindProperty("_titleKey").stringValue = titleKey;
-                    data.FindProperty("_hintKey").stringValue = hintKey;
-                    data.ApplyModifiedPropertiesWithoutUndo();
+                    definition.Configure(titleKey, hintKey);
                     AddThirdText(catalog, titleKey, ThirdTitles[index], index, "房间标题");
                     AddThirdText(catalog, hintKey, ThirdHints[index], index, "解谜提示");
                     SaveThirdAsset(definition, ThirdFolder + "/Level3Room" + index + "-Room.asset", created);

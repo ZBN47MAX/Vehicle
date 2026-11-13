@@ -122,15 +122,6 @@ MonoBehaviour:
     Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.Update / \u7528\u9014\uFF1A2D\u6E38\u73A9"
     Parameters: 
     Value: "2D\u6E38\u73A9"
-  - Key: LightGame.Update.013
-    Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
-    NormalPlay: 0
-    Component: "\u517C\u5BB9\u6A21\u5F0F\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u5DF2\u9009\u6298\u5C04\u8282\u70B9\u524D\u7F00"
-    Purpose: "\u517C\u5BB9\u65E7\u89C2\u770B / \u88C5\u7F6E\u6216\u65E7\u7EF4\u4FEE\u9762\u677F\u65F6\u4F7F\u7528\uFF1B\u5F53\u524DLightGame\u56DB\u89C6\u89D2\u6B63\u5E38\u6D41\u7A0B\u4E0D\u4F7F\u7528\u3002\u539F\u8C03\u7528\u4F4D\u7F6E\uFF1ALightGame.Update"
-    Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.Update / \u7528\u9014\uFF1A\u5DF2\u9009\u6298\u5C04\u8282\u70B9 "
-    Parameters: 
-    Value: "\u5DF2\u9009\u6298\u5C04\u8282\u70B9 "
   - Key: LightGame.Update.014
     Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
     NormalPlay: 0
@@ -185,15 +176,6 @@ MonoBehaviour:
     Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.Update / \u7528\u9014\uFF1A\u56FA\u5B9A\u7269\u4EF6"
     Parameters: 
     Value: "\u56FA\u5B9A\u7269\u4EF6"
-  - Key: LightGame.Update.020
-    Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
-    NormalPlay: 0
-    Component: "\u517C\u5BB9\u6A21\u5F0F\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u65E7\u6298\u5C04\u5207\u6362\u9884\u8B66"
-    Purpose: "\u517C\u5BB9\u65E7\u89C2\u770B / \u88C5\u7F6E\u6216\u65E7\u7EF4\u4FEE\u9762\u677F\u65F6\u4F7F\u7528\uFF1B\u5F53\u524DLightGame\u56DB\u89C6\u89D2\u6B63\u5E38\u6D41\u7A0B\u4E0D\u4F7F\u7528\u3002\u539F\u8C03\u7528\u4F4D\u7F6E\uFF1ALightGame.Update"
-    Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.Update / \u7528\u9014\uFF1A"
-    Parameters: 
-    Value: "\n\u5373\u5C06\u5207\u6362\u5149\u8DEF \xB7 "
   - Key: LightGame.BuildHelp.021
     Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
     NormalPlay: 0
@@ -221,15 +203,6 @@ MonoBehaviour:
     Location: "HUD\u5E95\u90E8 / \u5F53\u524D\u6A21\u5F0F\u64CD\u4F5C\u5E2E\u52A9\u53CA\u80FD\u529B\u89E3\u9501\u63D0\u793A / LightGame.BuildHelp"
     Parameters: '{0} = Label("Mode"); {1} = Label("Focus"); {2} = AbilityHelp(ProjectionAbility.MoveX, "DeviceHorizontal"); {3} = AbilityHelp(ProjectionAbility.MoveY, "DeviceVertical"); {4} = AbilityHelp(ProjectionAbility.MoveZ, "DeviceDepth"); {5} = AbilityHelp(ProjectionAbility.RotateX, "DeviceRotationX"); {6} = AbilityHelp(ProjectionAbility.RotateY, "DeviceRotationY"); {7} = AbilityHelp(ProjectionAbility.RotateZ, "DeviceRotation")'
     Value: "{0} \u8FD4\u56DE \xB7 {1} \u7EF4\u4FEE/\u6A21\u578B \xB7 \u70B9\u51FB\u9009\u62E9\u7269\u4EF6\n{2} \xB7 {3} \xB7 {4}\n{5} \xB7 {6} \xB7 {7}"
-  - Key: LightGame.BuildHelp.024
-    Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
-    NormalPlay: 0
-    Component: "\u517C\u5BB9\u6A21\u5F0F\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u65E7\u6298\u5C04\u9F20\u6807\u64CD\u4F5C\u5E2E\u52A9"
-    Purpose: "\u517C\u5BB9\u65E7\u89C2\u770B / \u88C5\u7F6E\u6216\u65E7\u7EF4\u4FEE\u9762\u677F\u65F6\u4F7F\u7528\uFF1B\u5F53\u524DLightGame\u56DB\u89C6\u89D2\u6B63\u5E38\u6D41\u7A0B\u4E0D\u4F7F\u7528\u3002\u539F\u8C03\u7528\u4F4D\u7F6E\uFF1ALightGame.BuildHelp"
-    Location: "HUD\u5E95\u90E8 / \u5F53\u524D\u6A21\u5F0F\u64CD\u4F5C\u5E2E\u52A9\u53CA\u80FD\u529B\u89E3\u9501\u63D0\u793A / LightGame.BuildHelp"
-    Parameters: '{0} = Label("Mode"); {1} = Label("Focus"); {2} = Label("Drag"); {3} = Label("Scroll"); {4} = Label("PointerRotate")'
-    Value: "{0} \u8fd4\u56de \u00b7 {1} \u7ef4\u4fee/\u6a21\u578b \u00b7 \u70b9\u51fb\u9009\u62e9\u7269\u4ef6\uff0c\u4f7f\u7528\u5df2\u89e3\u9501\u7684\u952e\u4f4d\u8c03\u6574 \u00b7 \u8f6e\u76d8\u6362\u8272"
   - Key: LightGame.BuildHelp.025
     Screen: "2D\u4E16\u754C"
     NormalPlay: 0
@@ -275,15 +248,6 @@ MonoBehaviour:
     Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.CollectAndTravel / \u7528\u9014\uFF1A\u83B7\u5F97\u6EE4\u955C\u80FD\u529B\uFF0C\u6574\u5C40\u6301\u7EED\u89E3\u9501"
     Parameters: 
     Value: "\u83B7\u5F97\u6EE4\u955C"
-  - Key: LightGame.CollectAndTravel.030
-    Screen: "2D\u4E16\u754C"
-    NormalPlay: 1
-    Component: "\u901A\u77E5\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u5149\u7247\u62FE\u53D6\u63D0\u793A"
-    Purpose: "\u623F\u95F4\u5305\u542B\u5149\u7247\u5E76\u88AB\u62FE\u53D6\u65F6\uFF0C\u5728HUD\u8BF4\u660E\u5DF2\u83B7\u53D6\u5185\u5BB9\u5728\u6B7B\u4EA1\u540E\u4FDD\u7559\u3002"
-    Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.CollectAndTravel / \u7528\u9014\uFF1A\u83B7\u5F97\u5149\u7247 \xB7 \u5DF2\u83B7\u53D6\u5185\u5BB9\u4F1A\u5728\u6B7B\u4EA1\u540E\u4FDD\u7559"
-    Parameters: 
-    Value: "\u83B7\u5F97\u5149\u7247 "
   - Key: LightGame.CollectAndTravel.031
     Screen: "2D\u4E16\u754C"
     NormalPlay: 1
@@ -302,24 +266,6 @@ MonoBehaviour:
     Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.CollectAndTravel / \u7528\u9014\uFF1A\u51FA\u53E3\u88AB\u5B9E\u4F53\u963B\u6321"
     Parameters: 
     Value: "\u51FA\u53E3\u88AB\u5B9E\u4F53\u963B\u6321"
-  - Key: LightGame.CollectAndTravel.033
-    Screen: "2D\u4E16\u754C"
-    NormalPlay: 1
-    Component: "\u901A\u77E5\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u5149\u7247\u6570\u91CF\u4E0D\u8DB3\u63D0\u793A"
-    Purpose: "\u4F7F\u7528\u5149\u7247\u6570\u91CF\u95E8\u69DB\u7684\u51FA\u53E3\uFF0C\u5728\u672A\u8FBE\u5230\u8981\u6C42\u65F6\u63D0\u793A\u6536\u9F50\u5149\u7247\u3002"
-    Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.CollectAndTravel / \u7528\u9014\uFF1A\u9700\u8981\u6536\u9F50\u672C\u623F\u95F4\u7684\u5149\u7247"
-    Parameters: 
-    Value: 
-  - Key: LightGame.CollectAndTravel.034
-    Screen: "2D\u4E16\u754C"
-    NormalPlay: 0
-    Component: "\u517C\u5BB9\u6A21\u5F0F\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u65E7\u7EF4\u4FEE\u672A\u5B8C\u6210\u7684\u51FA\u53E3\u63D0\u793A"
-    Purpose: "\u517C\u5BB9\u65E7\u89C2\u770B / \u88C5\u7F6E\u6216\u65E7\u7EF4\u4FEE\u9762\u677F\u65F6\u4F7F\u7528\uFF1B\u5F53\u524DLightGame\u56DB\u89C6\u89D2\u6B63\u5E38\u6D41\u7A0B\u4E0D\u4F7F\u7528\u3002\u539F\u8C03\u7528\u4F4D\u7F6E\uFF1ALightGame.CollectAndTravel"
-    Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.CollectAndTravel / \u7528\u9014\uFF1A\u5B8C\u6210\u672C\u623F\u95F4\u7684\u5149\u8DEF\u7EF4\u4FEE\u540E\uFF0C\u51FA\u53E3\u624D\u4F1A\u63A5\u901A"
-    Parameters: 
-    Value: "\u5B8C\u6210\u672C\u623F\u95F4\u7684\u5149\u8DEF\u7EF4\u4FEE\u540E\uFF0C\u51FA\u53E3\u624D\u4F1A\u63A5\u901A"
   - Key: LightGame.CollectAndTravel.035
     Screen: "2D\u4E16\u754C"
     NormalPlay: 1
@@ -428,15 +374,6 @@ MonoBehaviour:
     Location: "HUD\u4E0A\u65B9\u72B6\u6001\u533A / \u5149\u8DEF\u9636\u6BB5\u3001\u76EE\u6807\u51FA\u53E3\u3001\u9884\u8B66\u4E0E\u5012\u8BA1\u65F6"
     Parameters: '{0} = _repair.RemainingSeconds; {1} = next; {2} = targets'
     Value: " \xB7 {0:0.0} \u79D2\u540E\u68C0\u67E5\u9636\u6BB5\u201C{1}\u201D \xB7 \u76EE\u6807\u51FA\u53E3\uFF1A{2}"
-  - Key: LightGameRepair.OnGUI.008
-    Screen: "\u6295\u5F71\u4EEA\u7EF4\u4FEE"
-    NormalPlay: 0
-    Component: "\u517C\u5BB9\u6A21\u5F0F\u6587\u672C\uFF08TextMeshProUGUI\uFF09"
-    Title: "\u517C\u5BB9\u7EF4\u4FEE\u9762\u677F\u64CD\u4F5C\u5E2E\u52A9"
-    Purpose: "\u517C\u5BB9\u65E7\u89C2\u770B / \u88C5\u7F6E\u6216\u65E7\u7EF4\u4FEE\u9762\u677F\u65F6\u4F7F\u7528\uFF1B\u5F53\u524DLightGame\u56DB\u89C6\u89D2\u6B63\u5E38\u6D41\u7A0B\u4E0D\u4F7F\u7528\u3002\u539F\u8C03\u7528\u4F4D\u7F6E\uFF1ALightGameRepair.OnGUI"
-    Location: "\u7EF4\u4FEE\u754C\u9762\u548C\u7EF4\u4FEE\u72B6\u6001 / LightGameRepair.OnGUI / \u7528\u9014\uFF1A{0} \u70B9\u51FB\u673A\u5173\u65CB\u8F6C \xB7 {1} \u5207\u6362\u6A21\u578B \xB7 {2} \u8FD4\u56DE\u89C2\u770B \xB7 {3} \u6682\u505C"
-    Parameters: '{0} = Label("Drag"); {1} = Label("Focus"); {2} = Label("Mode"); {3} = Label("Pause")'
-    Value: "{0} \u70B9\u51FB\u6298\u955C\u6362\u6863 / \u6309\u4F4F\u900F\u955C\u8FDE\u7EED\u7784\u51C6 \xB7 {1} \u5207\u6362\u6A21\u578B \xB7 {2} \u8FD4\u56DE\u89C2\u770B \xB7 {3} \u6682\u505C"
   - Key: LightGameRooms.CreateLevelRooms.001
     Screen: "2D\u4E16\u754C"
     NormalPlay: 0
@@ -2493,3 +2430,255 @@ MonoBehaviour:
     Location: DebugTools
     Parameters:
     Value: "记录本次（退出时导出）"
+  - Key: Room.Level1.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level1"
+  - Key: Room.Level1.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2"
+  - Key: Room.Level2.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level1Room1.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room1 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level1Room1"
+  - Key: Room.Level1Room1.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room1 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level1Room2.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room2 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level1Room2"
+  - Key: Room.Level1Room2.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room2 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level1Room3.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room3 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level1Room3"
+  - Key: Room.Level1Room3.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room3 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level1Room4.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room4 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level1Room4"
+  - Key: Room.Level1Room4.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room4 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level1Room5.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room5 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level1Room5"
+  - Key: Room.Level1Room5.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level1Room5 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2Room1.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room1 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2Room1"
+  - Key: Room.Level2Room1.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room1 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2Room2.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room2 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2Room2"
+  - Key: Room.Level2Room2.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room2 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2Room3.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room3 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2Room3"
+  - Key: Room.Level2Room3.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room3 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2Room4.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room4 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2Room4"
+  - Key: Room.Level2Room4.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room4 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2Room5.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room5 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2Room5"
+  - Key: Room.Level2Room5.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room5 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Level2Room6.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room6 标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "Level2Room6"
+  - Key: Room.Level2Room6.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "Level2Room6 提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
+  - Key: Room.Default.Title
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "新房间默认标题"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: "新房间"
+  - Key: Room.Default.Hint
+    Screen: "房间提示"
+    NormalPlay: 1
+    Component: "LightRoomDefinition"
+    Title: "新房间默认提示"
+    Purpose: "房间内容统一从文案表读取，保留迁移前显示内容。"
+    Location: "HUD状态说明"
+    Parameters: ""
+    Value: ""
