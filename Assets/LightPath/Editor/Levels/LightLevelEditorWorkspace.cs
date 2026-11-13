@@ -199,8 +199,6 @@ namespace DelayNoMore.LightPath.Editor
                 if (marker)
                     objects.Add(marker.gameObject);
             }
-            if (_room.Shards != null)
-                objects.AddRange(_room.Shards.Where(x => x).Select(x => x.gameObject));
             return objects.Distinct().ToList();
         }
         /** @brief 绘制画布、轮廓、门线并处理鼠标。 @param canvas 画布矩形 */
@@ -467,7 +465,7 @@ namespace DelayNoMore.LightPath.Editor
             GameObject target = _picked;
             Edit("删除关卡对象", () =>
             {
-                CleanReferences(_room, target, new[] { "_platforms", "_shards", "_worldPresentation", "_spawn", "_exit" });
+                CleanReferences(_room, target, new[] { "_platforms", "_worldPresentation", "_spawn", "_exit" });
                 if (_room.Surface)
                     CleanReferences(_room.Surface, target, new[] { "_sources" });
                 Undo.DestroyObjectImmediate(target);

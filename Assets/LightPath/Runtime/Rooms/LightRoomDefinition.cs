@@ -16,8 +16,6 @@ namespace DelayNoMore.LightPath
         [SerializeField, Min(1), Tooltip("断光前预警时长，秒")] private float _warningSeconds = 8;
         /** @brief 是否启用光路变化。 */
         [SerializeField, Tooltip("启用周期性断光修复")] private bool _opticsEnabled;
-        /** @brief 完成本关需要获取的光片数量。 */
-        [SerializeField, Min(0), Tooltip("出口要求的本房间光片数量")] private int _requiredShards = 2;
         /** @brief 获取标题。 */
         public string Title => string.IsNullOrEmpty(_titleKey) ? _title : GameText.Get(_titleKey);
         /** @brief 获取提示。 */
@@ -32,8 +30,6 @@ namespace DelayNoMore.LightPath
         public float WarningSeconds => Mathf.Clamp(_warningSeconds, 1, CycleSeconds - 1);
         /** @brief 获取光路时序开关。 */
         public bool OpticsEnabled => _opticsEnabled;
-        /** @brief 获取出口光片需求。 */
-        public int RequiredShards => _requiredShards;
         /** @brief 填写关卡配置。 @param title 标题 @param hint 提示 @param optics 光路变化 */
         public void Configure(string title, string hint, bool optics)
         {

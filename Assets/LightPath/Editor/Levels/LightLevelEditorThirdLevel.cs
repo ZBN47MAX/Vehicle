@@ -52,7 +52,6 @@ namespace DelayNoMore.LightPath.Editor
                     string titleKey = "Level3.Room" + index + ".Title", hintKey = "Level3.Room" + index + ".Hint";
                     data.FindProperty("_titleKey").stringValue = titleKey;
                     data.FindProperty("_hintKey").stringValue = hintKey;
-                    data.FindProperty("_requiredShards").intValue = 0;
                     data.ApplyModifiedPropertiesWithoutUndo();
                     AddThirdText(catalog, titleKey, ThirdTitles[index], index, "房间标题");
                     AddThirdText(catalog, hintKey, ThirdHints[index], index, "解谜提示");
@@ -216,7 +215,7 @@ namespace DelayNoMore.LightPath.Editor
             checkpoint.transform.localRotation = Quaternion.Euler(0, 0, 45);
             checkpoint.GetComponent<MeshRenderer>().sharedMaterial = AssetDatabase.LoadAssetAtPath<Material>("Assets/LightPath/Prefabs/Markers/Checkpoint.mat");
             room.Configure(room.Definition, room.Surface, null, root.GetComponentsInChildren<ColorPlatform>(true), root.transform.Find("出生点"),
-                index == 6 ? root.transform.Find("出口") : null, new Transform[0], root.transform.Find("幕布").GetComponent<Renderer>());
+                index == 6 ? root.transform.Find("出口") : null, root.transform.Find("幕布").GetComponent<Renderer>());
             var sources = new SerializedObject(room.Surface).FindProperty("_sources");
             ProjectionSource[] all = root.GetComponentsInChildren<ProjectionSource>(true);
             sources.arraySize = all.Length;

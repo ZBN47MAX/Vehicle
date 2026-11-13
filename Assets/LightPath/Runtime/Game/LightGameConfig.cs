@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace DelayNoMore.LightPath
 {
@@ -53,8 +53,8 @@ namespace DelayNoMore.LightPath
         [SerializeField, Tooltip("落地前跳跃输入保存秒数"), Min(0)] private float _jumpBuffer = .12f;
         /** @brief 角色重力倍率。 */
         [SerializeField, Tooltip("角色2D重力倍率"), Min(.1f)] private float _gravityScale = 2;
-        /** @brief 光片收集半径。 */
-        [SerializeField, Tooltip("角色中心与光片的收集距离，米"), Min(.1f)] private float _collectRadius = .85f;
+        /** @brief 能力钥匙收集半径。 */
+        [SerializeField, Tooltip("角色中心与能力钥匙的收集距离，米"), Min(.1f)] private float _collectRadius = .85f;
         /** @brief 出口交互半径。 */
         [SerializeField, Tooltip("角色中心与出口的交互距离，米"), Min(.1f)] private float _exitRadius = 1.5f;
         /** @brief 传送冷却时间。 */

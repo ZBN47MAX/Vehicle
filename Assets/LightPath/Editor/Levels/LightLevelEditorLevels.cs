@@ -190,7 +190,7 @@ namespace DelayNoMore.LightPath.Editor
             GameObject spawn = Child(root, "出生点", new Vector3(-8, 1, 0));
             GameObject exit = CubeChild(root, "出口", new Vector3(8, 1, 0), new Vector3(.5f, 2, .2f), material);
             exit.AddComponent<LevelExit>();
-            room.Configure(definition, surface, null, new[] { platform }, spawn.transform, exit.transform, new Transform[0], screen.GetComponent<Renderer>());
+            room.Configure(definition, surface, null, new[] { platform }, spawn.transform, exit.transform, screen.GetComponent<Renderer>());
             return room;
         }
         /** @brief 新建空白房间并加入当前关卡，共享本关参数。 */

@@ -17,8 +17,6 @@ namespace DelayNoMore.LightPath
         [SerializeField, Tooltip("安全存档点")] private Transform _spawn;
         /** @brief 房间出口。 */
         [SerializeField, Tooltip("进入下一房间的位置")] private Transform _exit;
-        /** @brief 光片收集点。 */
-        [SerializeField, Tooltip("需要收集的光片")] private Transform[] _shards;
         /** @brief 幕布材质显示。 */
         [SerializeField, Tooltip("幕布背景 Renderer")] private Renderer _screen;
         /** @brief 额外属于2D世界的装饰表现，不包含幕布和维修装置。 */
@@ -56,12 +54,10 @@ namespace DelayNoMore.LightPath
         public bool HasSpawn => _spawn && _spawn.gameObject.activeInHierarchy;
         /** @brief 获取出口。 */
         public Vector2 Exit => _exit ? (Vector2)_exit.position : new Vector2(float.PositiveInfinity, float.PositiveInfinity);
-        /** @brief 获取收集点。 */
-        public Transform[] Shards => _shards;
         /** @brief 获取固定平台。 */
         public ColorPlatform[] Platforms => _platforms;
-        /** @brief 配置房间所有引用。 @param definition 定义 @param surface 投影 @param rig 光路 @param platforms 平台 @param spawn 出生 @param exit 出口 @param shards 光片 @param screen 幕布 */
-        public void Configure(LightRoomDefinition definition, ProjectionSurface surface, RefractionRig rig, ColorPlatform[] platforms, Transform spawn, Transform exit, Transform[] shards, Renderer screen)
+        /** @brief 配置房间所有引用。 @param definition 定义 @param surface 投影 @param rig 光路 @param platforms 平台 @param spawn 出生 @param exit 出口 @param screen 幕布 */
+        public void Configure(LightRoomDefinition definition, ProjectionSurface surface, RefractionRig rig, ColorPlatform[] platforms, Transform spawn, Transform exit, Renderer screen)
         {
             _definition = definition;
             _surface = surface;
@@ -69,7 +65,6 @@ namespace DelayNoMore.LightPath
             _platforms = platforms;
             _spawn = spawn;
             _exit = exit;
-            _shards = shards;
             _screen = screen;
         }
         /** @brief 重置关卡布局与光路。 */
@@ -125,8 +120,6 @@ namespace DelayNoMore.LightPath
             foreach (Transform root in _worldPresentation)
                 SetPresentation(root, Powered);
             SetPresentation(_exit, Powered);
-            foreach (Transform shard in _shards)
-                SetPresentation(shard, Powered);
             foreach (ColorPlatform platform in _platforms)
                 platform.Refresh(color, preview, Powered, config);
             _surface.Refresh(color, preview, Powered);

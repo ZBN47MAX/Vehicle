@@ -64,8 +64,6 @@ namespace DelayNoMore.LightPath
         private float _playSeconds;
         /** @brief 本局死亡次数。 */
         private int _deaths;
-        /** @brief 已获取的光片标识。 */
-        private readonly HashSet<string> _collected = new HashSet<string>();
         /** @brief 已获取滤镜。 */
         private readonly bool[] _unlocked = new bool[4];
         /** @brief 缓存角色碰撞。 */
@@ -562,20 +560,6 @@ namespace DelayNoMore.LightPath
                 }
                 key.gameObject.SetActive(!_unlocked[key.Color]);
             }
-            for (int i = 0; i < Room.Shards.Length; i++)
-            {
-                string id = _roomIndex + "/" + i;
-                Transform shard = Room.Shards[i];
-                if (!_collected.Contains(id) && Vector2.Distance(_player.position, shard.position) < _config.CollectRadius)
-                {
-                    RecordTelemetry("收集碎片", id, "解锁颜色" + Mathf.Min(_roomIndex, 3));
-                    if (!_unlocked[Mathf.Min(_roomIndex, 3)]) RecordTelemetry("能力解锁", "颜色" + Mathf.Min(_roomIndex, 3), id);
-                    _collected.Add(id);
-                    _unlocked[Mathf.Min(_roomIndex, 3)] = true;
-                    shard.gameObject.SetActive(false);
-                    NotifyUnlock(GameText.Get("LightGame.CollectAndTravel.030"));
-                }
-            }
             if (!Action("Interact").WasPressedThisFrame())
                 return;
             if (Time.time >= _portalUntil)
@@ -596,20 +580,6 @@ namespace DelayNoMore.LightPath
                 return;
             if (exits.Length == 0 && Vector2.Distance(_player.position, Room.Exit) > _config.ExitRadius)
                 return;
-            int count = 0;
-            for (int i = 0; i < Room.Shards.Length; i++)
-                if (_collected.Contains(_roomIndex + "/" + i))
-                    count++;
-            if (exits.Length == 0 && count < Room.Definition.RequiredShards)
-            {
-                Notify(GameText.Get("LightGame.CollectAndTravel.033"));
-                return;
-            }
-            if (_repair == null && exits.Length == 0 && Room.Definition.OpticsEnabled && Room.RepairCount == 0)
-            {
-                Notify(GameText.Get("LightGame.CollectAndTravel.034"));
-                return;
-            }
             RecordTelemetry("关卡完成", "Level" + (_roomLevels[_roomIndex] + 1), "使用关卡出口");
             BreakTelemetryVisit("关卡出口", true);
             int nextLevel = _roomLevels[_roomIndex] + 1;
@@ -672,8 +642,6 @@ namespace DelayNoMore.LightPath
             }
             if (_stage && _stage.Ready)
                 SetStageView(Room.Powered ? StageView.World : StageView.Overview, true);
-            for (int i = 0; i < Room.Shards.Length; i++)
-                Room.Shards[i].gameObject.SetActive(!_collected.Contains(_roomIndex + "/" + i));
             Physics2D.SyncTransforms();
             ApplyState();
             if (PlaytestRecording.Enabled && previousRoom == _roomIndex)
@@ -701,7 +669,6 @@ namespace DelayNoMore.LightPath
                 return;
             }
             BindRepairRooms();
-            _collected.Clear();
             ClearCheckpoint();
             _color = -1;
             _candidate = -1;
