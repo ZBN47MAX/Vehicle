@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e295ce6629e41119ad12921cc94e698, type: 3}
+  m_Name: Level2
+  m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.ProjectionLevel
+  RoomPrefab: {fileID: 1701412290052851045, guid: 061c656de8f68a143867dd73d6d9ec31, type: 3}
+  Rooms:
+  - Prefab: {fileID: 4429235581067816407, guid: e1794b4e7f009894989fdc31613492f2, type: 3}
+    Position: {x: 1, y: 0}
+    Edges: 02000000020000000000000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 5261741771546603168, guid: f3a47b01d6d452a48a62730342de3982, type: 3}
+    Position: {x: 2, y: 0}
+    Edges: 02000000020000000000000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 1223504559459191143, guid: 59bd75cd0d2b1a7418b68f22b6108601, type: 3}
+    Position: {x: 3, y: 0}
+    Edges: 02000000000000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 7201393724678500887, guid: 20ebae3ae56338d4db754817a494dc85, type: 3}
+    Position: {x: -1, y: 2}
+    Edges: 00000000000000000200000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 7386195982641399307, guid: 76da6f5e393a72e408abe1c107117868, type: 3}
+    Position: {x: -1, y: 1}
+    Edges: 00000000000000000200000002000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 7274751581952719101, guid: d6f2c1e1d7948cb4a908059be4a286f0, type: 3}
+    Position: {x: -1, y: 0}
+    Edges: 00000000020000000000000002000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  MainNeighbors: {x: -1, y: -1, z: -1, w: -1}
+  SlideSeconds: 0.45
+  HasLayout: 1
+  MainPosition: {x: 0, y: 0}
+  MainEdges: 02000000020000000000000000000000i
+  Config: {fileID: 11400000, guid: 7afb1b31b8ba5b54387a38cd4cea58f6, type: 2}

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e295ce6629e41119ad12921cc94e698, type: 3}
+  m_Name: Level1
+  m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.ProjectionLevel
+  RoomPrefab: {fileID: 397939799838889230, guid: 752eb736870a5c1459e5aec7e9fa448b, type: 3}
+  Rooms:
+  - Prefab: {fileID: 7037142094339773023, guid: d2cd679221f4778438450e268ff16154, type: 3}
+    Position: {x: 1, y: 0}
+    Edges: 02000000020000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 5113423599650476225, guid: cff19e15daf130f44969c106ce002cd0, type: 3}
+    Position: {x: 2, y: 0}
+    Edges: 02000000000000000100000002000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 5515008218438418062, guid: b4ac29504a5ad03449fe96e70b374b52, type: 3}
+    Position: {x: 2, y: 1}
+    Edges: 02000000000000000200000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 8051842460929795665, guid: cb734ed0dab08f14a935b449a63d9f85, type: 3}
+    Position: {x: 1, y: 1}
+    Edges: 02000000020000000200000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 320579692883916451, guid: dc820a3bbc98f9a4d9f9e7fc507e4f24, type: 3}
+    Position: {x: 0, y: 1}
+    Edges: 00000000020000000200000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  MainNeighbors: {x: -1, y: -1, z: -1, w: -1}
+  SlideSeconds: 0.45
+  HasLayout: 1
+  MainPosition: {x: 0, y: 0}
+  MainEdges: 00000000020000000000000002000000i
+  Config: {fileID: 11400000, guid: f8e912e769d60dd49835bbd613e28725, type: 2}

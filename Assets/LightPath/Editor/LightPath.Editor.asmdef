@@ -1,0 +1,12 @@
+{
+  "name": "LightPath.Editor",
+  "references": [
+    "LightPath.Runtime",
+    "Unity.InputSystem",
+    "Unity.TextMeshPro",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

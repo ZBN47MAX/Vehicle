@@ -1,0 +1,220 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96e48cb434544a4c8c159f07e251dc13, type: 3}
+  m_Name: Repair Layout
+  m_EditorClassIdentifier: Assembly-CSharp::DelayNoMore.LightPath.RepairLayout
+  Devices:
+  - Id: 523108a4-9013-451b-b4e9-0bd442b434bf
+    TextKey: 
+    Name: "\u5149\u6E901"
+    Type: 0
+    Position: {x: -10, y: 3}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+    TextKey: 
+    Name: "\u51FA\u53E32"
+    Type: 4
+    Position: {x: 10, y: 0.53125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: bdd6f16c-599e-4691-b73b-f733cc8127a8
+    TextKey: 
+    Name: "\u6298\u955C\u8282\u70B94"
+    Type: 3
+    Position: {x: 4.28125, y: -4.5625}
+    Direction: 3
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: fdd217a8-8236-4ae8-87e7-096aff026699
+    TextKey: 
+    Name: "\u5206\u5149\u56687"
+    Type: 2
+    Position: {x: 6.34375, y: -2.9375}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: d48b71db-8afb-41cb-b8af-7e8e479da372
+    TextKey: 
+    Name: "\u5149\u6E908"
+    Type: 0
+    Position: {x: -10, y: -3}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: f96d2dbb-6e25-473a-a01c-92dac32cca6e
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C7"
+    Type: 1
+    Position: {x: -7, y: 3.03125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: -1.9
+  - Id: 21443739-ef08-4da0-b5d7-82e5417b8b9c
+    TextKey: 
+    Name: "\u6298\u955C\u8282\u70B98"
+    Type: 3
+    Position: {x: -2.40625, y: -3}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: c691b163-8a14-41c6-a688-b1db1dba9de6
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C9"
+    Type: 1
+    Position: {x: 4.1875, y: 3.84375}
+    Direction: 6
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: -0.4
+  - Id: ded822b8-80a1-4f66-b2ef-e8982d13e0cb
+    TextKey: 
+    Name: "\u51FA\u53E310"
+    Type: 4
+    Position: {x: -6.1875, y: 5.75}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 6822fd89-1171-4a3d-8b35-c5b786b3a104
+    TextKey: 
+    Name: "\u51FA\u53E312"
+    Type: 4
+    Position: {x: -7.28125, y: -5.625}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 730423c0-48e4-41ea-8ae7-3a9c58e74b78
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C13"
+    Type: 1
+    Position: {x: -0.65625, y: -4.59375}
+    Direction: 4
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: -30
+  - Id: 53c5cdeb-6a00-4d68-8f47-b699eba427b2
+    TextKey: 
+    Name: "\u51FA\u53E314"
+    Type: 4
+    Position: {x: -7, y: 0}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 2effa2de-5b7f-4d9d-80b6-ba0f5e535e20
+    TextKey: 
+    Name: "\u5206\u5149\u566815"
+    Type: 2
+    Position: {x: -8.6875, y: -0}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: bda10c3c-12be-4c5f-86c4-8d9e06f9a76d
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C16"
+    Type: 1
+    Position: {x: -2.59375, y: 5.8125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: -30
+  - Id: 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
+    TextKey: 
+    Name: "\u51FA\u53E317"
+    Type: 4
+    Position: {x: 10, y: -1.25}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 25ec35db-0c14-4b5b-9ab8-1f7361a02bf3
+    TextKey: 
+    Name: "\u51FA\u53E317"
+    Type: 4
+    Position: {x: -9.15625, y: -5.625}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 39ccefe4-4578-43cc-8e17-4a686024ee21
+    TextKey: 
+    Name: "\u6298\u955C\u8282\u70B918"
+    Type: 3
+    Position: {x: 6.28125, y: -0.5}
+    Direction: 4
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 212e5af4-1c68-406c-8e38-a562d56282af
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C19"
+    Type: 1
+    Position: {x: -3, y: -0.5625}
+    Direction: 5
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: -5.8
+  Phases:
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+    - 6822fd89-1171-4a3d-8b35-c5b786b3a104
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+    - 6822fd89-1171-4a3d-8b35-c5b786b3a104
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 53c5cdeb-6a00-4d68-8f47-b699eba427b2
+    - ded822b8-80a1-4f66-b2ef-e8982d13e0cb
+    - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
+    - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+    - 53c5cdeb-6a00-4d68-8f47-b699eba427b2
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 25ec35db-0c14-4b5b-9ab8-1f7361a02bf3
+    - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+    - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
+  RandomPhaseOrder: 1
+  Interval: {x: 60, y: 120}
+  WarningSeconds: 5
+  Area:
+    serializedVersion: 2
+    x: -10
+    y: -6
+    width: 20
+    height: 12
+  HitRadius: 0.25

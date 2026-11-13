@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e295ce6629e41119ad12921cc94e698, type: 3}
+  m_Name: Level3
+  m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.ProjectionLevel
+  RoomPrefab: {fileID: 4319770975340857170, guid: 283b150956605dc429ae8b38517716fa, type: 3}
+  Rooms:
+  - Prefab: {fileID: 8882533515791533559, guid: 002f13a8c70b7f343a795c9d8f17cc2b, type: 3}
+    Position: {x: 1, y: 0}
+    Edges: 02000000020000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 2962420128497051998, guid: 7b4469fcdcb3bd847b7c17eee4111a20, type: 3}
+    Position: {x: 2, y: 0}
+    Edges: 02000000020000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 837953868937148867, guid: c653875ea295b7f4f84817336f688dfc, type: 3}
+    Position: {x: 3, y: 0}
+    Edges: 02000000020000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 6580319421744620476, guid: 4b213c7415a522443a023166b766b1d9, type: 3}
+    Position: {x: 4, y: 0}
+    Edges: 02000000020000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 5063922374267904604, guid: c589d0eba2afb4b4ebcbdafb31f014b2, type: 3}
+    Position: {x: 5, y: 0}
+    Edges: 02000000000000000000000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  - Prefab: {fileID: 8162779183670743308, guid: cbca2e29a4341d44f96dea7ccd013a4c, type: 3}
+    Position: {x: 6, y: 0}
+    Edges: 00000000000000000100000000000000i
+    Neighbors: {x: -1, y: -1, z: -1, w: -1}
+  MainNeighbors: {x: -1, y: -1, z: -1, w: -1}
+  SlideSeconds: 0.45
+  HasLayout: 1
+  MainPosition: {x: 0, y: 0}
+  MainEdges: 00000000020000000000000000000000i
+  Config: {fileID: 11400000, guid: 36a271d2fb479a9449610019ffe7af3c, type: 2}

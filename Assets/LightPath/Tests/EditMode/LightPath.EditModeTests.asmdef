@@ -1,0 +1,16 @@
+{
+  "name": "LightPath.EditModeTests",
+  "references": [
+    "LightPath.Runtime",
+    "LightPath.Editor",
+    "Unity.InputSystem",
+    "Unity.TextMeshPro",
+    "Unity.ugui"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

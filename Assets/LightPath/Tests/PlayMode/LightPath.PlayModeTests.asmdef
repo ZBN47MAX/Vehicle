@@ -1,0 +1,12 @@
+{
+  "name": "LightPath.PlayModeTests",
+  "references": [
+    "LightPath.Runtime",
+    "Unity.InputSystem",
+    "Unity.TextMeshPro",
+    "Unity.ugui"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

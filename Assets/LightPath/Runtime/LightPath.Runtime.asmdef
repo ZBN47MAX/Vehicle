@@ -1,0 +1,9 @@
+{
+  "name": "LightPath.Runtime",
+  "references": [
+    "Unity.InputSystem",
+    "Unity.Collections",
+    "Unity.TextMeshPro",
+    "Unity.ugui"
+  ]
+}

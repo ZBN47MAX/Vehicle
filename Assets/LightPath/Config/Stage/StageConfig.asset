@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 800a74f0b6a456040a74b1b1cf9b944d, type: 3}
+  m_Name: StageConfig
+  m_EditorClassIdentifier: Assembly-CSharp::DelayNoMore.LightPath.LightStageConfig
+  TextureWidth: 1920
+  TextureHeight: 1080
+  ScreenSize: {x: 50, y: 28.125}
+  RepairSize: {x: 1.8, y: 1.4}
+  DisplayLayer: 8
+  ScreenLayer: 11
+  FieldOfView: 55
+  TransitionSeconds: 0.5
+  FramePadding: 1.08
+  ScreenDistance: 2
+  RepairDistance: 3
+  NodeRadius: 0.45
+  BeamWidth: 0.08
