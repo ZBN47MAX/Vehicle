@@ -2461,3 +2461,48 @@ MonoBehaviour:
     NormalPlay: 1
     Component: TMP
     Value: "\u6295\u5f71\u9762\u677f"
+  - Key: Debug.Tools.BlackoutOn
+    Screen: Debug
+    NormalPlay: 0
+    Component: LightDebugPanel
+    Title: "\u65ad\u5149\uff1a\u5f00"
+    Purpose: Debug
+    Location: DebugTools
+    Parameters:
+    Value: "\u65ad\u5149\uff1a\u5f00"
+  - Key: Debug.Tools.BlackoutOff
+    Screen: Debug
+    NormalPlay: 0
+    Component: LightDebugPanel
+    Title: "\u65ad\u5149\uff1a\u5173"
+    Purpose: Debug
+    Location: DebugTools
+    Parameters:
+    Value: "\u65ad\u5149\uff1a\u5173"
+  - Key: Debug.Tools.RestorePower
+    Screen: Debug
+    NormalPlay: 0
+    Component: LightDebugPanel
+    Title: "\u6062\u590d\u771f\u5b9e\u5149\u8def\u4f9b\u5149"
+    Purpose: Debug
+    Location: DebugTools
+    Parameters:
+    Value: "\u6062\u590d\u771f\u5b9e\u5149\u8def\u4f9b\u5149"
+  - Key: Debug.PowerForcedOn
+    Screen: Debug
+    NormalPlay: 0
+    Component: LightDebugPanel
+    Title: "Debug\uff1a\u5f3a\u5236\u4f9b\u5149"
+    Purpose: Debug
+    Location: DebugTools
+    Parameters:
+    Value: "Debug\uff1a\u5f3a\u5236\u4f9b\u5149"
+  - Key: Debug.PowerForcedOff
+    Screen: Debug
+    NormalPlay: 0
+    Component: LightDebugPanel
+    Title: "Debug\uff1a\u5f3a\u5236\u65ad\u5149"
+    Purpose: Debug
+    Location: DebugTools
+    Parameters:
+    Value: "Debug\uff1a\u5f3a\u5236\u65ad\u5149"

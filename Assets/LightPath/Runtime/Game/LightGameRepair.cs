@@ -71,6 +71,8 @@ namespace DelayNoMore.LightPath
         /** @brief 生成维修状态与下一阶段预警。@return 状态说明 */
         private string RepairStatus()
         {
+            if (_repair.DebugPowerForced)
+                return GameText.Get(_repair.Powered ? "Debug.PowerForcedOn" : "Debug.PowerForcedOff");
             if (!_repair.Powered)
                 return GameText.Get("LightGameRepair.RepairStatus.003") + _repairLayout.Phases[_repair.PhaseIndex].DisplayName + GameText.Get("LightGameRepair.RepairStatus.004");
             string next = _repairLayout.Phases[_repair.NextPhaseIndex].DisplayName;

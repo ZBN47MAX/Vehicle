@@ -25,13 +25,21 @@ namespace DelayNoMore.LightPath
         /** @brief 剩余正常观看时间，秒。 */
         public float RemainingSeconds { get; private set; }
         /** @brief 当前是否为世界供光。 */
-        public bool Powered { get; private set; }
+        public bool Powered => _debugPower ?? _powered;
+        /** @brief 光路真实连接状态，与调试覆盖分开保存。 */
+        private bool _powered;
+        /** @brief 本会话强制供光状态，空值表示遵循光路。 */
+        private bool? _debugPower;
+        /** @brief 是否正在强制供光或断光。 */
+        public bool DebugPowerForced => _debugPower.HasValue;
+        /** @brief 覆盖供光状态，不修改角度、阶段、计时或维修次数。@param powered 供光状态，空值恢复真实光路 */
+        public void SetDebugPower(bool? powered) => _debugPower = powered;
         /** @brief 实际由断光恢复的次数。 */
         public int RepairCount { get; private set; }
         /** @brief 最近一次光路计算结果。 */
         public RepairPreviewSolver.Result Result { get; private set; }
         /** @brief 当前是否处于事件预警。 */
-        public bool Warning => Powered && RemainingSeconds <= _layout.WarningSeconds;
+        public bool Warning => !_debugPower.HasValue && Powered && RemainingSeconds <= _layout.WarningSeconds;
         /** @brief 当前生效阶段。 */
         public int PhaseIndex => _phase;
         /** @brief 下一事件阶段，由本局已确定的阶段顺序提供。 */
@@ -62,7 +70,7 @@ namespace DelayNoMore.LightPath
         /** @brief 只在正常供光观看期间调用；到期固定本次目标。@param seconds 本帧观看时间，秒 */
         public void Tick(float seconds)
         {
-            if (!Powered || seconds <= 0 || float.IsNaN(seconds) || float.IsInfinity(seconds))
+            if (_debugPower.HasValue || !Powered || seconds <= 0 || float.IsNaN(seconds) || float.IsInfinity(seconds))
                 return;
             RemainingSeconds = Mathf.Max(0, RemainingSeconds - seconds);
             if (RemainingSeconds > 0)
@@ -113,9 +121,9 @@ namespace DelayNoMore.LightPath
         /** @brief 统一重算并在真正恢复供光时累计维修次数。 */
         private void AfterAdjustment()
         {
-            bool wasPowered = Powered;
+            bool wasPowered = _powered;
             Recalculate();
-            if (!wasPowered && Powered)
+            if (!wasPowered && _powered)
             {
                 RepairCount++;
                 ScheduleNext();
@@ -125,8 +133,8 @@ namespace DelayNoMore.LightPath
         private void Recalculate()
         {
             Result = RepairPreviewSolver.TraceAngles(_layout, _angles);
-            Powered = Result.Matches(_layout.Phases[_phase].Targets);
-            if (!Powered) RemainingSeconds = 0;
+            _powered = Result.Matches(_layout.Phases[_phase].Targets);
+            if (!_powered) RemainingSeconds = 0;
         }
         /** @brief 为下一事件采样完整间隔；计时由外部观看状态推进。 */
         private void ScheduleNext()

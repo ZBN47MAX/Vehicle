@@ -98,6 +98,32 @@ namespace DelayNoMore.LightPath.Tests
             session.Tick(1000);
             Assert.That(session.PhaseIndex, Is.EqualTo(1)); Assert.That(session.Powered, Is.False);
         }
+        /** @brief 强制状态冻结阶段计时，不篡改真实解法、维修次数或共享配置。 */
+        [Test] public void DebugPower_OverridesBothStatesAndRestoresRealCircuit()
+        {
+            string before = JsonUtility.ToJson(_layout);
+            var session = new RepairSession(_layout);
+            Assert.That(session.Powered, Is.False);
+            session.SetDebugPower(true);
+            Assert.That(session.Powered && session.DebugPowerForced, Is.True);
+            session.Tick(1000);
+            Assert.That(session.PhaseIndex, Is.Zero);
+            Assert.That(session.RepairCount, Is.Zero);
+            session.SetDebugPower(null);
+            Assert.That(session.Powered || session.DebugPowerForced, Is.False);
+            _layout.Phases[0].Targets = new[] { "a", "b" };
+            session = new RepairSession(_layout);
+            float seconds = session.RemainingSeconds;
+            session.SetDebugPower(false);
+            session.Tick(1000);
+            Assert.That(session.Powered || session.Warning, Is.False);
+            Assert.That(session.RemainingSeconds, Is.EqualTo(seconds));
+            session.SetDebugPower(null);
+            Assert.That(session.Powered, Is.True);
+            Assert.That(session.RepairCount, Is.Zero);
+            _layout.Phases[0].Targets = new[] { "a" };
+            Assert.That(JsonUtility.ToJson(_layout), Is.EqualTo(before));
+        }
         /** @brief 缺少任意指定出口也不能供光。 */
         [Test] public void MissingExit_BlocksStartup()
         {

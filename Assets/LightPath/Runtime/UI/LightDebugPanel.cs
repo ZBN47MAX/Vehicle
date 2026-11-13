@@ -31,6 +31,8 @@ namespace DelayNoMore.LightPath
         private TMP_Text _destination;
         /** @brief 浮空开关状态文字。 */
         private TMP_Text _noclipLabel;
+        /** @brief 断光开关与恢复真实供光状态文字。 */
+        private TMP_Text _blackoutLabel, _restorePowerLabel;
         /** @brief 创建一个鼠标操作按钮。 @param parent 父级 @param text 文案 @param x 横坐标 @param y 纵坐标 @param width 宽度 @param action 点击动作 @return 文字组件 */
         private TMP_Text ToolButton(Transform parent, string text, float x, float y, float width, UnityEngine.Events.UnityAction action)
         {
@@ -69,7 +71,7 @@ namespace DelayNoMore.LightPath
             rect.anchorMin = rect.anchorMax = new Vector2(1, 1);
             rect.pivot = Vector2.one;
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(380, 520);
+            rect.sizeDelta = new Vector2(380, 550);
             _tools.GetComponent<Image>().color = new Color(.05f, .08f, .11f, .98f);
             for (int i = 0; i < 10; i++)
             {
@@ -86,7 +88,9 @@ namespace DelayNoMore.LightPath
             ToolButton(rect, GameText.Get("Debug.Tools.PrevRoom"), 12, 352, 174, () => SelectRoom(-1));
             ToolButton(rect, GameText.Get("Debug.Tools.NextRoom"), 194, 352, 174, () => SelectRoom(1));
             ToolButton(rect, GameText.Get("Debug.Tools.Jump"), 12, 400, 356, () => _game.DebugJump(_level, _room));
-            _noclipLabel = ToolButton(rect, "Noclip", 12, 448, 356, () => { _game.SetNoclip(!_game.Noclip); Refresh(); });
+            _noclipLabel = ToolButton(rect, "Noclip", 12, 448, 174, () => { _game.SetNoclip(!_game.Noclip); Refresh(); });
+            _blackoutLabel = ToolButton(rect, "", 194, 448, 174, () => { _game.DebugSetBlackout(!_game.DebugBlackout); Refresh(); });
+            _restorePowerLabel = ToolButton(rect, GameText.Get("Debug.Tools.RestorePower"), 12, 496, 356, () => { _game.DebugRestorePower(); Refresh(); });
         }
         /** @brief 选择关卡并重置房间选择。 @param delta 方向 */
         private void SelectLevel(int delta)
@@ -143,6 +147,8 @@ namespace DelayNoMore.LightPath
             }
             if (_destination) _destination.text = $"Level{_level + 1}\nRoom{_room}";
             if (_noclipLabel) _noclipLabel.text = "Noclip " + (_game.Noclip ? "✓" : "×");
+            if (_blackoutLabel) _blackoutLabel.text = GameText.Get(_game.DebugBlackout ? "Debug.Tools.BlackoutOn" : "Debug.Tools.BlackoutOff");
+            if (_restorePowerLabel) _restorePowerLabel.GetComponentInParent<Button>().interactable = _game.DebugPowerForced;
             GameText.ApplyFont(_text);
             InputAction toggle = _actions.FindAction("Light/Debug", false);
             _text.text = GameText.Get("Debug.Header", toggle != null ? toggle.GetBindingDisplayString() : "") + "\n" + _game.DebugSummary();

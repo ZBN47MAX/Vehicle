@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 namespace DelayNoMore.LightPath
 {
-    /** @brief 向策划调试面板提供只读运行快照，不改变玩法状态或共享配置。 */
+    /** @brief 向策划调试面板提供运行快照和会话内覆盖，不修改共享配置。 */
     public sealed partial class LightGame
     {
         /** @brief 会话内能力覆盖，空值表示使用真实收集进度。 */
@@ -57,6 +57,24 @@ namespace DelayNoMore.LightPath
             float speed = _config.NoclipSpeed * (Action("DebugBoost").IsPressed() ? _config.NoclipBoost : 1);
             _player.position += Vector2.ClampMagnitude(movement, 1) * (speed * Time.unscaledDeltaTime);
             Physics2D.SyncTransforms();
+        }
+        /** @brief 当前有效断光状态。 */
+        public bool DebugBlackout => _repair != null && !_repair.Powered;
+        /** @brief 是否正在强制覆盖供光。 */
+        public bool DebugPowerForced => _repair != null && _repair.DebugPowerForced;
+        /** @brief 强制进入或退出断光，保持当前视角。@param blackout 是否断光 */
+        public void DebugSetBlackout(bool blackout)
+        {
+            if (!_ready || _repair == null) return;
+            _repair.SetDebugPower(!blackout);
+            ApplyState();
+        }
+        /** @brief 清除调试供光覆盖，恢复当前真实光路状态。 */
+        public void DebugRestorePower()
+        {
+            if (_repair == null) return;
+            _repair.SetDebugPower(null);
+            if (_ready) ApplyState();
         }
         /** @brief 获取可选关卡数量。 */
         public int DebugLevelCount => _levels.Length;

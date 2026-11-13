@@ -58,6 +58,29 @@ namespace DelayNoMore.LightPath.Tests
             _game.SetNoclip(false);
             return rooms[index].GetComponentInChildren<RoomCheckpoint>(true);
         }
+        /** @brief 调试断光可双向强制，关闭面板仍保持，重开清除且不改变视角。 */
+        [UnityTest] public IEnumerator DebugBlackout_OverridesPowerUntilRestoredOrRestarted()
+        {
+            var panel = UnityEngine.Object.FindAnyObjectByType<LightDebugPanel>();
+            panel.SetVisible(true);
+            TMP_Text label = Read<TMP_Text>(panel, "_blackoutLabel");
+            var button = label.GetComponentInParent<UnityEngine.UI.Button>();
+            Assert.That(_game.DebugBlackout, Is.False);
+            StageView view = _stage.View;
+            button.onClick.Invoke();
+            Assert.That(_game.DebugBlackout && _game.DebugPowerForced, Is.True);
+            panel.SetVisible(false);
+            yield return null;
+            Assert.That(_game.Room.Powered, Is.False);
+            Assert.That(_stage.View, Is.EqualTo(view));
+            _game.DebugSetBlackout(false);
+            Assert.That(_game.Room.Powered && _game.DebugPowerForced, Is.True);
+            _game.DebugRestorePower();
+            Assert.That(_game.Room.Powered && !_game.DebugPowerForced, Is.True);
+            _game.DebugSetBlackout(true);
+            _game.Restart();
+            Assert.That(_game.DebugPowerForced, Is.False);
+        }
         /** @brief 重生只重置复活房间，保留其他已访问房间的通路姿态。 */
         [UnityTest] public IEnumerator Respawn_PreservesOtherVisitedRoomPose()
         {
