@@ -6,6 +6,57 @@ namespace DelayNoMore.LightPath
     {
         /** @brief 会话内能力覆盖，空值表示使用真实收集进度。 */
         private readonly bool?[] _debugAxes = new bool?[6], _debugColors = new bool?[4];
+        /** @brief 调试浮空状态。 */
+        public bool Noclip { get; private set; }
+        /** @brief 浮空前的物理模拟状态。 */
+        private bool _noclipWasSimulated;
+        /** @brief 浮空前的角色形状及相对位置。 */
+        private Bounds _noclipShape;
+        /** @brief 尝试开启或关闭浮空，关闭前检查实体重叠。 @param enabled 是否开启 */
+        public void SetNoclip(bool enabled)
+        {
+            if (!_ready || enabled == Noclip) return;
+            if (!enabled)
+            {
+                Bounds body = _noclipShape;
+                body.center += (Vector3)_player.position;
+                Room.Surface.Rebuild();
+                if (!Room.Surface.Bounds.Contains(body.min) || !Room.Surface.Bounds.Contains(body.max) || Room.Overlaps(body, _color, false))
+                {
+                    Notify(GameText.Get("Debug.NoclipBlocked"));
+                    return;
+                }
+            }
+            if (enabled)
+            {
+                _noclipShape = _body.bounds;
+                _noclipShape.center -= (Vector3)_player.position;
+                _noclipWasSimulated = _player.simulated;
+            }
+            Noclip = enabled;
+            _player.simulated = enabled ? false : _noclipWasSimulated;
+            _player.linearVelocity = Vector2.zero;
+            _jumpUntil = 0;
+            _checkpointContacts.Clear();
+            Physics2D.SyncTransforms();
+        }
+        /** @brief 正常游戏重开或退出时清理调试浮空。 */
+        private void ResetNoclip()
+        {
+            if (!Noclip) return;
+            Noclip = false;
+            _player.simulated = _noclipWasSimulated;
+            _player.linearVelocity = Vector2.zero;
+        }
+        /** @brief 在二维平面按统一UIS动作浮空，鼠标操作UI时停止移动。 */
+        private void MoveNoclip()
+        {
+            if (UnityEngine.EventSystems.EventSystem.current && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
+            Vector2 movement = Action("DebugMove").ReadValue<Vector2>();
+            float speed = _config.NoclipSpeed * (Action("DebugBoost").IsPressed() ? _config.NoclipBoost : 1);
+            _player.position += Vector2.ClampMagnitude(movement, 1) * (speed * Time.unscaledDeltaTime);
+            Physics2D.SyncTransforms();
+        }
         /** @brief 获取可选关卡数量。 */
         public int DebugLevelCount => _levels.Length;
         /** @brief 获取关卡房间数量。 @param level 关卡索引 @return 房间数 */
@@ -58,6 +109,11 @@ namespace DelayNoMore.LightPath
             Room.Surface.Invalidate();
             Room.Surface.Rebuild();
             Physics2D.SyncTransforms();
+            if (!Room.GetComponentInChildren<RoomSpawnPoint>() || !Room.Surface.Bounds.Contains(_player.position) || Room.Overlaps(_body.bounds, _color, false))
+            {
+                SetNoclip(true);
+                if (!Room.Surface.Bounds.Contains(_player.position)) _player.position = Room.Surface.Bounds.center;
+            }
             if (_stage) SetStageView(StageView.World, true);
             else { _editing = false; _repairFocus = false; }
             ApplyState();

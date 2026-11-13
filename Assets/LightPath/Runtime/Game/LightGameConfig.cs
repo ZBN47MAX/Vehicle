@@ -10,6 +10,10 @@ namespace DelayNoMore.LightPath
         [Min(1)] public float UnlockNoticeSeconds = 6;
         /** @brief 相连房间边缘保留的玩家高度倍数。 */
         [Min(0)] public float ConnectedEdgeClearance = 1.2f;
+        /** @brief 调试浮空移动速度，世界单位每秒。 */
+        [Min(.1f)] public float NoclipSpeed = 6;
+        /** @brief 调试加速倍率。 */
+        [Min(1)] public float NoclipBoost = 3;
         /** @brief 能力解锁通知的淡出秒数。 */
         [Min(.01f)] public float UnlockFadeSeconds = .4f;
         /** @brief 能力解锁通知颜色。 */

@@ -2396,3 +2396,13 @@ MonoBehaviour:
     Component: TMP
     Title: Projection clearance
     Value: "\u6295\u5f71\u8d85\u51fa\u53ef\u7528\u8303\u56f4"
+  - Key: Debug.NoclipBlocked
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u8bf7\u5148\u79fb\u52a8\u5230\u623f\u95f4\u5185\u7684\u7a7a\u5904\uff0c\u518d\u5173\u95ed Noclip"
+  - Key: Debug.NoclipActive
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "Debug \u00b7 Noclip \u6d6e\u7a7a\u7a7f\u5899"

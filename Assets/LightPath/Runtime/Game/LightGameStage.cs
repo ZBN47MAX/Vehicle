@@ -19,7 +19,7 @@ namespace DelayNoMore.LightPath
         {
             if (!ShowViewButtons || _stage.Moving)
                 return;
-            if (view == StageView.World)
+            if (view == StageView.World && !Noclip)
             {
                 if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009")); return; }
                 Room.Surface.Rebuild();
@@ -103,7 +103,7 @@ namespace DelayNoMore.LightPath
             _stageHover = !hit ? GameText.Get("LightGameStage.EditStage.005") : view == StageView.World ? GameText.Get("LightGameStage.EditStage.006") : view == StageView.Repair ? GameText.Get("LightGameStage.EditStage.007") : GameText.Get("LightGameStage.EditStage.008");
             if (!hit || !Action("Drag").WasPressedThisFrame())
                 return;
-            if (view == StageView.World)
+            if (view == StageView.World && !Noclip)
             {
                 if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009")); return; }
                 Room.Surface.Rebuild();

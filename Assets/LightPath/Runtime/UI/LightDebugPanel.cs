@@ -27,6 +27,8 @@ namespace DelayNoMore.LightPath
         private int _level, _room;
         /** @brief 跳转目标显示。 */
         private TMP_Text _destination;
+        /** @brief 浮空开关状态文字。 */
+        private TMP_Text _noclipLabel;
         /** @brief 创建一个鼠标操作按钮。 @param parent 父级 @param text 文案 @param x 横坐标 @param y 纵坐标 @param width 宽度 @param action 点击动作 @return 文字组件 */
         private TMP_Text ToolButton(Transform parent, string text, float x, float y, float width, UnityEngine.Events.UnityAction action)
         {
@@ -79,6 +81,7 @@ namespace DelayNoMore.LightPath
             ToolButton(rect, "上一房间", 12, 352, 174, () => SelectRoom(-1));
             ToolButton(rect, "下一房间", 194, 352, 174, () => SelectRoom(1));
             ToolButton(rect, "跳转到所选房间", 12, 400, 356, () => _game.DebugJump(_level, _room));
+            _noclipLabel = ToolButton(rect, "Noclip", 12, 448, 356, () => { _game.SetNoclip(!_game.Noclip); Refresh(); });
         }
         /** @brief 选择关卡并重置房间选择。 @param delta 方向 */
         private void SelectLevel(int delta)
@@ -129,6 +132,7 @@ namespace DelayNoMore.LightPath
                 _abilityLabels[i].color = _game.DebugAbility(i) ? new Color(.55f, .9f, .67f) : Color.white;
             }
             if (_destination) _destination.text = $"Level{_level + 1}\nRoom{_room}";
+            if (_noclipLabel) _noclipLabel.text = "Noclip " + (_game.Noclip ? "✓" : "×");
             GameText.ApplyFont(_text);
             InputAction toggle = _actions.FindAction("Light/Debug", false);
             _text.text = GameText.Get("Debug.Header", toggle != null ? toggle.GetBindingDisplayString() : "") + "\n" + _game.DebugSummary();

@@ -225,7 +225,9 @@ namespace DelayNoMore.LightPath
                 Respawn();
             if (Action("Mode").WasPressedThisFrame())
                 ToggleMode();
-            if (!_editing && Room.Powered)
+            if (Noclip && !_editing)
+                MoveNoclip();
+            else if (!_editing && Room.Powered)
             {
                 ReadPalette();
                 if (Action("Jump").WasPressedThisFrame())
@@ -268,6 +270,7 @@ namespace DelayNoMore.LightPath
             }
             if (Time.unscaledTime < _noticeUntil)
                 status = _notice;
+            if (Noclip) status = GameText.Get("Debug.NoclipActive") + "\n" + status;
             string unlock = UnlockNotice();
             if (unlock.Length > 0)
                 status = unlock;
@@ -487,7 +490,7 @@ namespace DelayNoMore.LightPath
         /** @brief 推进物理运动，消费跳跃缓存。 */
         private void FixedUpdate()
         {
-            if (!_ready || !_started || _paused || _editing || _transitioning || !Room.Powered || (_stage && _stage.Moving))
+            if (Noclip || !_ready || !_started || _paused || _editing || _transitioning || !Room.Powered || (_stage && _stage.Moving))
                 return;
             if (Grounded())
                 _groundedAt = Time.time;
@@ -667,6 +670,7 @@ namespace DelayNoMore.LightPath
         /** @brief 开始全新游玩。 */
         public void Restart()
         {
+            ResetNoclip();
             _unlockNotices.Clear();
             _unlockUntil = 0;
             if (!_ready)
@@ -727,6 +731,7 @@ namespace DelayNoMore.LightPath
         /** @brief 返回主菜单。 */
         public void MainMenu()
         {
+            ResetNoclip();
             _pointer.Cancel();
             _started = false;
             _paused = false;
@@ -744,7 +749,7 @@ namespace DelayNoMore.LightPath
             Room.Refresh(_config, _color, _preview, !_stage && _editing && !(_repair != null && _repairFocus), _selected);
             foreach (Renderer renderer in _playerRenderers)
                 if (renderer)
-                    renderer.enabled = Room.Powered;
+                    renderer.enabled = Room.Powered || Noclip;
         }
         /** @brief 更新观看与装置相机。 */
         private void UpdateCamera()
@@ -785,6 +790,7 @@ namespace DelayNoMore.LightPath
         /** @brief 清理输入与时间。 */
         private void OnDestroy()
         {
+            ResetNoclip();
             _repairPanel.Dispose();
             if (_stage && _ownsStage)
                 _stage.Release();
