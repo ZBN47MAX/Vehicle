@@ -87,7 +87,7 @@ namespace DelayNoMore.LightPath
                 EditProjectionKeyboard();
                 return;
             }
-            if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
+            if (_repairDrag < 0 && EventSystem.current && EventSystem.current.IsPointerOverGameObject())
             {
                 _stageHover = GameText.Get("LightGameStage.EditStage.003");
                 return;
@@ -96,7 +96,7 @@ namespace DelayNoMore.LightPath
             if (_stage.View == StageView.Repair)
             {
                 bool valid = _stage.TryRepairPoint(_repairLayout, point, out Vector2 boardPoint);
-                OperateRepair(_stage.PickRepair(_repairLayout, point), boardPoint, valid);
+                OperateRepair(_stage.PickRepair(_repairLayout, point, _repair), boardPoint, valid);
                 return;
             }
             bool hit = _stage.TryChoose(point, Room, out StageView view);

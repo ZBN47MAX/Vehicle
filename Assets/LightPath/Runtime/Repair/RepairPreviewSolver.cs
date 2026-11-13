@@ -32,6 +32,13 @@ namespace DelayNoMore.LightPath
         /** @brief 将目标角限制到透镜自身基准方向附近的允许区间。 */
         public static float ClampLensAngle(RepairLayout.Device device, float degrees) => device.Direction * 45f
             + Mathf.Clamp(Mathf.DeltaAngle(device.Direction * 45f, degrees), device.AngleRange.x, device.AngleRange.y);
+        /** @brief 指针到可见调角线的距离。 @param point 指针 @param center 起点 @param angle 角度 @param length 长度 @return 最短距离 */
+        public static float AngleLineDistance(Vector2 point, Vector2 center, float angle, float length)
+        {
+            Vector2 line = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad)) * length;
+            float amount = Mathf.Clamp01(Vector2.Dot(point - center, line) / Mathf.Max(.000001f, line.sqrMagnitude));
+            return Vector2.Distance(point, center + line * amount);
+        }
         /** @brief 求射线首次接触节点方框的位置，包含擦边。 @param start 起点 @param direction 单位方向 @param center 节点中心 @param radius 半宽 @param distance 接触距离 @return 是否相交 */
         public static bool HitNode(Vector2 start, Vector2 direction, Vector2 center, float radius, out float distance)
         {

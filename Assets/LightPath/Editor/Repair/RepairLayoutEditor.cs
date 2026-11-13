@@ -141,7 +141,7 @@ namespace DelayNoMore.LightPath.Editor
                 Handles.DrawAAPolyLine(3, p, p + new Vector2(Mathf.Cos(angle), -Mathf.Sin(angle)) * 19);
                 bool required = _layout.Phases.Length > 0 && _layout.Phases[Mathf.Clamp(_phase, 0, _layout.Phases.Length - 1)].Targets.Contains(device.Id);
                 GUI.Label(new Rect(p.x + 16, p.y - 12, 180, 22), device.Name + (required ? " [目标]" : ""));
-                if (e.type == EventType.MouseDown && e.button == 0 && hit.Contains(e.mousePosition))
+                if (e.type == EventType.MouseDown && e.button == 0 && (hit.Contains(e.mousePosition) || RepairPreviewSolver.AngleLineDistance(e.mousePosition, p, -direction, 19) <= 8))
                 {
                     _selected = i;
                     if (_trial != null && device.Type == RepairLayout.Kind.Lens) _drag = true;
@@ -161,8 +161,7 @@ namespace DelayNoMore.LightPath.Editor
             if (_drag && _trial != null && _selected >= 0 && e.type == EventType.MouseDrag && e.button == 0)
             {
                 var device = _layout.Devices[_selected];
-                Vector2 delta = e.mousePosition - Point(device.Position, area);
-                if (delta.sqrMagnitude > 16) _trial[_selected] = RepairPreviewSolver.ClampLensAngle(device, Mathf.Atan2(-delta.y, delta.x) * Mathf.Rad2Deg);
+                _trial[_selected] = RepairPreviewSolver.ClampLensAngle(device, _trial[_selected] - e.delta.x * _layout.LensDegreesPerPixel);
                 e.Use();
             }
             if (e.type == EventType.MouseUp) _drag = false;
@@ -209,10 +208,11 @@ namespace DelayNoMore.LightPath.Editor
             bool randomOrder = EditorGUILayout.Toggle("阶段随机循环（每轮不重复）", _layout.RandomPhaseOrder);
             float warning = EditorGUILayout.FloatField("预警秒数", _layout.WarningSeconds);
             Rect bounds = EditorGUILayout.RectField("操作范围", _layout.Area);
+            float sensitivity = EditorGUILayout.FloatField("透镜调角速度（度/像素）", _layout.LensDegreesPerPixel);
             float radius = EditorGUILayout.FloatField("节点边框半宽（同时用于命中）", _layout.NodeRadius);
             if (EditorGUI.EndChangeCheck())
             {
-                Edit(); _layout.WarningSeconds = Mathf.Max(.1f, warning);
+                Edit(); _layout.LensDegreesPerPixel = Mathf.Max(.001f, sensitivity); _layout.WarningSeconds = Mathf.Max(.1f, warning);
                 _layout.RandomPhaseOrder = randomOrder;
                 _layout.Interval = new Vector2(Mathf.Max(_layout.WarningSeconds + .1f, interval.x), Mathf.Max(_layout.WarningSeconds + .1f, interval.x, interval.y));
                 bounds.width = Mathf.Max(1, bounds.width); bounds.height = Mathf.Max(1, bounds.height); _layout.Area = bounds; _layout.NodeRadius = Mathf.Max(.01f, radius);

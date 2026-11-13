@@ -91,7 +91,7 @@ namespace DelayNoMore.LightPath
         /** @brief 获取包含边界节点的等比缩放。@param layout 布局 @param config 参数 @return 世界缩放 */
         private static float Scale(RepairLayout layout, LightStageConfig config) => Mathf.Min(config.RepairSize.x / (layout.Area.width + layout.NodeRadius * 4), config.RepairSize.y / (layout.Area.height + layout.NodeRadius * 4));
         /** @brief 在顶面射线命中点寻找可旋转节点。@param layout 布局 @param config 参数 @param frame 顶面坐标系 @param ray 世界射线 @return 索引或负一 */
-        public static int Pick(RepairLayout layout, LightStageConfig config, Transform frame, Ray ray)
+        public static int Pick(RepairLayout layout, LightStageConfig config, Transform frame, Ray ray, RepairSession session = null)
         {
             if (!TryPoint(layout, config, frame, ray, out Vector2 point)) return -1;
             float nearest = layout.NodeRadius * 1.8f;
@@ -100,7 +100,8 @@ namespace DelayNoMore.LightPath
             {
                 RepairLayout.Device node = layout.Devices[i];
                 if (node.Type == RepairLayout.Kind.Source || node.Type == RepairLayout.Kind.Exit) continue;
-                float delta = Vector2.Distance(point, node.Position);
+                float angle = session == null ? node.OutputAngle : session.Angle(i);
+                float delta = Mathf.Min(Vector2.Distance(point, node.Position), RepairPreviewSolver.AngleLineDistance(point, node.Position, angle, layout.NodeRadius * 2));
                 if (delta < nearest) { nearest = delta; result = i; }
             }
             return result;

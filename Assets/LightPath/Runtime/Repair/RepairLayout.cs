@@ -63,6 +63,8 @@ namespace DelayNoMore.LightPath
         public float HitRadius { get => NodeRadius; set => NodeRadius = value; }
         /** @brief 节点可见方形边框的半宽，同时用于射线命中和编辑器预览。 */
         [Min(.01f)] public float NodeRadius = .45f;
+        /** @brief 透镜每像素水平拖动的角度，正向右拖顺时针。 */
+        [Min(.001f)] public float LensDegreesPerPixel = .15f;
         /** @brief 验证运行所需内容，不修改配置。@param error 首个错误 @return 内容可用于运行时为真；不保证谜题可解 */
         public bool TryValidate(out string error)
         {

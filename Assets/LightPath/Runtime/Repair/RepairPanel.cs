@@ -103,7 +103,7 @@ namespace DelayNoMore.LightPath
             return board.center + new Vector2(delta.x, -delta.y) * scale;
         }
         /** @brief 从统一 UIS 提供的屏幕位置选择最近可旋转机关。@param layout 布局 @param pointer 左下原点屏幕坐标 @return 机关编号或负一 */
-        public int Pick(RepairLayout layout, Vector2 pointer)
+        public int Pick(RepairLayout layout, Vector2 pointer, RepairSession session = null)
         {
             Vector2 guiPoint = new Vector2(pointer.x, Screen.height - pointer.y);
             if (!PanelRect.Contains(guiPoint))
@@ -115,7 +115,8 @@ namespace DelayNoMore.LightPath
                 RepairLayout.Kind type = layout.Devices[i].Type;
                 if (type == RepairLayout.Kind.Source || type == RepairLayout.Kind.Exit)
                     continue;
-                float distance = Vector2.Distance(guiPoint, Point(layout, layout.Devices[i].Position));
+                float angle = session == null ? layout.Devices[i].OutputAngle : session.Angle(i);
+                float distance = RepairPreviewSolver.AngleLineDistance(guiPoint, Point(layout, layout.Devices[i].Position), -angle, 20);
                 if (distance < nearest)
                 {
                     nearest = distance;

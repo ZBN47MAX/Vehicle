@@ -270,7 +270,7 @@ namespace DelayNoMore.LightPath
             return found;
         }
         /** @brief 选择顶面机关。@param layout 布局 @param pointer 指针 @return 机关索引或负一 */
-        public int PickRepair(RepairLayout layout, Vector2 pointer) => RepairStageMesh.Pick(layout, _config, _repairFrame, PointerRay(pointer));
+        public int PickRepair(RepairLayout layout, Vector2 pointer, RepairSession session = null) => RepairStageMesh.Pick(layout, _config, _repairFrame, PointerRay(pointer), session);
         /** @brief 将维修指针转换为配置平面坐标。 */
         public bool TryRepairPoint(RepairLayout layout, Vector2 pointer, out Vector2 point) => RepairStageMesh.TryPoint(layout, _config, _repairFrame, PointerRay(pointer), out point);
         /** @brief 添加矩形取景边界。@param frame 坐标系 @param size 世界宽高 */

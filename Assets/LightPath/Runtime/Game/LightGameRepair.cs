@@ -46,7 +46,7 @@ namespace DelayNoMore.LightPath
         private void EditRepair()
         {
             Vector2 pointer = Action("Pointer").ReadValue<Vector2>();
-            OperateRepair(_repairPanel.Pick(_repairLayout, pointer), _repairPanel.BoardPoint(_repairLayout, pointer), true);
+            OperateRepair(_repairPanel.Pick(_repairLayout, pointer, _repair), _repairPanel.BoardPoint(_repairLayout, pointer), true);
         }
         /** @brief 共用维修输入：折镜点击八向切换，透镜按住并瞄准连续角度。 */
         private void OperateRepair(int index, Vector2 point, bool valid)
@@ -60,11 +60,10 @@ namespace DelayNoMore.LightPath
                 return;
             }
             if (!Action("Drag").IsPressed()) _repairDrag = -1;
-            if (_repairDrag >= 0 && valid)
+            if (_repairDrag >= 0 && Action("Drag").IsPressed())
             {
-                Vector2 delta = point - _repairLayout.Devices[_repairDrag].Position;
-                if (delta.sqrMagnitude > _repairLayout.HitRadius * _repairLayout.HitRadius)
-                    _repair.SetLensAngle(_repairDrag, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+                float delta = Action("PointerDelta").ReadValue<Vector2>().x;
+                _repair.SetLensAngle(_repairDrag, _repair.Angle(_repairDrag) - delta * _repairLayout.LensDegreesPerPixel);
             }
             if (!wasPowered && _repair.Powered)
                 Notify(GameText.Get("LightGameRepair.EditRepair.002"));
