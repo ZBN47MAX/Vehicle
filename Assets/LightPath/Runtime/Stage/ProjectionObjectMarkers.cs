@@ -1,142 +1,201 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
-
 namespace DelayNoMore.LightPath
 {
-    /** @brief 为可操作对象绘制统一四角抓手，复用舞台与二维捕获相机。 */
+    /** @brief 按真实外轮廓绘制物件与门：可移动虚线加完整折角，固定门实线。 */
     public sealed class ProjectionObjectMarkers : System.IDisposable
     {
-        /** @brief 各视角独立网格，避免提交后修改同一网格。 */
-        private readonly Mesh _display = new Mesh { name = "Movable markers 3D" }, _world = new Mesh { name = "Movable markers 2D" };
-        /** @brief 复用网格数据。 */
+        /** @brief 各空间独立缓存，预览网格禁止被场景卸载回收。 */
+        private readonly Mesh _display = new Mesh { name = "Object markers 3D", hideFlags = HideFlags.HideAndDontSave, indexFormat = IndexFormat.UInt32 },
+            _world = new Mesh { name = "Object markers 2D", hideFlags = HideFlags.HideAndDontSave, indexFormat = IndexFormat.UInt32 };
+        /** @brief 线段顶点缓存。 */
         private readonly List<Vector3> _vertices = new List<Vector3>();
-        /** @brief 复用三角索引。 */
+        /** @brief 线段三角索引缓存。 */
         private readonly List<int> _triangles = new List<int>();
-        /** @brief 黑白双层线条颜色。 */
+        /** @brief 逐顶点标识颜色。 */
         private readonly List<Color> _colors = new List<Color>();
-        /** @brief 绘制两个空间的对象标识。 @param room 房间 @param mapping 舞台映射 @param view 三维相机 @param capture 二维相机 @param config 表现配置 @param material 顶点色材质 */
-        public void Draw(LightRoom room, Matrix4x4 mapping, Camera view, Camera capture, LightStageConfig config, Material material, LightGame game)
+        /** @brief 最终投影的颜色遮罩，三维模型和作者预览不使用此遮罩。 */
+        private ProjectionSurface _maskSurface;
+        /** @brief 当前最终投影对应的源。 */
+        private ProjectionSource _maskSource;
+        /** @brief 向轮廓内部查询的中心。 */
+        private Vector3 _maskCenter;
+        /** @brief 背景选色。 */
+        private int _selectedColor;
+        /** @brief 当前选中或常规线色。 */
+        private Color _lineColor = Color.white;
+        /** @brief 两套标识网格的内容签名。 */
+        private int _displaySignature, _worldSignature;
+        /** @brief 对应缓存是否有效。 */
+        private bool _displayReady, _worldReady;
+        /** @brief 提交两个空间的标识，姿态与可见状态不变时复用网格。 */
+        public void Draw(LightRoom room, Matrix4x4 mapping, Camera view, Camera capture, LightStageConfig config, Material material, LightGame game, ProjectionSource selected = null)
         {
-            Build(_display, room, mapping, view, false, config.MarkerWidth, game);
-            Build(_world, room, Matrix4x4.identity, capture, true, config.MarkerWidth, game);
+            int color = game ? game.SelectedColor : -1;
+            Build(_display, room, mapping, view, false, config, game, selected, color);
+            Build(_world, room, Matrix4x4.identity, capture, true, config, game, selected, color);
             Graphics.DrawMesh(_display, Matrix4x4.identity, material, config.DisplayLayer, view, 0, null, ShadowCastingMode.Off, false);
-            Graphics.DrawMesh(_world, Matrix4x4.identity, material, room.Surface.gameObject.layer, capture, 0, null, ShadowCastingMode.Off, false);
+            if (room.Powered) Graphics.DrawMesh(_world, Matrix4x4.identity, material, room.Surface.gameObject.layer, capture, 0, null, ShadowCastingMode.Off, false);
         }
-        /** @brief 按相机平面构造四角框。 @param mesh 输出网格 @param room 房间 @param mapping 映射 @param camera 相机 @param projected 是否投影 @param width 线宽 */
-        private void Build(Mesh mesh, LightRoom room, Matrix4x4 mapping, Camera camera, bool projected, float width, LightGame game)
+        /** @brief 构造当前相机的轮廓；最终投影的线条和箭头统一按真实混色结果遮罩。 */
+        private void Build(Mesh mesh, LightRoom room, Matrix4x4 mapping, Camera camera, bool projected, LightStageConfig config, LightGame game, ProjectionSource selected, int color)
         {
-            _vertices.Clear(); _triangles.Clear(); _colors.Clear();
+            var portals = room.GetComponentsInChildren<RoomPortalLink>();
+            int hash = camera.worldToCameraMatrix.GetHashCode() ^ mapping.GetHashCode() ^ room.Surface.ProjectionOrigin.GetHashCode() ^ color ^ room.GetHashCode() ^ (selected ? selected.GetHashCode() : 0) ^ config.SelectionColor.GetHashCode() ^ config.MarkerWidth.GetHashCode() ^ room.Surface.Bounds.GetHashCode() ^ room.Surface.transform.position.z.GetHashCode();
+            foreach (ProjectionSource source in room.Surface.Sources)
+                if (source && source.Definition)
+                {
+                    source.RefreshGeometry();
+                    hash = unchecked(hash * 31 + source.Geometry.Signature + source.transform.localToWorldMatrix.GetHashCode() + source.Definition.Movable.GetHashCode() + source.Definition.Portal.GetHashCode() + source.Definition.MarkerWidth.GetHashCode() + source.Definition.GetColor(room.Surface.Configuration).GetHashCode() + source.gameObject.activeInHierarchy.GetHashCode());
+                }
+            foreach (RoomPortalLink portal in portals)
+                hash = unchecked(hash * 31 + portal.transform.localToWorldMatrix.GetHashCode() + (portal.TryGetComponent(out Collider2D collider) ? collider.enabled.GetHashCode() : 0) + portal.Bidirectional.GetHashCode());
+            if (projected ? _worldReady && _worldSignature == hash : _displayReady && _displaySignature == hash) return;
+            Clear(); _selectedColor = color;
+            _maskSurface = projected ? room.Surface : null;
             foreach (ProjectionSource source in room.Surface.Sources)
             {
-                if (!source || !source.isActiveAndEnabled || !source.Definition || (!source.Definition.Movable && !source.GetComponent<RoomPortalLink>() && !source.Partner)) continue;
-                Vector3 min = Vector3.one * float.PositiveInfinity, max = Vector3.one * float.NegativeInfinity;
-                bool found = false;
-                foreach (Vector3 vertex in source.Geometry.WorldVertices())
-                {
-                    Vector3 point = projected ? room.Surface.ProjectPoint(vertex) : mapping.MultiplyPoint3x4(vertex);
-                    point = camera.transform.InverseTransformPoint(point);
-                    min = Vector3.Min(min, point); max = Vector3.Max(max, point); found = true;
-                }
-                if (!found || min.z <= 0) continue;
-                bool portal = source.Definition.Portal && !source.GetComponent<ColorAbilityKey>() && !source.GetComponent<ProjectionAbilityKey>() && !source.GetComponent<LevelExit>();
-                float objectWidth = source.Definition.MarkerWidth;
-                if (source.Definition.Movable) Frame(min, max, camera, objectWidth, true);
-                if (portal) PortalFrame(min, max, camera, objectWidth, source.Definition.Movable, game && game.PortalBidirectional(source.gameObject));
+                if (!source || !source.isActiveAndEnabled || !source.Definition) continue;
+                _lineColor = selected == source ? config.SelectionColor : Color.white;
+                AddSource(source, room.Surface, mapping, camera, projected, game && game.PortalBidirectional(source.gameObject));
             }
+            _maskSurface = null; _lineColor = Color.white;
             if (projected)
-                foreach (RoomPortalLink portal in room.GetComponentsInChildren<RoomPortalLink>())
-                {
-                    if (portal.GetComponent<ProjectionSource>() || !portal.TryGetComponent(out Collider2D shape) || !shape.enabled) continue;
-                    Bounds bounds = shape.bounds;
-                    Vector3 a = camera.transform.InverseTransformPoint(bounds.min);
-                    Vector3 b = camera.transform.InverseTransformPoint(bounds.max);
-                    PortalFrame(Vector3.Min(a, b), Vector3.Max(a, b), camera, width, false, game && game.PortalBidirectional(portal.gameObject));
-                }
-            mesh.Clear(); mesh.SetVertices(_vertices); mesh.SetTriangles(_triangles, 0); mesh.SetColors(_colors); mesh.RecalculateBounds();
+                foreach (RoomPortalLink portal in portals)
+                    if (!portal.GetComponent<ProjectionSource>() && portal.TryGetComponent(out Collider2D shape) && shape.enabled)
+                        AddFixedPortal(shape, Matrix4x4.identity, camera, config.MarkerWidth, game && game.PortalBidirectional(portal.gameObject));
+            Upload(mesh);
+            if (projected) { _worldSignature = hash; _worldReady = true; } else { _displaySignature = hash; _displayReady = true; }
         }
-        /** @brief 编辑器使用与运行时相同的线框几何，不创建或修改玩法对象。@param sources 投影源 @param mapping 预览映射 @param camera 预览相机 @param bidirectional 门方向查询 @return 预览网格 */
-        public Mesh BuildPreview(ProjectionSource[] sources, Matrix4x4 mapping, Camera camera, System.Func<ProjectionSource, bool> bidirectional)
+        /** @brief 作者预览与运行使用同一轮廓和虚实线算法。 */
+        public Mesh BuildPreview(ProjectionSource[] sources, Matrix4x4 mapping, Camera camera, System.Func<ProjectionSource, bool> bidirectional, RoomPortalLink[] fixedPortals = null)
         {
-            _vertices.Clear(); _triangles.Clear(); _colors.Clear();
-            foreach (ProjectionSource source in sources)
-            {
-                if (!source || !source.Definition) continue;
-                Vector3 min = Vector3.one * float.PositiveInfinity, max = Vector3.one * float.NegativeInfinity;
-                bool found = false;
-                foreach (Vector3 vertex in source.Geometry.WorldVertices())
-                {
-                    Vector3 point = camera.transform.InverseTransformPoint(mapping.MultiplyPoint3x4(vertex));
-                    min = Vector3.Min(min, point); max = Vector3.Max(max, point); found = true;
-                }
-                if (!found || min.z <= 0) continue;
-                float width = source.Definition.MarkerWidth;
-                if (source.Definition.Movable) Frame(min, max, camera, width, true);
-                if (source.Definition.Portal && !source.GetComponent<ColorAbilityKey>() && !source.GetComponent<ProjectionAbilityKey>() && !source.GetComponent<LevelExit>())
-                    PortalFrame(min, max, camera, width, source.Definition.Movable, bidirectional(source));
-            }
-            _display.Clear(); _display.SetVertices(_vertices); _display.SetTriangles(_triangles, 0); _display.SetColors(_colors); _display.RecalculateBounds();
+            Clear(); _maskSurface = null; _lineColor = Color.white;
+            foreach (ProjectionSource source in sources) if (source && source.Definition) AddSource(source, null, mapping, camera, false, bidirectional(source));
+            if (fixedPortals != null)
+                foreach (RoomPortalLink portal in fixedPortals)
+                    if (!portal.GetComponent<ProjectionSource>() && portal.TryGetComponent(out Collider2D shape)) AddFixedPortal(shape, mapping, camera, .018f, !portal.UseArrivalPosition && portal.Bidirectional);
+            Upload(_display); _displayReady = false;
             return _display;
         }
-        /** @brief 绘制统一抓手框。 @param min 左下近点 @param max 右上远点 @param camera 相机 @param width 线宽 @param movable 是否可移动 */
-        private void Frame(Vector3 min, Vector3 max, Camera camera, float width, bool movable)
+        /** @brief 获取投影源的实际可见外轮廓，圆模型不再使用矩形包围。 */
+        private void AddSource(ProjectionSource source, ProjectionSurface surface, Matrix4x4 mapping, Camera camera, bool projected, bool bidirectional)
         {
-            float length = Mathf.Max(width * 3, Mathf.Min(max.x - min.x, max.y - min.y) * .22f);
-            for (int x = 0; x < 2; x++)
-                for (int y = 0; y < 2; y++)
+            bool portal = source.Definition.Portal && !source.GetComponent<ColorAbilityKey>() && !source.GetComponent<ProjectionAbilityKey>() && !source.GetComponent<LevelExit>();
+            if (!source.Definition.Movable && !portal) return;
+            var cameraPoints = new List<Vector3>(); float depth = float.PositiveInfinity;
+            foreach (Vector3 vertex in source.Geometry.WorldVertices())
+            {
+                Vector3 point = camera.transform.InverseTransformPoint(projected ? surface.ProjectPoint(vertex) : mapping.MultiplyPoint3x4(vertex));
+                cameraPoints.Add(point); depth = Mathf.Min(depth, point.z);
+            }
+            if (cameraPoints.Count < 3 || depth <= 0) return;
+            _maskSource = source;
+            float width = source.Definition.MarkerWidth;
+            depth = Mathf.Max(camera.nearClipPlane, depth - width * 3);
+            DrawContour(CameraContour(cameraPoints, camera, depth), depth, camera, width, source.Definition.Movable, portal, bidirectional);
+        }
+        /** @brief 固定门优先采用圆碰撞轮廓，其余模型使用真实顶点外轮廓。 */
+        private void AddFixedPortal(Collider2D shape, Matrix4x4 mapping, Camera camera, float width, bool bidirectional)
+        {
+            var cameraPoints = new List<Vector3>(); float depth = float.PositiveInfinity;
+            foreach (Vector3 vertex in FixedPortalOutline(shape))
+            { Vector3 point = camera.transform.InverseTransformPoint(mapping.MultiplyPoint3x4(vertex)); cameraPoints.Add(point); depth = Mathf.Min(depth, point.z); }
+            if (depth <= 0 || cameraPoints.Count < 3) return;
+            depth = Mathf.Max(camera.nearClipPlane, depth - width * 3);
+            DrawContour(CameraContour(cameraPoints, camera, depth), depth, camera, width, false, true, bidirectional);
+        }
+        /** @brief 透视相机按屏幕射线将顶点压到标识平面，避免倾斜观察时轮廓漂移。@param points 相机坐标 @param camera 当前相机 @param depth 绘制深度 @return 视线一致的外轮廓 */
+        private static Vector2[] CameraContour(List<Vector3> points, Camera camera, float depth)
+        {
+            var planar = new List<Vector2>(points.Count);
+            foreach (Vector3 point in points)
+                planar.Add((Vector2)point * (camera.orthographic ? 1 : depth / point.z));
+            return ProjectionContours.Hull(planar);
+        }
+        /** @brief 返回固定门世界外轮廓供编辑画布和运行共用。 */
+        public static IEnumerable<Vector3> FixedPortalOutline(Collider2D shape)
+        {
+            if (shape is CircleCollider2D circle) { foreach (Vector3 point in ProjectionContours.Circle(circle)) yield return point; yield break; }
+            foreach (MeshFilter filter in shape.GetComponentsInChildren<MeshFilter>())
+                if (filter.sharedMesh) { foreach (Vector3 point in new ProjectionMeshData(filter.sharedMesh).Vertices) yield return filter.transform.TransformPoint(point); yield break; }
+            Bounds bounds = shape.bounds;
+            yield return bounds.min; yield return new Vector3(bounds.max.x, bounds.min.y, bounds.center.z); yield return bounds.max; yield return new Vector3(bounds.min.x, bounds.max.y, bounds.center.z);
+        }
+        /** @brief 虚线环绕完整轮廓，明显折角额外补实线角；圆门保留连续圆弧。 */
+        private void DrawContour(Vector2[] hull, float depth, Camera camera, float width, bool movable, bool portal, bool bidirectional)
+        {
+            if (hull.Length < 3) return;
+            Vector2 min = hull[0], max = hull[0], center = Vector2.zero; float perimeter = 0;
+            for (int i = 0; i < hull.Length; i++) { min = Vector2.Min(min, hull[i]); max = Vector2.Max(max, hull[i]); center += hull[i]; perimeter += Vector2.Distance(hull[i], hull[(i + 1) % hull.Length]); }
+            center /= hull.Length;
+            _maskCenter = camera.transform.TransformPoint(new Vector3(center.x, center.y, depth));
+            float phase = 0, dash = Mathf.Max(width * 6, perimeter / 48);
+            for (int i = 0; i < hull.Length; i++)
+            {
+                Vector2 a = hull[i], b = hull[(i + 1) % hull.Length]; float length = Vector2.Distance(a, b), done = 0;
+                if (!movable) CameraStroke(a, b, depth, camera, width);
+                else
                 {
-                    Vector3 corner = new Vector3(x == 0 ? min.x : max.x, y == 0 ? min.y : max.y, min.z - width * 2);
-                    Stroke(camera.transform.TransformPoint(corner), camera.transform.TransformPoint(corner + Vector3.right * (x == 0 ? length : -length)), camera.transform.forward, width);
-                    Stroke(camera.transform.TransformPoint(corner), camera.transform.TransformPoint(corner + Vector3.up * (y == 0 ? length : -length)), camera.transform.forward, width);
+                    while (done < length - .000001f)
+                    {
+                        float cell = Mathf.Floor((phase + .000001f) / dash);
+                        float amount = Mathf.Min(length - done, Mathf.Max(.000001f, (cell + 1) * dash - phase));
+                        if ((int)cell % 2 == 0) CameraStroke(Vector2.Lerp(a, b, done / length), Vector2.Lerp(a, b, (done + amount) / length), depth, camera, width);
+                        done += amount; phase += amount;
+                    }
+                    Vector2 before = hull[(i + hull.Length - 1) % hull.Length] - a, after = b - a;
+                    if (Vector2.Angle(before, after) < 150)
+                    {
+                        float corner = Mathf.Min(before.magnitude, after.magnitude) * .18f;
+                        CameraStroke(a + before.normalized * corner, a, depth, camera, width);
+                        CameraStroke(a, a + after.normalized * corner, depth, camera, width);
+                    }
                 }
+            }
+            if (portal)
+            {
+                float length = (max.x - min.x) * .5f, spacing = (max.y - min.y) * .17f;
+                Arrow(center + Vector2.up * (bidirectional ? spacing : 0), length, depth, camera, width);
+                if (bidirectional) Arrow(center - Vector2.up * spacing, -length, depth, camera, width);
+            }
         }
-        /** @brief 绘制门轮廓、固定底座及单向或双向箭头。 @param min 左下点 @param max 右上点 @param camera 相机 @param width 线宽 @param movable 是否可移动 @param bidirectional 是否双向 */
-        private void PortalFrame(Vector3 min, Vector3 max, Camera camera, float width, bool movable, bool bidirectional)
+        /** @brief 通行箭头服从与轮廓相同的最终投影颜色遮罩。 */
+        private void Arrow(Vector2 center, float length, float depth, Camera camera, float width)
         {
-            float z = min.z - width * 3;
-            Vector3 a = new Vector3(min.x, min.y, z), b = new Vector3(max.x, min.y, z);
-            Vector3 c = new Vector3(max.x, max.y, z), d = new Vector3(min.x, max.y, z);
-            CameraStroke(a, b, camera, width); CameraStroke(b, c, camera, width);
-            CameraStroke(c, d, camera, width); CameraStroke(d, a, camera, width);
-            float baseOffset = Mathf.Max(width * 4, (max.y - min.y) * .06f);
-            if (!movable) CameraStroke(a + Vector3.down * baseOffset, b + Vector3.down * baseOffset, camera, width);
-            Vector3 center = (a + c) * .5f;
-            float length = Mathf.Max(width * 4, (max.x - min.x) * .55f);
-            float separation = Mathf.Max(width * 3, (max.y - min.y) * .18f);
-            Arrow(center + Vector3.up * (bidirectional ? separation : 0), length, camera, width);
-            if (bidirectional) Arrow(center - Vector3.up * separation, -length, camera, width);
+            Vector2 end = center + Vector2.right * length * .5f;
+            CameraStroke(center - Vector2.right * length * .5f, end, depth, camera, width);
+            CameraStroke(end, end - Vector2.right * length * .25f + Vector2.up * Mathf.Abs(length) * .2f, depth, camera, width);
+            CameraStroke(end, end - Vector2.right * length * .25f - Vector2.up * Mathf.Abs(length) * .2f, depth, camera, width);
         }
-        /** @brief 绘制通行方向箭头。 @param center 中心 @param length 带方向长度 @param camera 相机 @param width 线宽 */
-        private void Arrow(Vector3 center, float length, Camera camera, float width)
+        /** @brief 转为世界线段并按最终混色结果决定可见性。 */
+        private void CameraStroke(Vector2 a, Vector2 b, float depth, Camera camera, float width)
         {
-            Vector3 start = center - Vector3.right * length * .5f;
-            Vector3 end = center + Vector3.right * length * .5f;
-            CameraStroke(start, end, camera, width);
-            CameraStroke(end, end - Vector3.right * length * .25f + Vector3.up * Mathf.Abs(length) * .2f, camera, width);
-            CameraStroke(end, end - Vector3.right * length * .25f - Vector3.up * Mathf.Abs(length) * .2f, camera, width);
+            Vector3 worldA = camera.transform.TransformPoint(new Vector3(a.x, a.y, depth)), worldB = camera.transform.TransformPoint(new Vector3(b.x, b.y, depth));
+            if (_maskSurface)
+            {
+                Vector3 point = Vector3.Lerp((worldA + worldB) * .5f, _maskCenter, .025f); point.z = _maskSurface.transform.position.z;
+                if (!_maskSurface.Bounds.Contains(point)) return;
+                ProjectionRegion sample = _maskSurface.Sample(point);
+                if (!sample.Exists || (sample.Colored && _maskSurface.Configuration.Matches(sample.Color, _selectedColor)) || (sample.Portal && sample.Portal != _maskSource)) return;
+            }
+            Line(worldA, worldB, camera.transform.forward, width * 1.6f, Color.black);
+            Line(worldA - camera.transform.forward * .001f, worldB - camera.transform.forward * .001f, camera.transform.forward, width, _lineColor);
         }
-        /** @brief 将相机平面的线段提交到世界空间。 @param a 起点 @param b 终点 @param camera 相机 @param width 线宽 */
-        private void CameraStroke(Vector3 a, Vector3 b, Camera camera, float width)
-            => Stroke(camera.transform.TransformPoint(a), camera.transform.TransformPoint(b), camera.transform.forward, width);
-        /** @brief 黑白双线确保明暗背景均可读。 @param a 起点 @param b 终点 @param normal 平面法线 @param width 线宽 */
-        private void Stroke(Vector3 a, Vector3 b, Vector3 normal, float width)
-        {
-            Line(a, b, normal, width * 1.6f, Color.black);
-            Line(a - normal * .001f, b - normal * .001f, normal, width, Color.white);
-        }
-        /** @brief 添加线段四边形。 @param a 起点 @param b 终点 @param normal 平面法线 @param width 线宽 @param color 颜色 */
+        /** @brief 写入线段网格，避免每条线分配临时数组。 */
         private void Line(Vector3 a, Vector3 b, Vector3 normal, float width, Color color)
         {
-            Vector3 side = Vector3.Cross(b - a, normal).normalized * width * .5f;
-            int start = _vertices.Count;
-            _vertices.AddRange(new[] { a - side, b - side, b + side, a + side });
-            _triangles.AddRange(new[] { start, start + 1, start + 2, start, start + 2, start + 3 });
+            Vector3 side = Vector3.Cross(b - a, normal).normalized * width * .5f; int start = _vertices.Count;
+            _vertices.Add(a - side); _vertices.Add(b - side); _vertices.Add(b + side); _vertices.Add(a + side);
+            _triangles.Add(start); _triangles.Add(start + 1); _triangles.Add(start + 2); _triangles.Add(start); _triangles.Add(start + 2); _triangles.Add(start + 3);
             for (int i = 0; i < 4; i++) _colors.Add(color);
         }
-        /** @brief 释放实例网格。 */
-        public void Dispose()
-        {
-            Object.Destroy(_display); Object.Destroy(_world);
-        }
+        /** @brief 清空复用缓存。 */
+        private void Clear() { _vertices.Clear(); _triangles.Clear(); _colors.Clear(); }
+        /** @brief 上传目标网格。 */
+        private void Upload(Mesh mesh) { mesh.Clear(); mesh.SetVertices(_vertices); mesh.SetTriangles(_triangles, 0); mesh.SetColors(_colors); mesh.RecalculateBounds(); }
+        /** @brief 清理实例资源。 */
+        public void Dispose() { if (Application.isPlaying) { Object.Destroy(_display); Object.Destroy(_world); } else { Object.DestroyImmediate(_display); Object.DestroyImmediate(_world); } }
     }
 }

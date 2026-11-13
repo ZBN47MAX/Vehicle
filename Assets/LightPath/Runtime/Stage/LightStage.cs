@@ -238,18 +238,12 @@ namespace DelayNoMore.LightPath
             if (_room)
             {
                 _objectMarkers ??= new ProjectionObjectMarkers();
-                _objectMarkers.Draw(_room, _mapping, _viewCamera, _capture, _config, _repairMaterial, game);
+                _objectMarkers.Draw(_room, _mapping, _viewCamera, _capture, _config, _repairMaterial, game, View == StageView.Projection ? selected : null);
             }
             if (layout && repair != null)
                 _repairMesh.Draw(layout, repair, _config, _repairFrame, _repairMaterial, _viewCamera);
-            if (View == StageView.Projection && selected && _room)
-            {
-                if (_selectionOutline == null) _selectionOutline = new ProjectionSelectionOutline();
-                _selectionOutline.Draw(selected, _room.Surface, _mapping, _viewCamera, _capture, _config, _repairMaterial);
-            }
+
         }
-        /** @brief 双世界选中描边缓存。 */
-        private ProjectionSelectionOutline _selectionOutline;
         /** @brief 常驻的可移动对象标识。 */
         private ProjectionObjectMarkers _objectMarkers;
         /** @brief 从总览选取最近可见区域或物件，物件被实体遮挡时不穿透选择。@param pointer 指针 @param room 房间 @param view 目标视角 @return 是否命中入口 */
@@ -346,7 +340,6 @@ namespace DelayNoMore.LightPath
             _texture = null;
             _ownsTexture = false;
             _repairMesh?.Dispose(); _repairMesh = null;
-            _selectionOutline?.Dispose(); _selectionOutline = null;
             _objectMarkers?.Dispose(); _objectMarkers = null;
             _parts.Clear(); _room = null;
             Moving = false;
