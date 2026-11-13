@@ -639,9 +639,6 @@ namespace DelayNoMore.LightPath
             _jumpUntil = 0;
             _groundedAt = -10;
             _portalUntil = 0;
-            foreach (LightRoom room in _rooms)
-                foreach (ProjectionSource source in room.Surface.Sources)
-                    source.ResetPose();
             if (_levels != null && _levels.Length > 0)
             {
                 _config = _levels[_roomLevels[_roomIndex]].Config;
