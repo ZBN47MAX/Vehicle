@@ -24,6 +24,9 @@ namespace DelayNoMore.LightPath
         public bool TrySilhouette(Vector2[] points, out Vector2[] outline)
         {
             outline = null;
+            // 轮廓焊接和边相交检查会随模型复杂度急剧增长。
+            // 大模型继续使用BVH精确射线求解，避免低性能机器长时间无响应。
+            if (_vertices.Length > 4096 || _triangles.Length > 24576) return false;
             if (_welded == null)
             {
                 _welded = new int[_vertices.Length];
@@ -213,13 +216,13 @@ namespace DelayNoMore.LightPath
             Build(0, _triangles.Length / 3);
         }
         /** @brief 递归构建空间中点分割树。@param start 三角起点 @param count 数量 @return 节点索引 */
-        private int Build(int start, int count)
+        private int Build(int start, int count, int depth = 0)
         {
             Bounds bounds = new Bounds(_vertices[_triangles[start * 3]], Vector3.zero);
             for (int i = start * 3; i < (start + count) * 3; i++) bounds.Encapsulate(_vertices[_triangles[i]]);
             int index = _nodes.Count;
             _nodes.Add(new Node { Bounds = bounds, Start = start, Count = count });
-            if (count <= 8) return index;
+            if (count <= 8 || depth >= 32) return index;
             Vector3 size = bounds.size;
             int axis = size.x > size.y ? 0 : 1;
             if (size.z > size[axis]) axis = 2;
@@ -237,7 +240,7 @@ namespace DelayNoMore.LightPath
                 split++;
             }
             if (split == start || split == start + count) split = start + count / 2;
-            int left = Build(start, split - start), right = Build(split, start + count - split);
+            int left = Build(start, split - start, depth + 1), right = Build(split, start + count - split, depth + 1);
             _nodes[index] = new Node { Bounds = bounds, Left = left, Right = right };
             return index;
         }
