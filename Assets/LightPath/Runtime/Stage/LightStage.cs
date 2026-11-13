@@ -235,6 +235,11 @@ namespace DelayNoMore.LightPath
                             Graphics.DrawMesh(mesh, _mapping * part.Filter.transform.localToWorldMatrix, part.Materials[sub],
                                 _config.DisplayLayer, _viewCamera, sub, _properties, ShadowCastingMode.Off, false);
                 }
+            if (_room)
+            {
+                _objectMarkers ??= new ProjectionObjectMarkers();
+                _objectMarkers.Draw(_room, _mapping, _viewCamera, _capture, _config, _repairMaterial);
+            }
             if (layout && repair != null)
                 _repairMesh.Draw(layout, repair, _config, _repairFrame, _repairMaterial, _viewCamera);
             if (View == StageView.Projection && selected && _room)
@@ -245,6 +250,8 @@ namespace DelayNoMore.LightPath
         }
         /** @brief 双世界选中描边缓存。 */
         private ProjectionSelectionOutline _selectionOutline;
+        /** @brief 常驻的可移动对象标识。 */
+        private ProjectionObjectMarkers _objectMarkers;
         /** @brief 从总览选取最近可见区域或物件，物件被实体遮挡时不穿透选择。@param pointer 指针 @param room 房间 @param view 目标视角 @return 是否命中入口 */
         public bool TryChoose(Vector2 pointer, LightRoom room, out StageView view)
         {
@@ -305,6 +312,7 @@ namespace DelayNoMore.LightPath
             _ownsTexture = false;
             _repairMesh?.Dispose(); _repairMesh = null;
             _selectionOutline?.Dispose(); _selectionOutline = null;
+            _objectMarkers?.Dispose(); _objectMarkers = null;
             _parts.Clear(); _room = null;
             Moving = false;
         }
