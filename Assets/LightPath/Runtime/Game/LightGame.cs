@@ -176,7 +176,7 @@ namespace DelayNoMore.LightPath
                 _menu.BindConfig(_config, this);
                 _player.gravityScale = _config.GravityScale;
             }
-            _player.position = RespawnPosition();
+            SetPlayerPosition(RespawnPosition());
             _stage.ConfigureProjection(Room.Surface);
             Room.Surface.SetFocus(_player.position);
             Room.ResetRoom();
@@ -506,7 +506,7 @@ namespace DelayNoMore.LightPath
                 _menu.BindConfig(_config, this);
                 _player.gravityScale = _config.GravityScale;
             }
-            _player.position = RespawnPosition();
+            SetPlayerPosition(RespawnPosition());
             _stage.ConfigureProjection(Room.Surface);
             Room.Surface.SetFocus(_player.position);
             Room.ResetRoom();

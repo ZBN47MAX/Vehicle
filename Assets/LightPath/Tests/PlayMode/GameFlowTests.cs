@@ -80,6 +80,23 @@ namespace DelayNoMore.LightPath.Tests
                 Assert.That(_player.GetComponentInChildren<SpriteRenderer>().sprite, Is.Not.Null);
             }
         }
+        /** @brief 已浮空时跳到平移过的第三关房间，刚体与可见Transform必须在同一落点。 */
+        [UnityTest] public IEnumerator DebugJump_NoclipUsesTranslatedRoomPosition()
+        {
+            _game.SetNoclip(true);
+            var rooms = Read<LightRoom[]>(_game, "_rooms");
+            int first = Read<int[]>(_game, "_levelFirst")[2];
+            LightRoom room = rooms[first + 1];
+            room.transform.position += new Vector3(240, 48, 0);
+            _game.DebugJump(2, 1);
+            Assert.That(Vector2.Distance(_player.transform.position, _player.position), Is.LessThan(.001f), "跳房当帧可见位置与刚体一致");
+            yield return null;
+            Assert.That(room.Surface.Bounds.Contains(_player.transform.position), Is.True, "下一帧不退回上一房间");
+            Assert.That(room.Surface.LoadedChunks, Is.GreaterThan(0));
+            Assert.That(room.Surface.Regions.Count, Is.GreaterThan(0));
+            foreach (Renderer renderer in _player.GetComponentsInChildren<Renderer>())
+                Assert.That(renderer.enabled, Is.True);
+        }
         /** @brief 调试断光可双向强制，关闭面板仍保持，重开清除且不改变视角。 */
         [UnityTest] public IEnumerator DebugBlackout_OverridesPowerUntilRestoredOrRestarted()
         {
@@ -321,6 +338,16 @@ namespace DelayNoMore.LightPath.Tests
                     else if (source.name == "X_Plate" || source.name == "终局X桥") source.Adjust(Vector3.zero, 90, 0);
                     else if (source.name == "Y_Beam" || source.name == "终局Y桥") source.Adjust(Vector3.zero, 90, 1);
                     else if (source.name == "终局Z桥") source.Adjust(Vector3.zero, -90, 2);
+                    if (source.name == "X_Plate" || source.name == "Y_Beam" || source.name.StartsWith("终局"))
+                    {
+                        Vector3 origin = room.Surface.ProjectionOrigin;
+                        Vector3 center = source.transform.position;
+                        Vector3 projected = room.Surface.ProjectPoint(center);
+                        Vector3 goal = room.transform.position + new Vector3(0, .65f, 0);
+                        if (source.name.StartsWith("终局")) goal.x = projected.x;
+                        float fraction = (center.z - origin.z) / (room.Surface.transform.position.z - origin.z);
+                        source.SetWorldPose(center + new Vector3(goal.x - projected.x, goal.y - projected.y, 0) * fraction, source.transform.rotation);
+                    }
                 }
                 room.Surface.Invalidate(); room.Surface.Rebuild();
                 if (index == 1 || index == 2 || index == 4 || index == 6)

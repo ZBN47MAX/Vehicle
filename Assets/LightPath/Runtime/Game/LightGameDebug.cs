@@ -47,6 +47,12 @@ namespace DelayNoMore.LightPath
                 SetPaused(false);
             }
         }
+        /** @brief 瞬移同步物理位置与显示位置，关闭模拟时也立即生效。@param position 世界二维落点 */
+        private void SetPlayerPosition(Vector2 position)
+        {
+            _player.position = position;
+            _player.transform.position = new Vector3(position.x, position.y, _player.transform.position.z);
+        }
         /** @brief 正常游戏重开或退出时清理调试浮空。 */
         private void ResetNoclip()
         {
@@ -131,7 +137,7 @@ namespace DelayNoMore.LightPath
             _config = _levels[level].Config;
             _menu.BindConfig(_config, this);
             _player.gravityScale = _config.GravityScale;
-            _player.position = Room.Spawn;
+            SetPlayerPosition(Room.Spawn);
             _stage.ConfigureProjection(Room.Surface);
             Room.Surface.SetFocus(_player.position);
             if (!_visited[_roomIndex]) Room.ResetRoom();
@@ -155,7 +161,7 @@ namespace DelayNoMore.LightPath
             if (!Room.Powered || !Room.HasSpawn || !Room.Surface.Bounds.Contains(playerBounds.min) || !Room.Surface.Bounds.Contains(playerBounds.max) || Room.Overlaps(playerBounds, _color, false))
             {
                 SetNoclip(true);
-                if (!Room.Surface.Bounds.Contains(_player.position)) _player.position = Room.Surface.Bounds.center;
+                if (!Room.Surface.Bounds.Contains(_player.position)) SetPlayerPosition(Room.Surface.Bounds.center);
             }
             Room.Surface.SetFocus(_player.position);
             Room.Surface.Rebuild();

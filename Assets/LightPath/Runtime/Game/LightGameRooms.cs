@@ -228,7 +228,7 @@ namespace DelayNoMore.LightPath
                         if (Room.Powered && Room.Surface.Bounds.Contains(body.min) && Room.Surface.Bounds.Contains(body.max) && !Room.Overlaps(body, _color, false))
                         {
                             RecordTelemetry("传送成功", _telemetryPortal, "同房间坐标落点");
-                            _player.position = landing;
+                            SetPlayerPosition(landing);
                             _portalUntil = Time.time + _config.PortalCooldown;
                             Physics2D.SyncTransforms();
                         }
@@ -283,7 +283,7 @@ namespace DelayNoMore.LightPath
                 if (PortalAvailable(Room, destination) && !Room.Overlaps(body, _color, false))
                 {
                     RecordTelemetry("传送成功", _telemetryPortal, "同房间门=" + (destination ? destination.name : "坐标落点"));
-                    _player.position = landing;
+                    SetPlayerPosition(landing);
                     _portalUntil = Time.time + _config.PortalCooldown;
                 }
                 else
@@ -394,7 +394,7 @@ namespace DelayNoMore.LightPath
             _selected = 0;
             _editing = false;
             _repairFocus = false;
-            _player.position = landing;
+            SetPlayerPosition(landing);
             _player.linearVelocity = velocity;
             _roomTravelUntil = Time.unscaledTime + .3f;
             _portalUntil = Time.time + _config.PortalCooldown;
