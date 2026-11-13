@@ -273,7 +273,10 @@ namespace DelayNoMore.LightPath.Editor
                 if (effect)
                 {
                     UnityEditor.Editor.CreateCachedEditor(effect, null, ref _effectEditor);
-                    _effectEditor.OnInspectorGUI();
+                    if (effect is LevelExit || effect is RoomCheckpoint)
+                        DrawWithoutColor(_effectEditor);
+                    else
+                        _effectEditor.OnInspectorGUI();
                 }
                 if (target.GetComponent<RoomPortalLink>() && !target.GetComponent<ProjectionSource>() && !_inspectTemplate)
                     DrawPortalConnection(target);
@@ -338,6 +341,20 @@ namespace DelayNoMore.LightPath.Editor
             }
             EditorGUILayout.HelpBox("使用关卡色表；与全局滤镜同色时隐藏，并停用碰撞或交互。基础色始终可见（断光除外）。", MessageType.Info);
         }
+        /** @brief 颜色已由统一入口编辑，组件其他属性仍沿用序列化检查器。@param editor 缓存编辑器 */
+        private static void DrawWithoutColor(UnityEditor.Editor editor)
+        {
+            editor.serializedObject.Update();
+            SerializedProperty property = editor.serializedObject.GetIterator();
+            bool enterChildren = true;
+            while (property.NextVisible(enterChildren))
+            {
+                enterChildren = false;
+                if (property.name == "m_Script" || property.name == "_color" || property.name == "_colorIndex") continue;
+                EditorGUILayout.PropertyField(property, true);
+            }
+            editor.serializedObject.ApplyModifiedProperties();
+        }
         /** @brief 修改模板资产中的尺寸与组件。 @param prefab 模板 */
         private void DrawTemplateProperties(GameObject prefab)
         {
@@ -355,7 +372,10 @@ namespace DelayNoMore.LightPath.Editor
             if (component)
             {
                 UnityEditor.Editor.CreateCachedEditor(component, null, ref _objectEditor);
-                _objectEditor.OnInspectorGUI();
+                if (component is ColorPlatform)
+                    DrawWithoutColor(_objectEditor);
+                else
+                    _objectEditor.OnInspectorGUI();
             }
             if (GUILayout.Button("保存模板修改"))
             {
