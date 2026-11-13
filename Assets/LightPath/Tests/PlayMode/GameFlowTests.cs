@@ -659,6 +659,35 @@ namespace DelayNoMore.LightPath.Tests
             }
             finally { _game.DebugSetRecording(false); }
         }
+        /** @brief 正式Debug授权后才生成故障线索，异常对象与Unity堆栈可立即读取，关闭后删除。 */
+        [UnityTest] public IEnumerator Telemetry_DiagnosticsCaptureMissingObjectsAndErrors()
+        {
+            _game.DebugJump(2, 1);
+            _game.DebugSetRecording(true);
+            yield return null;
+            var recorder = PlaytestRecording.Recorder;
+            string journal = recorder.PendingPath.Replace(".pending.csv", ".diagnostic.pending.log");
+            var source = _game.Room.Surface.Sources.First();
+            bool active = source.gameObject.activeSelf;
+            try
+            {
+                Assert.That(System.IO.File.ReadAllText(journal), Does.Contain("状态快照").And.Contain("GPU="));
+                source.gameObject.SetActive(false);
+                typeof(LightGame).GetField("_nextDiagnostic", _flags).SetValue(_game, 0d);
+                Call(_game, "ObserveDiagnostics", recorder);
+                Assert.That(System.IO.File.ReadAllText(journal), Does.Contain("物件意外停用"));
+                LogAssert.Expect(LogType.Error, "diagnostic-test-error");
+                Debug.LogError("diagnostic-test-error");
+                Assert.That(System.IO.File.ReadAllText(journal), Does.Contain("diagnostic-test-error"));
+            }
+            finally
+            {
+                if (source) source.gameObject.SetActive(active);
+                _game.DebugSetRecording(false);
+            }
+            Assert.That(System.IO.File.Exists(journal), Is.False);
+            Assert.That(System.IO.File.Exists(recorder.PendingPath), Is.False);
+        }
         /** @brief 只在此用例启用后保留许可，让真实停止Play回调完成导出；产物明确标记自动化。 */
         [UnityTest] public IEnumerator Telemetry_StopPlayExportsCurrentSession()
         {

@@ -345,6 +345,7 @@ namespace DelayNoMore.LightPath
             text.AppendLine($"- 编号：{_stem}\n- 版本：{Cell(_version)}\n- 启动时间：{_launchUtc.ToLocalTime():O}\n- 开始采集：{Wall(_begin)}\n- 结束时间：{Wall(now)}\n- 退出状态：正常退出\n- 启动至退出：{Number(now - _launchClock)} 秒\n- 采集区间：{Number(now - _begin)} 秒\n- 实际游玩：{Number(_play)} 秒\n- 暂停：{Number(_pause)} 秒\n- 菜单/结算：{Number(_menu)} 秒\n- 转场：{Number(_transition)} 秒\n- 完成关卡数：{_completed.Count}\n- 本采集区间是否通关：{(_won ? "是" : "否")}\n");
             text.AppendLine("只记录本次启用后的数据；中途启用前的状态为基线，不补造历史。游玩包括投影调整、维修、断光等待；暂停与转场另计。实际操作时长仅表示存在有效输入，不等于思考时长。Debug干预保留在事件明细和指标中。重开不会重置本报告。\n");
             if (!string.IsNullOrEmpty(LastError)) text.AppendLine("**写盘曾失败，CSV可能不完整：** " + Cell(LastError) + "\n");
+            text.AppendLine("故障诊断若在本次Debug授权期间启用，见同编号 `.diagnostic.log`。异常结束时直接读取 `.diagnostic.pending.log` 和 `.pending.csv`；pending不等于已确认崩溃，日志仅保留成功写入的数据。\n");
             text.AppendLine("## 房间汇总\n\n| 房间 | 访问次数 | 总停留秒 | 游玩秒 | 暂停秒 | 操作秒 | 首次进入至首次通过秒 |\n|---|---:|---:|---:|---:|---:|---:|");
             foreach (var group in _visits.GroupBy(visit => visit.Room))
                 text.AppendLine($"| {Cell(group.Key)} | {group.Count()} | {Number(group.Sum(v => v.End - v.Start))} | {Number(group.Sum(v => v.Play))} | {Number(group.Sum(v => v.Pause))} | {Number(group.Sum(v => v.Active))} | {(_firstPass.TryGetValue(group.Key, out double passed) ? Number(passed - group.First().Start) : "未观察到通过")} |");

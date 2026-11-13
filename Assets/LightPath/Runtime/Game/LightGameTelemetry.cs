@@ -21,9 +21,16 @@ namespace DelayNoMore.LightPath
         {
             if (enabled == DebugRecording) return;
             PlaytestRecording.SetEnabled(enabled);
+            if (!DebugRecording)
+            {
+                _diagnosticObjects.Clear(); _diagnosticWarnings.Clear(); _diagnosticRecorder = null;
+                _telemetryBound = null;
+                return;
+            }
             if (DebugRecording)
             {
                 ObserveTelemetry();
+                if (_ready) ObserveDiagnostics(PlaytestRecording.Recorder);
                 RecordTelemetry("启用记录", "Debug面板", "仅记录当前启用区间；退出导出");
                 for (int i = 0; i < 10; i++) RecordTelemetry("能力基线", i < 6 ? ((ProjectionAbility)i).ToString() : "颜色" + (i - 6), "有效=" + DebugAbility(i));
                 if (_checkpoint) RecordTelemetry("存档基线", TelemetryObject(_checkpoint.transform), "开启前已激活，不计本次激活次数");
@@ -48,6 +55,15 @@ namespace DelayNoMore.LightPath
         {
             PlaytestRecorder recorder = PlaytestRecording.Recorder;
             if (recorder == null || !_ready) return;
+            if (_rooms == null || _roomIndex < 0 || _roomIndex >= _rooms.Length || !_rooms[_roomIndex] || !_rooms[_roomIndex].Surface)
+            {
+                if (Time.realtimeSinceStartupAsDouble >= _nextDiagnostic)
+                {
+                    _nextDiagnostic = Time.realtimeSinceStartupAsDouble + 2;
+                    PlaytestRecording.Diagnostic("异常线索", "当前房间或投影面丢失，房间索引=" + _roomIndex);
+                }
+                return;
+            }
             if (_telemetryBound != recorder)
             {
                 _telemetryRoomNames = new string[_rooms.Length];
@@ -61,7 +77,11 @@ namespace DelayNoMore.LightPath
                 _telemetryBound = recorder;
             }
             recorder.Observe(TelemetrySnapshot(), Time.realtimeSinceStartupAsDouble, frame ? Time.unscaledDeltaTime * 1000 : 0);
-            if (frame) recorder.EndFrame(Time.realtimeSinceStartupAsDouble, Time.frameCount);
+            if (frame)
+            {
+                ObserveDiagnostics(recorder);
+                recorder.EndFrame(Time.realtimeSinceStartupAsDouble, Time.frameCount);
+            }
         }
         /** @brief 记录离散结果，未启用时不保留任何历史。 @param kind 事件或指标类别 @param subject 对象或状态标识 @param detail 补充说明 @param amount 累计变化量 */
         private void RecordTelemetry(string kind, string subject = "", string detail = "", double amount = 0)

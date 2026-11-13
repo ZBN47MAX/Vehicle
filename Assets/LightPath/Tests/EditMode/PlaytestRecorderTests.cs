@@ -18,6 +18,40 @@ namespace DelayNoMore.LightPath.Tests
         private PlaytestSession Session() => new PlaytestSession(_folder, "test", _launch, 0);
         /** @brief 正常游玩快照。 */
         private static PlaytestRecorder.Snapshot State(string room, string view = "World", bool paused = false) => new PlaytestRecorder.Snapshot { Room = room, View = view, Color = "无选色", Playing = true, Paused = paused, Powered = true, Active = true };
+        /** @brief 异常结束保留已刷盘线索，关闭许可则删除，正常结束产生完成标记。 */
+        [Test] public void DiagnosticJournal_PreservesOnlyAuthorizedInterval()
+        {
+            Directory.CreateDirectory(_folder);
+            string pending = Path.Combine(_folder, "test.diagnostic.pending.log");
+            var journal = new PlaytestDiagnosticJournal(pending, "test GPU");
+            journal.Write("状态快照", "Level3Room1");
+            journal.Fault("错误", "stack");
+            Assert.That(File.ReadAllText(pending), Does.Contain("Level3Room1").And.Contain("stack"));
+            journal.Close(false, false);
+            Assert.That(File.Exists(pending), Is.True);
+            Assert.That(File.Exists(pending.Replace(".pending.log", ".log")), Is.False);
+            string cancelled = Path.Combine(_folder, "cancel.diagnostic.pending.log");
+            journal = new PlaytestDiagnosticJournal(cancelled, "test");
+            journal.Close(true, false);
+            Assert.That(File.Exists(cancelled), Is.False);
+            string normal = Path.Combine(_folder, "normal.diagnostic.pending.log");
+            journal = new PlaytestDiagnosticJournal(normal, "test");
+            journal.Close(false, true);
+            Assert.That(File.Exists(normal), Is.False);
+            Assert.That(File.ReadAllText(normal.Replace(".pending.log", ".log")), Does.Contain("正常退出"));
+        }
+        /** @brief 多线程错误日志不破坏文件，重复错误压缩保留计数。 */
+        [Test] public void DiagnosticJournal_SerializesConcurrentErrors()
+        {
+            Directory.CreateDirectory(_folder);
+            string pending = Path.Combine(_folder, "threads.diagnostic.pending.log");
+            var journal = new PlaytestDiagnosticJournal(pending, "test");
+            System.Threading.Tasks.Parallel.For(0, 201, index => journal.Fault("same", "stack"));
+            journal.Close(false, false);
+            string text = File.ReadAllText(pending);
+            Assert.That(text, Does.Contain("次数=200"));
+            Assert.That(text.Split(new[] { "Unity错误或异常" }, StringSplitOptions.None).Length, Is.EqualTo(2));
+        }
         /** @brief 未启用时连目录都不产生。 */
         [Test] public void NeverEnabled_ExitCreatesNothing()
         {
