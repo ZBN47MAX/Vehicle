@@ -384,7 +384,6 @@ namespace DelayNoMore.LightPath.Editor
             EditorGUILayout.PropertyField(definition.FindProperty("_portal"), new GUIContent("作为传送门"));
             EditorGUILayout.PropertyField(definition.FindProperty("_movable"), new GUIContent("游戏中允许操作"));
             var palette = definition.FindProperty("_paletteIndex");
-            EditorGUILayout.PropertyField(definition.FindProperty("_rotationAxes"), new GUIContent("允许旋转轴（XYZ，0禁用/1允许）"));
             palette.intValue = EditorGUILayout.Popup("预设颜色", palette.intValue + 1,
                 new[] { "自定义色", "颜色1", "颜色2", "颜色3", "颜色4" }) - 1;
             EditorGUILayout.PropertyField(definition.FindProperty("_color"), new GUIContent("自定义色"));

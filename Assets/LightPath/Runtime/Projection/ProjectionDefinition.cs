@@ -28,14 +28,15 @@ namespace DelayNoMore.LightPath
         public bool Portal => _portal;
         /** @brief 获取可编辑状态。 */
         public bool Movable => _movable;
-        /** @brief 每个物件允许的局部旋转轴，教学机关可单独限制。 */
-        [SerializeField] private Vector3Int _rotationAxes = Vector3Int.one;
-        /** @brief 判断物件是否允许指定局部轴旋转。@param axis X/Y/Z编号 @return 是否允许 */
-        public bool AllowsRotation(int axis) => axis >= 0 && axis < 3 && _rotationAxes[axis] != 0;
+        /** @brief 判断指定轴是否有效，操作权限由玩家能力决定。@param axis X/Y/Z编号 @return 是否允许 */
+        public bool AllowsRotation(int axis) => axis >= 0 && axis < 3;
         /** @brief 获取有效权重。 */
         public float Weight => Mathf.Max(.01f, _weight);
-        /** @brief 获取移动范围。 */
-        public Vector3 Travel => _travel;
+        /** @brief 获取移动范围；兼容旧教学配置中用于禁用移动轴的零值。 */
+        public Vector3 Travel => !_movable ? _travel : new Vector3(
+            _travel.x > 0 ? _travel.x : 3,
+            _travel.y > 0 ? _travel.y : 2,
+            _travel.z > 0 ? _travel.z : 2);
         /** @brief 获取消隐检查标记。 */
         public bool RequiresMatch => _requiresMatch;
         /** @brief 获取透射色。 @param config 全局配置 @return 连续 RGB 颜色 */

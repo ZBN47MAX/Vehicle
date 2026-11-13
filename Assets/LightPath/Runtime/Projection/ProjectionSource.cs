@@ -59,10 +59,7 @@ namespace DelayNoMore.LightPath
             Vector3 local = transform.parent ? transform.parent.InverseTransformPoint(position) : position;
             Vector3 offset = local - _initialPosition, range = _definition.Travel;
             transform.localPosition = _initialPosition + new Vector3(Mathf.Clamp(offset.x, -range.x, range.x), Mathf.Clamp(offset.y, -range.y, range.y), Mathf.Clamp(offset.z, -range.z, range.z));
-            Vector3 delta = (Quaternion.Inverse(transform.rotation) * rotation).eulerAngles;
-            for (int axis = 0; axis < 3; axis++)
-                delta[axis] = _definition.AllowsRotation(axis) ? Mathf.DeltaAngle(0, delta[axis]) : 0;
-            transform.rotation *= Quaternion.Euler(delta);
+            transform.rotation = rotation;
         }
         /** @brief 初始化配置。 @param definition 定义 @param partner 配对 */
         public void Configure(ProjectionDefinition definition, ProjectionSource partner = null)

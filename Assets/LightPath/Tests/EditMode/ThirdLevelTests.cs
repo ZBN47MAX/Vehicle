@@ -48,7 +48,10 @@ namespace DelayNoMore.LightPath.Tests
                 var source = room.Surface.Sources.Single();
                 Assert.That(source.Definition.AllowsRotation(axis), Is.True);
                 for (int other = 0; other < 3; other++)
-                    if (other != axis) Assert.That(source.Definition.AllowsRotation(other), Is.False);
+                    Assert.That(source.Definition.AllowsRotation(other), Is.True);
+                Assert.That(source.Definition.Travel.x, Is.GreaterThan(0));
+                Assert.That(source.Definition.Travel.y, Is.GreaterThan(0));
+                Assert.That(source.Definition.Travel.z, Is.GreaterThan(0));
                 source.Adjust(Vector3.zero, 90, axis);
                 var geometry = new ProjectionPreviewGeometry(room.Surface.Sources);
                 Vector3 origin = room.Surface.ProjectionOrigin;

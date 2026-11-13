@@ -249,7 +249,6 @@ namespace DelayNoMore.LightPath.Editor
             definition.Configure(color >= 0 || portal, portal, color, true, Color.white);
             var data = new SerializedObject(definition);
             data.FindProperty("_travel").vector3Value = travel;
-            data.FindProperty("_rotationAxes").vector3IntValue = axes;
             data.ApplyModifiedPropertiesWithoutUndo();
             SaveThirdAsset(definition, ThirdFolder + "/" + room.name + "-" + name + "-Projection.asset", created);
             var source = model.AddComponent<ProjectionSource>(); source.Configure(definition);
