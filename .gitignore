@@ -85,3 +85,6 @@ Desktop.ini
 # Keep Assets and their .meta files, Packages (including packages-lock.json),
 # and ProjectSettings (including ProjectVersion.txt) under version control.
 # Native plugins and authored binary assets must also remain versioned.
+
+# Opt-in local playtest sessions and crash-recovery journals
+/PlaytestReports/

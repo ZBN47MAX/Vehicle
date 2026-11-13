@@ -294,10 +294,12 @@ namespace DelayNoMore.LightPath
                     if (!_sourceBounds.ContainsKey(source))
                         _sourceBounds[source] = SourceBounds(source);
                 }
+            bool rebuilt = false;
             foreach (Chunk chunk in _chunks.Values)
             {
                 if (!chunk.Dirty)
                     continue;
+                rebuilt = true;
                 _candidates.Clear();
                 _samples.Clear();
                 foreach (ProjectionSource source in _sources)
@@ -322,6 +324,7 @@ namespace DelayNoMore.LightPath
             Refresh(_selected, _preview, _powered);
             Physics2D.SyncTransforms();
             LastBuildMilliseconds = timer.Elapsed.TotalMilliseconds;
+            if (rebuilt) PlaytestRecording.Build(this, LastBuildMilliseconds);
         }
         /** @brief 无重叠闭合网格直接裁剪真实单环投影轮廓，避免逐格光线与数千碰撞路径。@param chunk 脏块 @return 是否已精确构建 */
         private bool TryBuildContourChunk(Chunk chunk)

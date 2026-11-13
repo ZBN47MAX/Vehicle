@@ -133,6 +133,7 @@ namespace DelayNoMore.LightPath
         /** @brief 所有模拟操作完成后提交舞台绘制；菜单或暂停时仍保留画面，计时由ApplyState管理。 */
         private void LateUpdate()
         {
+            ObserveTelemetry(true);
             if (_ready && _playerAnimation)
                 _playerAnimation.UpdateMotion(_player.linearVelocity, Grounded(), Time.timeScale > 0);
             UpdateRepairPanel();

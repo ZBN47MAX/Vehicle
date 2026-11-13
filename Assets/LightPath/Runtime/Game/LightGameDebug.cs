@@ -33,6 +33,7 @@ namespace DelayNoMore.LightPath
                 _noclipShape.center -= (Vector3)_player.position;
                 _noclipWasSimulated = _player.simulated;
             }
+            RecordTelemetry("Debug浮空开关", "Noclip", enabled ? "开启" : "关闭");
             Noclip = enabled;
             _player.simulated = enabled ? false : _noclipWasSimulated;
             _player.linearVelocity = Vector2.zero;
@@ -73,6 +74,7 @@ namespace DelayNoMore.LightPath
         public void DebugSetBlackout(bool blackout)
         {
             if (!_ready || _repair == null) return;
+            RecordTelemetry("Debug强制断光", "断光", blackout ? "开启" : "关闭");
             _repair.SetDebugPower(!blackout);
             ApplyState();
         }
@@ -80,6 +82,7 @@ namespace DelayNoMore.LightPath
         public void DebugRestorePower()
         {
             if (_repair == null) return;
+            RecordTelemetry("Debug恢复供光规则");
             _repair.SetDebugPower(null);
             if (_ready) ApplyState();
         }
@@ -94,6 +97,7 @@ namespace DelayNoMore.LightPath
         /** @brief 设置调试能力覆盖。 @param index 六轴后接四色 @param value 是否启用 */
         public void DebugSetAbility(int index, bool value)
         {
+            RecordTelemetry("Debug能力覆盖", index < 6 ? ((ProjectionAbility)index).ToString() : "颜色" + (index - 6), value ? "开启" : "关闭");
             if (index >= 0 && index < 6) _debugAxes[index] = value;
             else if (index >= 6 && index < 10) _debugColors[index - 6] = value;
             if (_color >= 0 && !IsUnlocked(_color)) { _color = -1; _candidate = -1; _preview = false; }
@@ -101,8 +105,9 @@ namespace DelayNoMore.LightPath
         /** @brief 查询调试面板显示的有效能力。 @param index 六轴后接四色 @return 是否有效 */
         public bool DebugAbility(int index) => index < 6 ? HasProjectionAbility((ProjectionAbility)index) : IsUnlocked(index - 6);
         /** @brief 清除临时覆盖，恢复本局真实收集进度。 */
-        public void DebugRestoreAbilities()
+        public void DebugRestoreAbilities(bool record = true)
         {
+            if (record) RecordTelemetry("Debug恢复能力进度");
             System.Array.Clear(_debugAxes, 0, _debugAxes.Length);
             System.Array.Clear(_debugColors, 0, _debugColors.Length);
             if (_color >= 0 && !IsUnlocked(_color)) { _color = -1; _candidate = -1; }
@@ -117,6 +122,8 @@ namespace DelayNoMore.LightPath
         {
             if (!_ready || !_started || _transitioning || level < 0 || level >= _levels.Length || room < 0 || room >= DebugRoomCount(level))
                 return;
+            RecordTelemetry("Debug跳房间", $"Level{level + 1}Room{room}");
+            BreakTelemetryVisit("Debug跳房间");
             if (_roomLevels[_roomIndex] != level) ClearCheckpoint();
             Room.gameObject.SetActive(false);
             _roomIndex = _levelFirst[level] + room;

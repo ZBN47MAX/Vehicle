@@ -109,7 +109,7 @@ namespace DelayNoMore.LightPath
                 ProjectionLevel.EdgeBehavior behavior = level.Edge(local, direction);
                 if (behavior == ProjectionLevel.EdgeBehavior.Hazard)
                 {
-                    Respawn();
+                    Respawn(true, "危险边界死亡");
                     return true;
                 }
                 if (behavior == ProjectionLevel.EdgeBehavior.Move && Time.unscaledTime >= _roomTravelUntil)
@@ -207,6 +207,8 @@ namespace DelayNoMore.LightPath
         /** @brief 处理固定二维门和三维投影门的统一连接。@param portal 当前门 @return 是否处理 */
         private bool TryPortalObjectTravel(GameObject portal)
         {
+            _telemetryPortal = TelemetryObject(portal.transform);
+            RecordTelemetry("传送尝试", _telemetryPortal);
             int target = -1;
             GameObject destination = null;
             RoomPortalLink link = portal.GetComponent<RoomPortalLink>();
@@ -215,7 +217,7 @@ namespace DelayNoMore.LightPath
                 target = TargetRoom(link.TargetRoom);
                 if (link.UseArrivalPosition)
                 {
-                    if (target < 0) { Notify(GameText.Get("LightGameRooms.TryPortalTravel.003")); return true; }
+                    if (target < 0) { RejectPortal("LightGameRooms.TryPortalTravel.003"); return true; }
                     if (target != _roomIndex)
                         StartCoroutine(ChangeRoomTo(target, Vector2.zero, null, link.ArrivalPosition));
                     else
@@ -226,6 +228,7 @@ namespace DelayNoMore.LightPath
                         Room.Surface.SetFocus(landing);
                         if (Room.Powered && Room.Surface.Bounds.Contains(body.min) && Room.Surface.Bounds.Contains(body.max) && !Room.Overlaps(body, _color, false))
                         {
+                            RecordTelemetry("传送成功", _telemetryPortal, "同房间坐标落点");
                             _player.position = landing;
                             _portalUntil = Time.time + _config.PortalCooldown;
                             Physics2D.SyncTransforms();
@@ -233,7 +236,7 @@ namespace DelayNoMore.LightPath
                         else
                         {
                             Room.Surface.SetFocus(_player.position);
-                            Notify(GameText.Get("LightGameRooms.TryPortalTravel.004"));
+                            RejectPortal("LightGameRooms.TryPortalTravel.004");
                         }
                     }
                     return true;
@@ -250,7 +253,7 @@ namespace DelayNoMore.LightPath
                         {
                             if (destination)
                             {
-                                Notify(GameText.Get("LightGameRooms.TryPortalTravel.002"));
+                                RejectPortal("LightGameRooms.TryPortalTravel.002");
                                 return true;
                             }
                             target = i;
@@ -261,7 +264,7 @@ namespace DelayNoMore.LightPath
             }
             if (!destination || destination == portal)
             {
-                Notify(GameText.Get("LightGameRooms.TryPortalTravel.003"));
+                RejectPortal("LightGameRooms.TryPortalTravel.003");
                 return true;
             }
             if (!destination.GetComponent<ProjectionSource>())
@@ -269,7 +272,7 @@ namespace DelayNoMore.LightPath
                 var platform = destination.GetComponent<ColorPlatform>();
                 if (!destination.activeSelf || (platform && platform.ColorIndex >= 0 && platform.ColorIndex == _color))
                 {
-                    Notify(GameText.Get("LightGameRooms.TryPortalTravel.004"));
+                    RejectPortal("LightGameRooms.TryPortalTravel.004");
                     return true;
                 }
             }
@@ -280,15 +283,22 @@ namespace DelayNoMore.LightPath
                 body.center += (Vector3)(landing - _player.position);
                 if (PortalAvailable(Room, destination) && !Room.Overlaps(body, _color, false))
                 {
+                    RecordTelemetry("传送成功", _telemetryPortal, "同房间门=" + (destination ? destination.name : "坐标落点"));
                     _player.position = landing;
                     _portalUntil = Time.time + _config.PortalCooldown;
                 }
                 else
-                    Notify(GameText.Get("LightGameRooms.TryPortalTravel.004"));
+                    RejectPortal("LightGameRooms.TryPortalTravel.004");
             }
             else
                 StartCoroutine(ChangeRoomTo(target, Vector2.zero, destination.GetComponent<ProjectionSource>(), destination.GetComponent<ProjectionSource>() ? (Vector2?)null : (Vector2)destination.transform.position - (Vector2)_rooms[target].transform.position));
             return true;
+        }
+        /** @brief 明确拒绝原因同时进入事件记录，不把所有提示猜测为失败。 */
+        private void RejectPortal(string key)
+        {
+            RecordTelemetry("传送失败", _telemetryPortal, GameText.Get(key));
+            Notify(GameText.Get(key));
         }
         /** @brief 保持入口的相对位置，只在穿越方向留出角色空间。@param from 原房间 @param to 目标房间 @param position 角色位置 @param body 角色碰撞范围 @param direction 穿越方向 @return 目标角色位置 */
         public static Vector2 BoundaryLanding(Rect from, Rect to, Vector2 position, Bounds body, Vector2 direction)
@@ -354,6 +364,7 @@ namespace DelayNoMore.LightPath
             {
                 next.gameObject.SetActive(false);
                 next.transform.position = originalPosition;
+                RecordTelemetry("房间切换失败", direction == Vector2.zero ? _telemetryPortal : "房间边界", "目标=" + TelemetryRoom(target) + "；供光、落点碰撞或门状态不满足");
                 Notify(GameText.Get("LightGameRooms.ChangeRoom.005"));
                 yield break;
             }
@@ -376,6 +387,8 @@ namespace DelayNoMore.LightPath
                 }
             }
             _camera.transform.position = cameraEnd;
+            RecordTelemetry(direction == Vector2.zero ? "传送成功" : "边界通行", direction == Vector2.zero ? _telemetryPortal : direction.ToString(), "目标=" + TelemetryRoom(target));
+            BreakTelemetryVisit(direction == Vector2.zero ? "传送门" : "相连边界", true);
             old.gameObject.SetActive(false);
             _roomIndex = target;
             _checkpointContacts.Clear();

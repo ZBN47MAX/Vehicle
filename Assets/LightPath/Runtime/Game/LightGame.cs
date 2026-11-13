@@ -222,7 +222,7 @@ namespace DelayNoMore.LightPath
             _playSeconds += Time.unscaledDeltaTime;
             Room.Surface.SetFocus(_player.position);
             if (Action("Retry").WasPressedThisFrame())
-                Respawn();
+                Respawn(true, "手动读档");
             if (Action("Mode").WasPressedThisFrame())
                 ToggleMode();
             if (Noclip && !_editing)
@@ -240,7 +240,7 @@ namespace DelayNoMore.LightPath
                     Notify(_stage ? GameText.Get("LightGame.Update.004", Label("Mode")) : GameText.Get("LightGame.Update.005", Label("Mode")));
                 }
                 if (Room.Powered && _player.position.y < Room.transform.position.y + _config.DeathHeight)
-                    Respawn();
+                    Respawn(true, "跌落死亡");
                 if (Room.Powered && !_editing)
                 {
                     if (TryBoundaryTravel())
@@ -296,7 +296,11 @@ namespace DelayNoMore.LightPath
             else if (_preview)
             {
                 if (_candidate >= 0 && CanSwitch())
+                {
+                    RecordTelemetry("选用颜色", "颜色" + _candidate, "轮盘松开提交");
                     _color = _candidate;
+                }
+                else if (_candidate >= 0) RecordTelemetry("换色被阻止", "颜色" + _candidate, "角色处于禁止换色区域");
                 _preview = false;
             }
         }
@@ -422,13 +426,16 @@ namespace DelayNoMore.LightPath
                 return;
             float scroll = Action("Scroll").ReadValue<Vector2>().y;
             if (scroll != 0 && !(UnityEngine.EventSystems.EventSystem.current && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()))
+            {
                 _selected = ProjectionSelection.Next(sources, _selected, scroll > 0 ? -1 : 1);
+                if (_selected >= 0 && _selected < sources.Count && sources[_selected]) RecordTelemetry("对象选择", TelemetryObject(sources[_selected].transform), "滚轮");
+            }
             if (Action("Drag").WasPressedThisFrame() && !(UnityEngine.EventSystems.EventSystem.current && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()))
             {
                 if (_stage)
                 {
                     int picked = _stage.PickProjectionObject(Action("Pointer").ReadValue<Vector2>(), Room, _color);
-                    if (picked >= 0) _selected = picked;
+                    if (picked >= 0) { _selected = picked; RecordTelemetry("对象选择", TelemetryObject(sources[picked].transform), "鼠标"); }
                 }
                 else
                 {
@@ -477,6 +484,7 @@ namespace DelayNoMore.LightPath
                 source.SetWorldPose(previousPosition, previousRotation);
                 Notify(GameText.Get("Projection.ClearanceBlocked"));
             }
+            TelemetryObjectMotion(source, movement, rotation, previousPosition, previousRotation);
             Room.Surface.Invalidate(source);
             _keyboardProjectionDirty = true;
             if (Time.unscaledTime >= _projectionAt)
@@ -517,11 +525,14 @@ namespace DelayNoMore.LightPath
         /** @brief UI 选择候选色，松开统一提交。 @param index 色号 */
         public void SelectColor(int index)
         {
+            if (_started && !_paused && _preview && IsUnlocked(index) && !CanSwitch())
+                RecordTelemetry("换色被阻止", "颜色" + index, "角色处于禁止换色区域");
             if (_started && !_paused && _preview && IsUnlocked(index) && CanSwitch())
             {
                 _candidate = index;
                 if (_editing)
                 {
+                    RecordTelemetry("选用颜色", "颜色" + index, "投影调整轮盘提交");
                     _color = index;
                     _preview = false;
                 }
@@ -538,6 +549,7 @@ namespace DelayNoMore.LightPath
                     : Vector2.Distance(_player.position, key.transform.position) < _config.CollectRadius;
                 if (!_unlocked[key.Color] && key.gameObject.activeInHierarchy && touchingKey)
                 {
+                    RecordTelemetry("能力解锁", "颜色" + key.Color, TelemetryObject(key.transform));
                     _unlocked[key.Color] = true;
                     key.gameObject.SetActive(false);
                     ProjectionSource keySource = key.GetComponent<ProjectionSource>();
@@ -556,6 +568,8 @@ namespace DelayNoMore.LightPath
                 Transform shard = Room.Shards[i];
                 if (!_collected.Contains(id) && Vector2.Distance(_player.position, shard.position) < _config.CollectRadius)
                 {
+                    RecordTelemetry("收集碎片", id, "解锁颜色" + Mathf.Min(_roomIndex, 3));
+                    if (!_unlocked[Mathf.Min(_roomIndex, 3)]) RecordTelemetry("能力解锁", "颜色" + Mathf.Min(_roomIndex, 3), id);
                     _collected.Add(id);
                     _unlocked[Mathf.Min(_roomIndex, 3)] = true;
                     shard.gameObject.SetActive(false);
@@ -582,6 +596,7 @@ namespace DelayNoMore.LightPath
                 Room.Surface.SetFocus(target);
                 if (!Room.Overlaps(destination, _color, false))
                 {
+                    RecordTelemetry("传送成功", TelemetryObject(portal.transform), "同房间配对门=" + TelemetryObject(portal.Partner.transform));
                     _player.position = target;
                     _portalUntil = Time.time + _config.PortalCooldown;
                     Notify(GameText.Get("LightGame.CollectAndTravel.031"));
@@ -589,6 +604,7 @@ namespace DelayNoMore.LightPath
                 else
                 {
                     Room.Surface.SetFocus(_player.position);
+                    RecordTelemetry("传送失败", TelemetryObject(portal.transform), "目标位置被阻挡");
                     Notify(GameText.Get("LightGame.CollectAndTravel.032"));
                 }
                 return;
@@ -615,9 +631,12 @@ namespace DelayNoMore.LightPath
                 Notify(GameText.Get("LightGame.CollectAndTravel.034"));
                 return;
             }
+            RecordTelemetry("关卡完成", "Level" + (_roomLevels[_roomIndex] + 1), "使用关卡出口");
+            BreakTelemetryVisit("关卡出口", true);
             int nextLevel = _roomLevels[_roomIndex] + 1;
             if (nextLevel == _levels.Length)
             {
+                RecordTelemetry("游戏通关");
                 _started = false;
                 _preview = false;
                 _menu.ShowEnd(_playSeconds, _deaths, UnlockedCount());
@@ -629,15 +648,19 @@ namespace DelayNoMore.LightPath
                 Room.gameObject.SetActive(false);
                 _roomIndex = _levelFirst[nextLevel];
                 Room.gameObject.SetActive(true);
-                Respawn(false);
+                Respawn(false, "下一关");
                 Notify(GameText.Get("LightGame.CollectAndTravel.035"));
             }
         }
-        /** @brief 从当前存档点恢复并保留已获取内容。 @param countDeath 是否计入死亡 */
-        public void Respawn(bool countDeath = true)
+        /** @brief 从当前存档点恢复并保留已获取内容。 @param countDeath 是否计入死亡 @param reason 可识别的恢复原因，供本次记录使用 */
+        public void Respawn(bool countDeath = true, string reason = "重生")
         {
             if (!_ready)
                 return;
+            int previousRoom = _roomIndex;
+            RecordTelemetry(reason == "手动读档" ? "手动读档" : reason.Contains("死亡") ? "死亡" : countDeath ? "重生" : "出生定位", TelemetryObject(_checkpoint ? _checkpoint.transform : null), reason);
+            if (countDeath && HasValidCheckpoint()) RecordTelemetry("从存档恢复", TelemetryObject(_checkpoint.transform), reason);
+            BreakTelemetryVisit(reason);
             if (countDeath)
                 _deaths++;
             RestoreRespawnRoom();
@@ -674,10 +697,18 @@ namespace DelayNoMore.LightPath
                 Room.Shards[i].gameObject.SetActive(!_collected.Contains(_roomIndex + "/" + i));
             Physics2D.SyncTransforms();
             ApplyState();
+            if (PlaytestRecording.Enabled && previousRoom == _roomIndex)
+            {
+                ObserveTelemetry();
+                PlaytestRecording.Recorder.SplitVisit(Time.realtimeSinceStartupAsDouble, reason);
+            }
+            ObserveTelemetry();
         }
         /** @brief 开始全新游玩。 */
         public void Restart()
         {
+            RecordTelemetry("重新开始");
+            BreakTelemetryVisit("重新开始");
             ResetNoclip();
             _unlockNotices.Clear();
             _unlockUntil = 0;
@@ -696,7 +727,7 @@ namespace DelayNoMore.LightPath
             _color = -1;
             _candidate = -1;
             _projectionAbilities.Reset();
-            DebugRestoreAbilities();
+            DebugRestoreAbilities(false);
             foreach (LightRoom room in _rooms)
                 foreach (ProjectionAbilityKey key in room.GetComponentsInChildren<ProjectionAbilityKey>(true))
                     key.SetCollected(false);
@@ -711,7 +742,7 @@ namespace DelayNoMore.LightPath
             _paused = false;
             _playSeconds = 0;
             _deaths = 0;
-            Respawn(false);
+            Respawn(false, "重新开始");
             // 初始化断光只冻结世界，不强制将玩家带入维修或3D总览。
             if (_stage && _stage.Ready) SetStageView(StageView.World, true);
             else { _editing = false; _repairFocus = false; ApplyState(); }
@@ -721,7 +752,7 @@ namespace DelayNoMore.LightPath
         public void RetryCheckpoint()
         {
             _paused = false;
-            Respawn();
+            Respawn(true, "手动读档");
             _menu.ShowGame();
         }
         /** @brief 设置用户暂停。 @param paused 是否暂停 */
@@ -729,16 +760,20 @@ namespace DelayNoMore.LightPath
         {
             if (!_started)
                 return;
+            ObserveTelemetry();
             _pointer.Cancel();
             _paused = paused;
             _preview = false;
             _jumpUntil = 0;
             _menu.ShowPause(paused);
             ApplyState();
+            ObserveTelemetry();
         }
         /** @brief 返回主菜单。 */
         public void MainMenu()
         {
+            RecordTelemetry("返回主菜单");
+            BreakTelemetryVisit("返回主菜单");
             ResetNoclip();
             _pointer.Cancel();
             _started = false;
@@ -796,6 +831,7 @@ namespace DelayNoMore.LightPath
         /** @brief 禁用会话时隐藏兼容维修 UI。 */
         private void OnDisable()
         {
+            DetachTelemetry();
             ResetNoclip();
             _repairPanel.SetVisible(false);
         }
@@ -813,6 +849,8 @@ namespace DelayNoMore.LightPath
         /** @brief 失去窗口焦点时释放对象抓取，防止返回后继续拖动。 @param focused 是否有焦点 */
         private void OnApplicationFocus(bool focused)
         {
+            RecordTelemetry(focused ? "窗口获得焦点" : "窗口失去焦点");
+            if (!focused) PlaytestRecording.Recorder?.Flush(Time.realtimeSinceStartupAsDouble);
             if (!focused)
                 _pointer.Cancel();
         }

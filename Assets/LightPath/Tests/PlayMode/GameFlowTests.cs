@@ -583,6 +583,77 @@ namespace DelayNoMore.LightPath.Tests
             }
             finally { InputSystem.RemoveDevice(keyboard); InputSystem.settings = originalSettings; originalSettings.hideFlags = originalFlags; UnityEngine.Object.Destroy(settings); }
         }
+        /** @brief 正式Debug开关不因重开或主菜单而导出，关闭丢弃，再开启不沿用旧区间。 */
+        [UnityTest] public IEnumerator Telemetry_DebugToggleIsSessionOnly()
+        {
+            Assert.That(_game.DebugRecording, Is.False);
+            var panel = UnityEngine.Object.FindAnyObjectByType<LightDebugPanel>();
+            panel.SetVisible(true);
+            var toggle = Read<UnityEngine.UI.Toggle>(panel, "_recordingToggle");
+            Assert.That(toggle.isOn, Is.False);
+            try
+            {
+                toggle.isOn = true;
+                Assert.That(_game.DebugRecording, Is.True);
+                var recorder = PlaytestRecording.Recorder;
+                string pending = recorder.PendingPath;
+                _game.DebugJump(1, 1); yield return null;
+                _game.Restart(); yield return null;
+                _game.MainMenu(); yield return null;
+                Assert.That(PlaytestRecording.Recorder, Is.SameAs(recorder));
+                Assert.That(System.IO.File.Exists(System.IO.Path.ChangeExtension(pending.Replace(".pending.csv", ".csv"), ".md")), Is.False);
+                toggle.isOn = false;
+                Assert.That(_game.DebugRecording, Is.False);
+                Assert.That(System.IO.File.Exists(pending), Is.False);
+                toggle.isOn = true;
+                Assert.That(PlaytestRecording.Recorder.Id, Is.Not.EqualTo(recorder.Id));
+            }
+            finally { _game.DebugSetRecording(false); }
+        }
+        /** @brief 只在此用例启用后保留许可，让真实停止Play回调完成导出；产物明确标记自动化。 */
+        [UnityTest] public IEnumerator Telemetry_StopPlayExportsCurrentSession()
+        {
+            Assert.That(_game.DebugRecording, Is.False);
+            var panel = UnityEngine.Object.FindAnyObjectByType<LightDebugPanel>();
+            panel.SetVisible(true);
+            Read<UnityEngine.UI.Toggle>(panel, "_recordingToggle").isOn = true;
+            PlaytestRecording.Recorder.Record(Time.realtimeSinceStartupAsDouble, "自动化验证会话", "GameFlowTests", "用于核查退出导出，不是真实用户试玩");
+            _game.SetPaused(false); _game.DebugAllAbilities(true);
+            yield return new WaitForSecondsRealtime(.1f);
+            _game.DebugJump(1, 1); yield return null;
+            Call(_game, "SetStageView", StageView.Projection, true);
+            InputSettings original = InputSystem.settings; HideFlags flags = original.hideFlags;
+            InputSettings settings = UnityEngine.Object.Instantiate(original);
+            original.hideFlags = HideFlags.DontSave; settings.hideFlags = HideFlags.DontSave;
+            settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+#if UNITY_EDITOR
+            settings.editorInputBehaviorInPlayMode = InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+#endif
+            InputSystem.settings = settings; Keyboard keyboard = InputSystem.AddDevice<Keyboard>();
+            try
+            {
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState(Key.D));
+                yield return new WaitForSecondsRealtime(.1f);
+                InputSystem.QueueStateEvent(keyboard, new KeyboardState());
+                yield return null; yield return null;
+                PlaytestRecording.Recorder.Flush(Time.realtimeSinceStartupAsDouble);
+                using (var stream = new System.IO.FileStream(PlaytestRecording.Recorder.PendingPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+                using (var reader = new System.IO.StreamReader(stream))
+                    Assert.That(reader.ReadToEnd(), Does.Contain("对象操作结束"));
+            }
+            finally { InputSystem.RemoveDevice(keyboard); InputSystem.settings = original; original.hideFlags = flags; UnityEngine.Object.Destroy(settings); }
+            Call(_game, "SetStageView", StageView.World, true);
+            _game.DebugSetBlackout(true); yield return new WaitForSecondsRealtime(.1f);
+            _game.DebugSetBlackout(false); yield return null;
+            _game.Respawn(true, "手动读档"); yield return null;
+            _game.SetPaused(true); yield return new WaitForSecondsRealtime(.1f);
+            string pending = PlaytestRecording.Recorder.PendingPath;
+            Assert.That(System.IO.File.Exists(pending), Is.True);
+            Assert.That(System.IO.File.Exists(pending.Replace(".pending.csv", ".md")), Is.False);
+            System.IO.File.WriteAllText(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../../Docs/Reports/TelemetryPlayPending.txt")), pending);
+            ScreenCapture.CaptureScreenshot(System.IO.Path.GetFullPath(System.IO.Path.Combine(Application.dataPath, "../../Docs/Reports/telemetry-toggle.png")));
+            yield return new WaitForSecondsRealtime(.5f);
+        }
         /** @brief 初始解法中拾取并转动已有折镜，循环恢复后仍保持维修视角。 */
         [UnityTest] public IEnumerator RepairPicking_RestoresPowerWithoutForcedViewChange()
         {

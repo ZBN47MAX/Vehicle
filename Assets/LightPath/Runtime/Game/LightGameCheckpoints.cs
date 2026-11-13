@@ -22,6 +22,7 @@ namespace DelayNoMore.LightPath
                     if (_checkpointContacts.Add(checkpoint) && _checkpoint != checkpoint)
                     {
                         if (_checkpoint) _checkpoint.SetActivated(false);
+                        RecordTelemetry("激活存档点", TelemetryObject(checkpoint.transform));
                         _checkpoint = checkpoint;
                         _checkpointRoom = _roomIndex;
                         checkpoint.SetActivated(true);

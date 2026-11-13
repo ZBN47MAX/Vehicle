@@ -56,6 +56,7 @@ namespace DelayNoMore.LightPath
             bool wasPowered = _repair.Powered;
             if (Action("Drag").WasPressedThisFrame())
             {
+                if (index >= 0) RecordTelemetry("维修节点操作", _repairLayout.Devices[index].Id, _repairLayout.Devices[index].Type.ToString());
                 _repairDrag = index >= 0 && _repairLayout.Devices[index].Type == RepairLayout.Kind.Lens ? index : -1;
                 if (_repairDrag < 0) _repair.Rotate(index);
                 else _lensDrag.Begin(point, valid);
@@ -67,7 +68,9 @@ namespace DelayNoMore.LightPath
             {
                 Vector2 center = _repairLayout.Devices[_repairDrag].Position;
                 float angle = _lensDrag.Step(center, point, valid, _repair.Angle(_repairDrag), _repairLayout.NodeRadius * .25f, _repairLayout.LensDragSensitivity);
+                float previousAngle = _repair.Angle(_repairDrag);
                 _repair.SetLensAngle(_repairDrag, angle);
+                TelemetryOperation(_repairLayout.Devices[_repairDrag].Id, "透镜调角", Mathf.Abs(Mathf.DeltaAngle(previousAngle, _repair.Angle(_repairDrag))));
             }
             if (!wasPowered && _repair.Powered)
                 Notify(GameText.Get("LightGameRepair.EditRepair.002"));

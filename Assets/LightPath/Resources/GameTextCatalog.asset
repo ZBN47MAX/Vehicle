@@ -2484,3 +2484,12 @@ MonoBehaviour:
     NormalPlay: 0
     Component: Toggle
     Value: "\u65ad\u5149"
+  - Key: Debug.Tools.RecordSession
+    Screen: Debug
+    NormalPlay: 0
+    Component: Toggle
+    Title: "本次会话记录"
+    Purpose: "仅当前启动有效，关闭放弃采集，退出导出"
+    Location: DebugTools
+    Parameters:
+    Value: "记录本次（退出时导出）"
