@@ -20,6 +20,10 @@ namespace DelayNoMore.LightPath
         [SerializeField, Tooltip("混色权重，大于零"), Min(.01f)] private float _weight = 1;
         /** @brief 相对初始位置的移动范围。 */
         [SerializeField, Tooltip("相对初始位置的 XYZ 最大移动量，米")] private Vector3 _travel = new Vector3(3, 2, 2);
+        /** @brief 本定义所有对象的标识线宽，运行与编辑器共用。 */
+        [SerializeField, Min(.001f)] private float _markerWidth = .018f;
+        /** @brief 获取对象标识线宽。 */
+        public float MarkerWidth => Mathf.Max(.001f, _markerWidth);
         /** @brief 是否必须匹配一种预设色。 */
         [SerializeField, Tooltip("策划工具对无法匹配预设色的结果给出提示")] private bool _requiresMatch;
         /** @brief 获取透光状态。 */

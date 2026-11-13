@@ -40,8 +40,9 @@ namespace DelayNoMore.LightPath
                 }
                 if (!found || min.z <= 0) continue;
                 bool portal = source.Definition.Portal && !source.GetComponent<ColorAbilityKey>() && !source.GetComponent<ProjectionAbilityKey>() && !source.GetComponent<LevelExit>();
-                if (source.Definition.Movable) Frame(min, max, camera, width, true);
-                if (portal) PortalFrame(min, max, camera, width, source.Definition.Movable, game && game.PortalBidirectional(source.gameObject));
+                float objectWidth = source.Definition.MarkerWidth;
+                if (source.Definition.Movable) Frame(min, max, camera, objectWidth, true);
+                if (portal) PortalFrame(min, max, camera, objectWidth, source.Definition.Movable, game && game.PortalBidirectional(source.gameObject));
             }
             if (projected)
                 foreach (RoomPortalLink portal in room.GetComponentsInChildren<RoomPortalLink>())
@@ -53,6 +54,29 @@ namespace DelayNoMore.LightPath
                     PortalFrame(Vector3.Min(a, b), Vector3.Max(a, b), camera, width, false, game && game.PortalBidirectional(portal.gameObject));
                 }
             mesh.Clear(); mesh.SetVertices(_vertices); mesh.SetTriangles(_triangles, 0); mesh.SetColors(_colors); mesh.RecalculateBounds();
+        }
+        /** @brief 编辑器使用与运行时相同的线框几何，不创建或修改玩法对象。@param sources 投影源 @param mapping 预览映射 @param camera 预览相机 @param bidirectional 门方向查询 @return 预览网格 */
+        public Mesh BuildPreview(ProjectionSource[] sources, Matrix4x4 mapping, Camera camera, System.Func<ProjectionSource, bool> bidirectional)
+        {
+            _vertices.Clear(); _triangles.Clear(); _colors.Clear();
+            foreach (ProjectionSource source in sources)
+            {
+                if (!source || !source.Definition) continue;
+                Vector3 min = Vector3.one * float.PositiveInfinity, max = Vector3.one * float.NegativeInfinity;
+                bool found = false;
+                foreach (Vector3 vertex in source.Geometry.WorldVertices())
+                {
+                    Vector3 point = camera.transform.InverseTransformPoint(mapping.MultiplyPoint3x4(vertex));
+                    min = Vector3.Min(min, point); max = Vector3.Max(max, point); found = true;
+                }
+                if (!found || min.z <= 0) continue;
+                float width = source.Definition.MarkerWidth;
+                if (source.Definition.Movable) Frame(min, max, camera, width, true);
+                if (source.Definition.Portal && !source.GetComponent<ColorAbilityKey>() && !source.GetComponent<ProjectionAbilityKey>() && !source.GetComponent<LevelExit>())
+                    PortalFrame(min, max, camera, width, source.Definition.Movable, bidirectional(source));
+            }
+            _display.Clear(); _display.SetVertices(_vertices); _display.SetTriangles(_triangles, 0); _display.SetColors(_colors); _display.RecalculateBounds();
+            return _display;
         }
         /** @brief 绘制统一抓手框。 @param min 左下近点 @param max 右上远点 @param camera 相机 @param width 线宽 @param movable 是否可移动 */
         private void Frame(Vector3 min, Vector3 max, Camera camera, float width, bool movable)

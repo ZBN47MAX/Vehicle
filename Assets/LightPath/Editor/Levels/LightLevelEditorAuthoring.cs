@@ -41,6 +41,9 @@ namespace DelayNoMore.LightPath.Editor
         private Vector2 _inspectorScroll;
         /** @brief 预览渲染器。 */
         private PreviewRenderUtility _modelPreview;
+        /** @brief 复用运行时描边网格及顶点色材质。 */
+        private ProjectionObjectMarkers _markerPreview;
+        private Material _markerMaterial;
         /** @brief 3D预览视角。 */
         private Vector2 _orbit = new Vector2(20, -25);
         /** @brief 3D预览距离倍率。 */
@@ -365,7 +368,7 @@ namespace DelayNoMore.LightPath.Editor
         {
             if (!source.Definition)
                 return;
-            EditorGUILayout.HelpBox("下方颜色/透光/传送门属性保存在共享SO，所有引用者同步变化。可先建立独立定义。", MessageType.Info);
+            EditorGUILayout.HelpBox("下方描边/颜色/透光/传送门属性保存在共享SO，所有引用者同步变化。可先建立独立定义。", MessageType.Info);
             if (GUILayout.Button("为当前物件建立独立定义"))
             {
                 string path = EditorUtility.SaveFilePanelInProject("独立投影定义", source.name + "-Definition", "asset", "保存独立SO", "Assets/LightPath/Config/Projection");
@@ -389,11 +392,14 @@ namespace DelayNoMore.LightPath.Editor
             EditorGUILayout.PropertyField(definition.FindProperty("_color"), new GUIContent("自定义色"));
             EditorGUILayout.PropertyField(definition.FindProperty("_weight"), new GUIContent("混色权重"));
             EditorGUILayout.PropertyField(definition.FindProperty("_travel"), new GUIContent("游戏中移动范围"));
+            EditorGUILayout.PropertyField(definition.FindProperty("_markerWidth"), new GUIContent("标识描边宽度", "默认0.018；与运行时一致。共享此定义的对象同步更新。"));
             EditorGUILayout.PropertyField(definition.FindProperty("_requiresMatch"), new GUIContent("需要预设匹配检查"));
             if (definition.FindProperty("_portal").boolValue)
                 definition.FindProperty("_transmissive").boolValue = true;
             if (definition.ApplyModifiedProperties())
                 Repaint();
+            EditorGUILayout.LabelField("描边实时预览（拖动旋转／滚轮缩放）", EditorStyles.boldLabel);
+            DrawModelPreview(source.gameObject, GUILayoutUtility.GetRect(180, 220, GUILayout.ExpandWidth(true)));
         }
         /** @brief 预览网格并通过鼠标旋转预览相机。 @param target 场景源或模板 @param rect 固定预览矩形 */
         private void DrawModelPreview(GameObject target, Rect rect)
@@ -446,8 +452,28 @@ namespace DelayNoMore.LightPath.Editor
                         _modelPreview.DrawMesh(filter.sharedMesh, Matrix4x4.Translate(-bounds.center) * filter.transform.localToWorldMatrix, material, i);
                 }
             }
+            _markerPreview ??= new ProjectionObjectMarkers();
+            if (!_markerMaterial) _markerMaterial = new Material(Shader.Find("Light Path/Repair Stage")) { hideFlags = HideFlags.HideAndDontSave };
+            Mesh markers = _markerPreview.BuildPreview(target.GetComponentsInChildren<ProjectionSource>(true), Matrix4x4.Translate(-bounds.center), camera, PreviewBidirectional);
+            _modelPreview.DrawMesh(markers, Matrix4x4.identity, _markerMaterial, 0);
             _modelPreview.Render(true);
             GUI.DrawTexture(rect, _modelPreview.EndPreview(), ScaleMode.StretchToFill, false);
+        }
+        /** @brief 从编辑关卡解析双向门，包括自动回程端。@param source 门 @return 是否双向 */
+        private bool PreviewBidirectional(ProjectionSource source)
+        {
+            RoomPortalLink link = source.GetComponent<RoomPortalLink>();
+            if (!link) return source.Partner;
+            if (!link.ArrivalOnly) return !link.UseArrivalPosition && link.Bidirectional;
+            if (!_level || !source.GetComponentInParent<LightRoom>()) return false;
+            for (int i = 0; i < _level.RoomCount; i++)
+                foreach (RoomPortalLink incoming in _level.Prefab(i).GetComponentsInChildren<RoomPortalLink>(true))
+                    if (!incoming.ArrivalOnly && !incoming.UseArrivalPosition && incoming.Bidirectional
+                        && incoming.TargetRoom >= 0 && incoming.TargetRoom < _level.RoomCount
+                        && _level.Prefab(incoming.TargetRoom) && incoming.TargetPortal == source.name
+                        && _level.Prefab(incoming.TargetRoom).name == source.GetComponentInParent<LightRoom>().name)
+                        return true;
+            return false;
         }
         /** @brief 清理工作区预览资源。 */
         private void ReleaseAuthoringResources()
@@ -456,6 +482,8 @@ namespace DelayNoMore.LightPath.Editor
                 DestroyImmediate(_effectEditor);
             _modelPreview?.Cleanup();
             _modelPreview = null;
+            _markerPreview?.Dispose(); _markerPreview = null;
+            if (_markerMaterial) DestroyImmediate(_markerMaterial);
 
         }
     }
