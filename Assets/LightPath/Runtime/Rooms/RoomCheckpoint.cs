@@ -4,6 +4,38 @@ namespace DelayNoMore.LightPath
     /** @brief 接触后成为本关唯一复活标记；激活操作由游戏会话管理。 */
     public sealed class RoomCheckpoint : MonoBehaviour
     {
+        /** @brief 顶部世界文字，兼容旧关卡内嵌存档点。 */
+        private TMPro.TextMeshPro _label;
+        /** @brief 初始化可读标识，仅创建文字表现。 */
+        private void Start()
+        {
+            Transform existing = transform.Find("CheckpointLabel");
+            _label = existing ? existing.GetComponent<TMPro.TextMeshPro>() : null;
+            if (!_label)
+            {
+                var item = new GameObject("CheckpointLabel", typeof(RectTransform));
+                item.transform.SetParent(transform, false);
+                _label = item.AddComponent<TMPro.TextMeshPro>();
+            }
+            GameText.ApplyFont(_label);
+            _label.text = "Checkpoint";
+            _label.fontSize = 3;
+            _label.alignment = TMPro.TextAlignmentOptions.Center;
+            _label.color = Color.white;
+            _label.rectTransform.sizeDelta = new Vector2(3, .5f);
+            _label.raycastTarget = false;
+            PositionLabel();
+        }
+        /** @brief 抵消标记的旋转缩放，使文字位于世界顶部并保持水平。 */
+        private void PositionLabel()
+        {
+            if (!_label) return;
+            float top = TryGetComponent(out Collider2D area) ? area.bounds.max.y : transform.position.y + .5f;
+            _label.transform.position = new Vector3(transform.position.x, top + .35f, transform.position.z - .15f);
+            _label.transform.rotation = Quaternion.identity;
+            Vector3 scale = transform.lossyScale;
+            _label.transform.localScale = new Vector3(1 / Mathf.Max(.001f, Mathf.Abs(scale.x)), 1 / Mathf.Max(.001f, Mathf.Abs(scale.y)), 1 / Mathf.Max(.001f, Mathf.Abs(scale.z)));
+        }
         /** @brief 自身色号，默认使用存档点专用正红色。 */
         [SerializeField, Range(-1, 4)] private int _colorIndex = LightGameConfig.RedColorIndex;
         /** @brief 当前节点色号。 */
@@ -18,8 +50,10 @@ namespace DelayNoMore.LightPath
             foreach (Renderer renderer in GetComponentsInChildren<Renderer>(true))
             {
                 renderer.enabled = visible;
+                if (renderer.GetComponent<TMPro.TMP_Text>()) continue;
                 renderer.SetPropertyBlock(properties);
             }
+            PositionLabel();
             if (TryGetComponent(out Collider2D area)) area.enabled = visible;
         }
         /** @brief 相对标记的安全落点，可在预制体或关卡实例中编辑。 */
