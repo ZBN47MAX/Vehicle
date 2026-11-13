@@ -65,7 +65,6 @@ namespace DelayNoMore.LightPath
         /** @brief 进入一个关注状态；调用者已完成玩法条件验证。@param view 目标视角 @param snap 是否立即定位 */
         private void SetStageView(StageView view, bool snap = false)
         {
-            _pointer.Cancel();
             _preview = false;
             _jumpUntil = 0;
             if (_keyboardProjectionDirty)

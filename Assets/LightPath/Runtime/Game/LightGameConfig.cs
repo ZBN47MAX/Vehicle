@@ -71,12 +71,6 @@ namespace DelayNoMore.LightPath
         public float PortalCooldown => _portalCooldown;
         /** @brief 获取坠落高度。 */
         public float DeathHeight => _deathHeight;
-        /** @brief 鼠标旋转灵敏度。 */
-        [SerializeField, Min(.01f), Tooltip("每像素鼠标移动对应旋转角度")] private float _pointerRotation = .3f;
-        /** @brief 拖动滚轮深度灵敏度。 */
-        [SerializeField, Min(.0001f), Tooltip("每单位UIS滚轮增量对应的深度米数")] private float _scrollDepth = .003f;
-        /** @brief 节点拾取范围。 */
-        [SerializeField, Min(4), Tooltip("维修节点鼠标拾取半径，屏幕像素")] private float _pickPixels = 28;
         /** @brief 镜头跟随配置。 */
         [SerializeField, Tooltip("启用连续卷轴镜头；旧演示默认固定镜头")] private bool _scrollingCamera;
         /** @brief 观看相机高度。 */
@@ -91,12 +85,6 @@ namespace DelayNoMore.LightPath
         [SerializeField, Min(4), Tooltip("围绕角色的投影激活半径，需覆盖相机视野并留预加载距离")] private float _activeRadius = 24;
         /** @brief 边界细化次数。 */
         [SerializeField, Range(0, 4), Tooltip("混合区域边界递归细分次数；内部一致区域不继续细分")] private int _edgeRefinement = 2;
-        /** @brief 获取鼠标角度灵敏度。 */
-        public float PointerRotation => _pointerRotation;
-        /** @brief 获取深度灵敏度。 */
-        public float ScrollDepth => _scrollDepth;
-        /** @brief 获取拾取范围。 */
-        public float PickPixels => _pickPixels;
         /** @brief 获取卷轴开关。 */
         public bool ScrollingCamera => _scrollingCamera;
         /** @brief 获取相机半高。 */

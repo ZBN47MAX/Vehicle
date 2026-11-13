@@ -1134,26 +1134,6 @@
                     "priority": 0
                 },
                 {
-                    "name": "PointerRotate",
-                    "type": "Button",
-                    "id": "fb701b26-924c-4653-ad68-a5493cd6e5a4",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false,
-                    "priority": 0
-                },
-                {
-                    "name": "PointerDelta",
-                    "type": "Value",
-                    "id": "120bcccb-64cb-4192-b421-8d1beab83aa8",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true,
-                    "priority": 0
-                },
-                {
                     "name": "Scroll",
                     "type": "Value",
                     "id": "216cceef-de56-46e2-bd08-af2501ea9ab2",
@@ -1382,28 +1362,6 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "Drag",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "df796654-93f2-469f-a231-1763bb60edea",
-                    "path": "<Mouse>/rightButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "PointerRotate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "745fbea3-e8e2-49d9-9ac4-039d2fdbdd39",
-                    "path": "<Pointer>/delta",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "PointerDelta",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

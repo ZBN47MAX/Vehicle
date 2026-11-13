@@ -370,7 +370,6 @@ namespace DelayNoMore.LightPath
             _visited[target] = true;
             _transitioning = true;
             _preview = false;
-            _pointer.Cancel();
             Vector2 velocity = _player.linearVelocity;
             Time.timeScale = 0;
             Vector3 cameraEnd = cameraStart + (next.transform.position - old.transform.position);

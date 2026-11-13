@@ -133,7 +133,6 @@ namespace DelayNoMore.LightPath
             if (!_visited[_roomIndex]) Room.ResetRoom();
             _visited[_roomIndex] = true;
             _selected = 0;
-            _pointer.Cancel();
             _repairDrag = -1;
             _preview = false;
             _checkpointContacts.Clear();

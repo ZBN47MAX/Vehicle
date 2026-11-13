@@ -32,8 +32,6 @@ namespace DelayNoMore.LightPath
         private int _candidate = -1;
         /** @brief 当前模型选择。 */
         private int _selected;
-        /** @brief 模型当前旋转轴。 */
-        private readonly DevicePointerController _pointer = new DevicePointerController();
         /** @brief 缓存角色表现。 */
         private Renderer[] _playerRenderers;
         /** @brief 角色序列帧表现；旧主角未安装此组件时保持兼容。 */
@@ -313,7 +311,6 @@ namespace DelayNoMore.LightPath
         /** @brief 鼠标仅选择投影模型，位移与旋转统一读取UIS键盘动作。 */
         private void EditProjectionKeyboard()
         {
-            _pointer.Cancel();
             var sources = Room.Surface.Sources;
             if (sources == null || sources.Count == 0)
                 return;
@@ -378,7 +375,6 @@ namespace DelayNoMore.LightPath
         {
             if (!_started || _paused || !_editing || !Room.Powered || RepairVisible || (_stage && (_stage.Moving || _stage.View != StageView.Projection)))
                 return;
-            _pointer.Cancel();
             _preview = !_preview;
             _candidate = _color;
         }
@@ -496,7 +492,6 @@ namespace DelayNoMore.LightPath
             RestoreRespawnRoom();
             _candidate = _color;
             _selected = 0;
-            _pointer.Cancel();
             _preview = false;
             _editing = false;
             _repairFocus = false;
@@ -588,7 +583,6 @@ namespace DelayNoMore.LightPath
             if (!_started)
                 return;
             ObserveTelemetry();
-            _pointer.Cancel();
             _paused = paused;
             _preview = false;
             _jumpUntil = 0;
@@ -602,7 +596,6 @@ namespace DelayNoMore.LightPath
             RecordTelemetry("返回主菜单");
             BreakTelemetryVisit("返回主菜单");
             ResetNoclip();
-            _pointer.Cancel();
             _started = false;
             _paused = false;
             _preview = false;
@@ -650,13 +643,12 @@ namespace DelayNoMore.LightPath
                 _actions.FindActionMap("Light", false)?.Disable();
             Time.timeScale = 1;
         }
-        /** @brief 失去窗口焦点时释放对象抓取，防止返回后继续拖动。 @param focused 是否有焦点 */
+        /** @brief 失去窗口焦点时释放维修调角，防止返回后继续拖动。 @param focused 是否有焦点 */
         private void OnApplicationFocus(bool focused)
         {
             RecordTelemetry(focused ? "窗口获得焦点" : "窗口失去焦点");
             if (!focused) PlaytestRecording.Recorder?.Flush(Time.realtimeSinceStartupAsDouble);
-            if (!focused)
-                _pointer.Cancel();
+            if (!focused) _repairDrag = -1;
         }
     }
 }
