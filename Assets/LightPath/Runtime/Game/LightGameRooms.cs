@@ -59,7 +59,7 @@ namespace DelayNoMore.LightPath
             ProjectionLevel level = _levels[_roomLevels[_roomIndex]];
             int local = _roomIndex - _levelFirst[_roomLevels[_roomIndex]];
             Rect bounds = RoomRect(Room);
-            float margin = _body.bounds.size.y * _config.ConnectedEdgeClearance;
+            float margin = (Noclip ? _noclipShape.size.y : _body.bounds.size.y) * _config.ConnectedEdgeClearance;
             bool left = level.Edge(local, 0) == ProjectionLevel.EdgeBehavior.Move;
             bool right = level.Edge(local, 1) == ProjectionLevel.EdgeBehavior.Move;
             bool bottom = level.Edge(local, 2) == ProjectionLevel.EdgeBehavior.Move;

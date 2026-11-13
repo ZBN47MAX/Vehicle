@@ -34,6 +34,15 @@ namespace DelayNoMore.LightPath
                 foreach (Vector3 point in part.Data.Vertices)
                     yield return matrix.MultiplyPoint3x4(point);
             }
+            if (HasMeshes) yield break;
+            foreach (Collider collider in _source.GetComponentsInChildren<Collider>())
+            {
+                if (!collider.enabled) continue;
+                Bounds bounds = collider.bounds;
+                for (int corner = 0; corner < 8; corner++)
+                    yield return bounds.center + Vector3.Scale(bounds.extents,
+                        new Vector3((corner & 1) == 0 ? -1 : 1, (corner & 2) == 0 ? -1 : 1, (corner & 4) == 0 ? -1 : 1));
+            }
         }
         /** @brief 无法读取或不受支持的网格数量。 */
         public int MissingMeshes { get; private set; }
