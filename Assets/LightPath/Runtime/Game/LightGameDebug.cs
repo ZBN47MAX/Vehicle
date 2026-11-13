@@ -45,6 +45,7 @@ namespace DelayNoMore.LightPath
         {
             if (!Noclip) return;
             Noclip = false;
+            if (!_player) return;
             _player.simulated = _noclipWasSimulated;
             _player.linearVelocity = Vector2.zero;
         }
