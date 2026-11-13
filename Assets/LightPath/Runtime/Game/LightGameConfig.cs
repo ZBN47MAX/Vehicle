@@ -6,6 +6,12 @@ namespace DelayNoMore.LightPath
     [CreateAssetMenu(menuName = "Light Path/Game Config")]
     public sealed class LightGameConfig : ScriptableObject
     {
+        /** @brief 能力解锁通知的停留秒数。 */
+        [Min(1)] public float UnlockNoticeSeconds = 6;
+        /** @brief 能力解锁通知的淡出秒数。 */
+        [Min(.01f)] public float UnlockFadeSeconds = .4f;
+        /** @brief 能力解锁通知颜色。 */
+        public Color UnlockNoticeColor = new Color(1, .88f, .63f);
         /** @brief 存档点专用正红色色号，不属于玩家手动滤镜。 */
         public const int RedColorIndex = 4;
         /** @brief 判断是否为玩家可手动选择的色号，解锁状态另外检查。@param index 色号 @return 是否允许手动选择 */

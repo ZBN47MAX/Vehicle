@@ -74,6 +74,28 @@ namespace DelayNoMore.LightPath
         private string _notice;
         /** @brief 提示截止时间。 */
         private float _noticeUntil;
+        /** @brief 排队显示的能力通知，不被普通状态消息覆盖。 */
+        private readonly Queue<string> _unlockNotices = new Queue<string>();
+        /** @brief 当前能力通知的结束时刻。 */
+        private float _unlockUntil;
+        /** @brief 当前能力通知正文。 */
+        private string _unlockNotice;
+        /** @brief 登记本局能力通知。 @param message 文案 */
+        private void NotifyUnlock(string message) => _unlockNotices.Enqueue(message);
+        /** @brief 提取能力提示并计算淡出。 @return 富文本或空 */
+        private string UnlockNotice()
+        {
+            if (Time.unscaledTime >= _unlockUntil && _unlockNotices.Count > 0)
+            {
+                _unlockNotice = _unlockNotices.Dequeue();
+                _unlockUntil = Time.unscaledTime + _config.UnlockNoticeSeconds + _config.UnlockFadeSeconds;
+            }
+            if (Time.unscaledTime >= _unlockUntil)
+                return "";
+            Color color = _config.UnlockNoticeColor;
+            color.a *= Mathf.Clamp01((_unlockUntil - Time.unscaledTime) / Mathf.Max(.01f, _config.UnlockFadeSeconds));
+            return "<size=115%><color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">" + _unlockNotice + "</color></size>";
+        }
         /** @brief 获取当前房间。 */
         public LightRoom Room => _rooms[_roomIndex];
         /** @brief 获取整局维修布局，只供读取；未绑定时为空。 */
@@ -246,6 +268,9 @@ namespace DelayNoMore.LightPath
             }
             if (Time.unscaledTime < _noticeUntil)
                 status = _notice;
+            string unlock = UnlockNotice();
+            if (unlock.Length > 0)
+                status = unlock;
             if (_repair != null)
                 status += "\n" + RepairStatus();
             if (_repair == null && Room.Warning && Room.Rig)
@@ -503,7 +528,7 @@ namespace DelayNoMore.LightPath
                         Room.Surface.Invalidate(keySource);
                         Room.Surface.Rebuild();
                     }
-                    Notify(GameText.Get("LightGame.CollectAndTravel.029"));
+                    NotifyUnlock(GameText.Get("LightGame.CollectAndTravel.029"));
                 }
                 key.gameObject.SetActive(!_unlocked[key.Color]);
             }
@@ -516,7 +541,7 @@ namespace DelayNoMore.LightPath
                     _collected.Add(id);
                     _unlocked[Mathf.Min(_roomIndex, 3)] = true;
                     shard.gameObject.SetActive(false);
-                    Notify(GameText.Get("LightGame.CollectAndTravel.030"));
+                    NotifyUnlock(GameText.Get("LightGame.CollectAndTravel.030"));
                 }
             }
             if (!Action("Interact").WasPressedThisFrame())
@@ -638,6 +663,8 @@ namespace DelayNoMore.LightPath
         /** @brief 开始全新游玩。 */
         public void Restart()
         {
+            _unlockNotices.Clear();
+            _unlockUntil = 0;
             if (!_ready)
                 return;
             if (!InitializeRepair())

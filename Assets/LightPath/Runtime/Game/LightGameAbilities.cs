@@ -20,7 +20,7 @@ namespace DelayNoMore.LightPath
                 bool touching = source ? Room.Surface.FindPortal(_body.bounds, _color) == source
                     : (!platform || platform.ColorIndex < 0 || platform.ColorIndex != _color) && Vector2.Distance(_player.position, key.transform.position) < _config.CollectRadius;
                 if (touching && _projectionAbilities.Unlock(key.Ability))
-                    Notify(GameText.Get("LightGameAbilities.CollectProjectionAbilities.001") + ProjectionAbilityState.Label(key.Ability) + GameText.Get("LightGameAbilities.CollectProjectionAbilities.002"));
+                    NotifyUnlock(GameText.Get("LightGameAbilities.CollectProjectionAbilities.001") + ProjectionAbilityState.Label(key.Ability) + GameText.Get("LightGameAbilities.CollectProjectionAbilities.002"));
             }
             RefreshProjectionKeys(Room);
         }

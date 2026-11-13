@@ -166,7 +166,7 @@ MonoBehaviour:
     Purpose: "HUD\u9009\u4E2D\u6A21\u578B\u4FE1\u606F\u4E2D\u7684\u64CD\u4F5C\u8BF4\u660E\u7247\u6BB5\u3002"
     Location: "\u6E38\u73A9HUD\u3001\u4EA4\u4E92\u901A\u77E5\u548C\u64CD\u4F5C\u63D0\u793A / LightGame.Update / \u7528\u9014\uFF1A \xB7 \u9F20\u6807\u62D6\u52A8/\u65CB\u8F6C \xB7 "
     Parameters: 
-    Value: " \xB7 \u9F20\u6807\u62D6\u52A8/\u65CB\u8F6C \xB7 "
+    Value: " \u00b7 \u70b9\u51fb\u9009\u62e9\u7269\u4ef6\uff0c\u4f7f\u7528\u5df2\u89e3\u9501\u7684\u952e\u4f4d\u8c03\u6574 \u00b7 "
   - Key: LightGame.Update.018
     Screen: "\u6295\u5F71\u8C03\u6574"
     NormalPlay: 1
@@ -229,7 +229,7 @@ MonoBehaviour:
     Purpose: "\u517C\u5BB9\u65E7\u89C2\u770B / \u88C5\u7F6E\u6216\u65E7\u7EF4\u4FEE\u9762\u677F\u65F6\u4F7F\u7528\uFF1B\u5F53\u524DLightGame\u56DB\u89C6\u89D2\u6B63\u5E38\u6D41\u7A0B\u4E0D\u4F7F\u7528\u3002\u539F\u8C03\u7528\u4F4D\u7F6E\uFF1ALightGame.BuildHelp"
     Location: "HUD\u5E95\u90E8 / \u5F53\u524D\u6A21\u5F0F\u64CD\u4F5C\u5E2E\u52A9\u53CA\u80FD\u529B\u89E3\u9501\u63D0\u793A / LightGame.BuildHelp"
     Parameters: '{0} = Label("Mode"); {1} = Label("Focus"); {2} = Label("Drag"); {3} = Label("Scroll"); {4} = Label("PointerRotate")'
-    Value: "{0} \u8FD4\u56DE \xB7 {1} \u7EF4\u4FEE/\u6A21\u578B \xB7 {2} \u62D6\u52A8 \xB7 {3} \u62D6\u52A8\u6DF1\u5EA6 \xB7 {4} \u65CB\u8F6C \xB7 UI\u6309\u94AE\u6362\u8272"
+    Value: "{0} \u8fd4\u56de \u00b7 {1} \u7ef4\u4fee/\u6a21\u578b \u00b7 \u70b9\u51fb\u9009\u62e9\u7269\u4ef6\uff0c\u4f7f\u7528\u5df2\u89e3\u9501\u7684\u952e\u4f4d\u8c03\u6574 \u00b7 \u8f6e\u76d8\u6362\u8272"
   - Key: LightGame.BuildHelp.025
     Screen: "2D\u4E16\u754C"
     NormalPlay: 0
