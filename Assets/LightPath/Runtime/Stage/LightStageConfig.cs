@@ -34,6 +34,8 @@ namespace DelayNoMore.LightPath
         public Color SelectionColor = new Color(1, .75f, .05f, 1);
         /** @brief 舞台世界中的描边宽度，二维按映射等比例换算。 */
         [Min(.001f)] public float SelectionWidth = .12f;
+        /** @brief 可移动物件与门的细线标识宽度，独立于选中描边。 */
+        [Min(.001f)] public float MarkerWidth = .018f;
         /** @brief 验证表现配置。@param error 首个错误 @return 是否有效 */
         public bool TryValidate(out string error)
         {
@@ -50,7 +52,7 @@ namespace DelayNoMore.LightPath
                 error = GameText.Get("LightStageConfig.TryValidate.005");
             else if (!Positive(FieldOfView) || FieldOfView < 15 || FieldOfView > 100 || !Positive(TransitionSeconds)
                 || !Positive(FramePadding) || FramePadding < 1 || !Positive(ScreenDistance) || !Positive(RepairDistance)
-                || !Positive(BeamWidth) || !Positive(SelectionWidth))
+                || !Positive(BeamWidth) || !Positive(SelectionWidth) || !Positive(MarkerWidth))
                 error = GameText.Get("LightStageConfig.TryValidate.006");
             return error.Length == 0;
         }

@@ -18,8 +18,8 @@ namespace DelayNoMore.LightPath
         /** @brief 绘制两个空间的对象标识。 @param room 房间 @param mapping 舞台映射 @param view 三维相机 @param capture 二维相机 @param config 表现配置 @param material 顶点色材质 */
         public void Draw(LightRoom room, Matrix4x4 mapping, Camera view, Camera capture, LightStageConfig config, Material material, LightGame game)
         {
-            Build(_display, room, mapping, view, false, config.SelectionWidth, game);
-            Build(_world, room, Matrix4x4.identity, capture, true, config.SelectionWidth, game);
+            Build(_display, room, mapping, view, false, config.MarkerWidth, game);
+            Build(_world, room, Matrix4x4.identity, capture, true, config.MarkerWidth, game);
             Graphics.DrawMesh(_display, Matrix4x4.identity, material, config.DisplayLayer, view, 0, null, ShadowCastingMode.Off, false);
             Graphics.DrawMesh(_world, Matrix4x4.identity, material, room.Surface.gameObject.layer, capture, 0, null, ShadowCastingMode.Off, false);
         }
@@ -74,11 +74,13 @@ namespace DelayNoMore.LightPath
             Vector3 c = new Vector3(max.x, max.y, z), d = new Vector3(min.x, max.y, z);
             CameraStroke(a, b, camera, width); CameraStroke(b, c, camera, width);
             CameraStroke(c, d, camera, width); CameraStroke(d, a, camera, width);
-            if (!movable) CameraStroke(a + Vector3.down * width * 4, b + Vector3.down * width * 4, camera, width * 2);
+            float baseOffset = Mathf.Max(width * 4, (max.y - min.y) * .06f);
+            if (!movable) CameraStroke(a + Vector3.down * baseOffset, b + Vector3.down * baseOffset, camera, width);
             Vector3 center = (a + c) * .5f;
             float length = Mathf.Max(width * 4, (max.x - min.x) * .55f);
-            Arrow(center + Vector3.up * (bidirectional ? width * 3 : 0), length, camera, width);
-            if (bidirectional) Arrow(center - Vector3.up * width * 3, -length, camera, width);
+            float separation = Mathf.Max(width * 3, (max.y - min.y) * .18f);
+            Arrow(center + Vector3.up * (bidirectional ? separation : 0), length, camera, width);
+            if (bidirectional) Arrow(center - Vector3.up * separation, -length, camera, width);
         }
         /** @brief 绘制通行方向箭头。 @param center 中心 @param length 带方向长度 @param camera 相机 @param width 线宽 */
         private void Arrow(Vector3 center, float length, Camera camera, float width)
@@ -95,7 +97,7 @@ namespace DelayNoMore.LightPath
         /** @brief 黑白双线确保明暗背景均可读。 @param a 起点 @param b 终点 @param normal 平面法线 @param width 线宽 */
         private void Stroke(Vector3 a, Vector3 b, Vector3 normal, float width)
         {
-            Line(a, b, normal, width * 2.5f, Color.black);
+            Line(a, b, normal, width * 1.6f, Color.black);
             Line(a - normal * .001f, b - normal * .001f, normal, width, Color.white);
         }
         /** @brief 添加线段四边形。 @param a 起点 @param b 终点 @param normal 平面法线 @param width 线宽 @param color 颜色 */
