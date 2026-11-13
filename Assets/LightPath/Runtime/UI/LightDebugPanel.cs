@@ -21,6 +21,8 @@ namespace DelayNoMore.LightPath
         private float _nextRefresh;
         /** @brief 属于面板的操作区。 */
         private GameObject _tools;
+        /** @brief 本面板按需补充的UI射线检测器。 */
+        private GraphicRaycaster _ownedRaycaster;
         /** @brief 能力按钮文字。 */
         private readonly TMP_Text[] _abilityLabels = new TMP_Text[10];
         /** @brief 当前选择的关卡与房间。 */
@@ -58,9 +60,12 @@ namespace DelayNoMore.LightPath
         /** @brief 构造独立的可点击调试区。 */
         private void CreateTools()
         {
+            Canvas canvas = _group.GetComponentInParent<Canvas>();
+            if (!canvas.GetComponent<GraphicRaycaster>())
+                _ownedRaycaster = canvas.gameObject.AddComponent<GraphicRaycaster>();
             _tools = new GameObject("DebugTools", typeof(RectTransform), typeof(Image));
             var rect = (RectTransform)_tools.transform;
-            rect.SetParent(_group.GetComponentInParent<Canvas>().transform, false);
+            rect.SetParent(canvas.transform, false);
             rect.anchorMin = rect.anchorMax = new Vector2(1, 1);
             rect.pivot = Vector2.one;
             rect.anchoredPosition = new Vector2(-20, -20);
@@ -72,15 +77,15 @@ namespace DelayNoMore.LightPath
                 _abilityLabels[i] = ToolButton(rect, "", 12 + i % 2 * 182, 12 + i / 2 * 48, 174,
                     () => { _game.DebugSetAbility(index, !_game.DebugAbility(index)); Refresh(); });
             }
-            ToolButton(rect, "全部开启", 12, 256, 112, () => { _game.DebugAllAbilities(true); Refresh(); });
-            ToolButton(rect, "全部关闭", 134, 256, 112, () => { _game.DebugAllAbilities(false); Refresh(); });
-            ToolButton(rect, "恢复进度", 256, 256, 112, () => { _game.DebugRestoreAbilities(); Refresh(); });
-            ToolButton(rect, "上一关", 12, 304, 112, () => SelectLevel(-1));
+            ToolButton(rect, GameText.Get("Debug.Tools.AllOn"), 12, 256, 112, () => { _game.DebugAllAbilities(true); Refresh(); });
+            ToolButton(rect, GameText.Get("Debug.Tools.AllOff"), 134, 256, 112, () => { _game.DebugAllAbilities(false); Refresh(); });
+            ToolButton(rect, GameText.Get("Debug.Tools.Restore"), 256, 256, 112, () => { _game.DebugRestoreAbilities(); Refresh(); });
+            ToolButton(rect, GameText.Get("Debug.Tools.PrevLevel"), 12, 304, 112, () => SelectLevel(-1));
             _destination = ToolButton(rect, "", 134, 304, 112, () => { });
-            ToolButton(rect, "下一关", 256, 304, 112, () => SelectLevel(1));
-            ToolButton(rect, "上一房间", 12, 352, 174, () => SelectRoom(-1));
-            ToolButton(rect, "下一房间", 194, 352, 174, () => SelectRoom(1));
-            ToolButton(rect, "跳转到所选房间", 12, 400, 356, () => _game.DebugJump(_level, _room));
+            ToolButton(rect, GameText.Get("Debug.Tools.NextLevel"), 256, 304, 112, () => SelectLevel(1));
+            ToolButton(rect, GameText.Get("Debug.Tools.PrevRoom"), 12, 352, 174, () => SelectRoom(-1));
+            ToolButton(rect, GameText.Get("Debug.Tools.NextRoom"), 194, 352, 174, () => SelectRoom(1));
+            ToolButton(rect, GameText.Get("Debug.Tools.Jump"), 12, 400, 356, () => _game.DebugJump(_level, _room));
             _noclipLabel = ToolButton(rect, "Noclip", 12, 448, 356, () => { _game.SetNoclip(!_game.Noclip); Refresh(); });
         }
         /** @brief 选择关卡并重置房间选择。 @param delta 方向 */
@@ -142,6 +147,7 @@ namespace DelayNoMore.LightPath
         private void OnDestroy()
         {
             if (_tools) Destroy(_tools);
+            if (_ownedRaycaster) Destroy(_ownedRaycaster);
         }
     }
 }

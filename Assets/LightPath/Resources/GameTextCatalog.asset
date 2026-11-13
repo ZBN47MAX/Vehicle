@@ -2406,3 +2406,43 @@ MonoBehaviour:
     NormalPlay: 0
     Component: TMP
     Value: "Debug \u00b7 Noclip \u6d6e\u7a7a\u7a7f\u5899"
+  - Key: Debug.Tools.AllOn
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u5168\u90e8\u5f00\u542f"
+  - Key: Debug.Tools.AllOff
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u5168\u90e8\u5173\u95ed"
+  - Key: Debug.Tools.Restore
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u6062\u590d\u8fdb\u5ea6"
+  - Key: Debug.Tools.PrevLevel
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u4e0a\u4e00\u5173"
+  - Key: Debug.Tools.NextLevel
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u4e0b\u4e00\u5173"
+  - Key: Debug.Tools.PrevRoom
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u4e0a\u4e00\u623f\u95f4"
+  - Key: Debug.Tools.NextRoom
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u4e0b\u4e00\u623f\u95f4"
+  - Key: Debug.Tools.Jump
+    Screen: Debug
+    NormalPlay: 0
+    Component: TMP
+    Value: "\u8df3\u8f6c\u5230\u6240\u9009\u623f\u95f4"
