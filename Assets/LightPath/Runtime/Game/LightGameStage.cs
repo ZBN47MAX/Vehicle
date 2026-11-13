@@ -10,6 +10,28 @@ namespace DelayNoMore.LightPath
         [SerializeField, InspectorName("四视角舞台"), Tooltip("绑定手动拼装的LightStage。启用后左键进入关注区，Tab返回3D总览。")] private LightStage _stage;
         /** @brief 是否启用四视角模式。 */
         public bool StageMode => _stage;
+        /** @brief 是否显示鼠标视角入口。 */
+        public bool ShowViewButtons => _ready && _started && !_paused && !_transitioning && _stage && _stage.View != StageView.World;
+        /** @brief 当前关注视角。 */
+        public StageView CurrentView => _stage ? _stage.View : StageView.World;
+        /** @brief 从鼠标按钮请求关注视角，复用原入口验证。 @param view 目标视角 */
+        public void ChooseStageView(StageView view)
+        {
+            if (!ShowViewButtons || _stage.Moving)
+                return;
+            if (view == StageView.World)
+            {
+                if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009")); return; }
+                Room.Surface.Rebuild();
+                if (Room.Overlaps(_body.bounds, _color, false))
+                {
+                    Notify(GameText.Get("LightGameStage.EditStage.010"));
+                    return;
+                }
+            }
+            _repairDrag = -1;
+            SetStageView(view);
+        }
         /** @brief 本游戏是否拥有舞台资源，防止其他实例初始化失败后释放占用者资源。 */
         private bool _ownsStage;
         /** @brief 总览当前悬停入口提示。 */

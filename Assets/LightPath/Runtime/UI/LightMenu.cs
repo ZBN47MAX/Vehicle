@@ -39,6 +39,63 @@ namespace DelayNoMore.LightPath
         [SerializeField, Tooltip("四个色名标签")] private TMP_Text[] _optionLabels;
         /** @brief 当前唯一动作资产，按界面状态控制导航动作。 */
         private InputActionAsset _actions;
+        /** @brief 属于本界面的鼠标视角按钮组。 */
+        private GameObject _viewButtons;
+        /** @brief 三个关注入口。 */
+        private Button[] _viewChoices;
+        /** @brief 按钮对应的视角。 */
+        private readonly StageView[] _views = { StageView.World, StageView.Repair, StageView.Projection };
+        /** @brief 创建仅属于本菜单的鼠标入口，不安装玩法组件。 */
+        private void CreateViewButtons()
+        {
+            if (_viewButtons || !_game || !_game.StageMode)
+                return;
+            _viewButtons = new GameObject("ViewButtons", typeof(RectTransform));
+            var rect = (RectTransform)_viewButtons.transform;
+            rect.SetParent(transform, false);
+            rect.anchorMin = rect.anchorMax = new Vector2(1, .5f);
+            rect.pivot = new Vector2(1, .5f);
+            rect.anchoredPosition = new Vector2(-24, 0);
+            rect.sizeDelta = new Vector2(220, 192);
+            _viewChoices = new Button[3];
+            string[] labels = { "2D 关注", "投影仪", "投影面板" };
+            for (int i = 0; i < _views.Length; i++)
+            {
+                var item = new GameObject(labels[i], typeof(RectTransform), typeof(Image), typeof(Button));
+                var itemRect = (RectTransform)item.transform;
+                itemRect.SetParent(rect, false);
+                itemRect.anchorMin = itemRect.anchorMax = new Vector2(.5f, 1);
+                itemRect.pivot = new Vector2(.5f, 1);
+                itemRect.anchoredPosition = new Vector2(0, -i * 64);
+                itemRect.sizeDelta = new Vector2(220, 54);
+                item.GetComponent<Image>().color = new Color(.12f, .17f, .21f, .96f);
+                Button button = item.GetComponent<Button>();
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
+                StageView view = _views[i];
+                button.onClick.AddListener(() => _game.ChooseStageView(view));
+                var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+                label.transform.SetParent(item.transform, false);
+                label.rectTransform.anchorMin = Vector2.zero;
+                label.rectTransform.anchorMax = Vector2.one;
+                label.rectTransform.sizeDelta = Vector2.zero;
+                label.font = HudFont;
+                label.fontSize = 24;
+                label.alignment = TextAlignmentOptions.Center;
+                label.text = labels[i];
+                label.raycastTarget = false;
+                _viewChoices[i] = button;
+            }
+        }
+        /** @brief 按游戏生命周期更新入口，菜单和二维关注期间隐藏。 */
+        private void LateUpdate()
+        {
+            CreateViewButtons();
+            if (!_viewButtons)
+                return;
+            _viewButtons.SetActive(_game && _game.ShowViewButtons);
+            for (int i = 0; i < _viewChoices.Length; i++)
+                _viewChoices[i].interactable = _game && _game.CurrentView != _views[i];
+        }
         /** @brief 供运行时维修视图复用现有中文 HUD 字体。 */
         public TMP_FontAsset HudFont => GameText.Font;
         /** @brief 色名说明。 */
