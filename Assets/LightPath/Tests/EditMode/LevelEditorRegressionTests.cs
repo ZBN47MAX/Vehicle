@@ -14,6 +14,36 @@ namespace DelayNoMore.LightPath.Tests
     {
         /** @brief 私有窗口入口的测试访问范围。 */
         private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic;
+        /** @brief 预览刷新不提示保存，真实Undo移动提示保存，恢复原值后解除提示。 */
+        [Test] public void SavePrompt_TracksAuthoredChangesOnly()
+        {
+            var window = ScriptableObject.CreateInstance<LightLevelEditor>();
+            try
+            {
+                var level = AssetDatabase.LoadAssetAtPath<ProjectionLevel>("Assets/LightPath/Levels/Level1.asset");
+                typeof(LightLevelEditor).GetMethod("OpenRoom", Flags).Invoke(window, new object[] { level, 0 });
+                var room = (LightRoom)typeof(LightLevelEditor).GetField("_room", Flags).GetValue(window);
+                var dirty = typeof(LightLevelEditor).GetMethod("HasUnsavedLevel", Flags);
+                typeof(LightLevelEditor).GetMethod("BuildPreview", Flags).Invoke(window, null);
+                Assert.That(dirty.Invoke(window, null), Is.False);
+                Transform platform = room.GetComponentInChildren<ColorPlatform>(true).transform;
+                Vector3 original = platform.position;
+                Undo.RecordObject(platform, "测试移动");
+                platform.position += Vector3.right;
+                Undo.FlushUndoRecordObjects();
+                Assert.That(dirty.Invoke(window, null), Is.True);
+                platform.position = original;
+                Assert.That(dirty.Invoke(window, null), Is.False);
+            }
+            finally
+            {
+                // 用例只操作内存编辑内容，测试结束直接卸载。
+                var contents = (GameObject)typeof(LightLevelEditor).GetField("_levelContents", Flags).GetValue(window);
+                typeof(LightLevelEditor).GetField("_levelContents", Flags).SetValue(window, null);
+                if (contents) PrefabUtility.UnloadPrefabContents(contents);
+                Object.DestroyImmediate(window);
+            }
+        }
         /** @brief 使用窗口真实鼠标事件验证2D选取、拖动和预览绘制；不保存修改。 */
         [UnityTest] public IEnumerator Canvas_MouseDragMovesExistingPlatform()
         {

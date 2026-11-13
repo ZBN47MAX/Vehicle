@@ -18,10 +18,34 @@ namespace DelayNoMore.LightPath.Editor
         private Vector2 _objectsScroll;
         /** @brief 成功打开或保存时的房间内容快照。 */
         [SerializeField] private string _savedRoomSnapshot;
+        /** @brief 只记录当前编辑会话的作者操作，预览与TMP刷新不属于编辑。 */
+        [SerializeField] private bool _roomWasEdited;
+        /** @brief 打开或保存时的关卡布局数据。 */
+        [SerializeField] private string _savedLevelSnapshot;
+        /** @brief 将Undo记录限定到当前房间。@param modifications 属性变更 @return 原变更记录 */
+        private UndoPropertyModification[] TrackRoomEdits(UndoPropertyModification[] modifications)
+        {
+            if (!_levelContents) return modifications;
+            foreach (UndoPropertyModification modification in modifications)
+            {
+                UnityEngine.Object target = modification.currentValue.target;
+                GameObject item = target as GameObject;
+                if (target is Component component) item = component.gameObject;
+                if (item && item.transform.IsChildOf(_levelContents.transform)) _roomWasEdited = true;
+            }
+            return modifications;
+        }
+        /** @brief 撤销或重做后重新比较实际房间内容。 */
+        private void RoomUndoChanged()
+        {
+            _roomWasEdited = true;
+            Repaint();
+        }
         /** @brief 比较实际可保存内容，预览场景脏标记不代表用户尚未保存。 @return 是否存在未保存内容 */
         private bool HasUnsavedLevel()
         {
-            return _levelContents && (RoomSnapshot() != _savedRoomSnapshot || (_level && EditorUtility.IsDirty(_level)));
+            return _levelContents && ((_roomWasEdited && RoomSnapshot() != _savedRoomSnapshot)
+                || (_level && EditorJsonUtility.ToJson(_level) != _savedLevelSnapshot));
         }
         /** @brief 获取当前房间的可序列化组件内容。 @return 同一编辑会话内可比较的快照 */
         private string RoomSnapshot()
@@ -83,6 +107,7 @@ namespace DelayNoMore.LightPath.Editor
                 _report = "房间模板缺失，无法打开。";
                 return;
             }
+            if (_levelContents && _level == level && _editingRoom == index) return;
             if (!CloseLevel())
                 return;
             _level = level;
@@ -107,6 +132,8 @@ namespace DelayNoMore.LightPath.Editor
             FrameMap();
             BuildPreview();
             _savedRoomSnapshot = RoomSnapshot();
+            _savedLevelSnapshot = EditorJsonUtility.ToJson(_level);
+            _roomWasEdited = false;
         }
         /** @brief 保存当前关卡。 */
         private void SaveLevel()
@@ -119,6 +146,8 @@ namespace DelayNoMore.LightPath.Editor
 
             AssetDatabase.SaveAssets();
             _savedRoomSnapshot = RoomSnapshot();
+            _savedLevelSnapshot = EditorJsonUtility.ToJson(_level);
+            _roomWasEdited = false;
         }
         /** @brief 创建一个独立的空白投影关卡及最小运行引用。 */
         private void CreateLevel()

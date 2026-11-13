@@ -396,6 +396,7 @@ namespace DelayNoMore.LightPath.Editor
             {
                 Undo.RecordObject(_dragging.transform, "移动关卡对象");
                 MoveTo(_dragging, Snap(target + _grabOffset));
+                _roomWasEdited = true;
                 UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(_room.gameObject.scene);
                 e.Use();
                 Repaint();
