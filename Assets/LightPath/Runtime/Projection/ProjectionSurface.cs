@@ -605,6 +605,29 @@ namespace DelayNoMore.LightPath
                     return region.Portal;
             return null;
         }
+        /** @brief 在最终可见投影上反查可操作源，采用真实网格射线而非包围盒。@param point 幕布世界点 @param selected 背景色 @return 最近的可操作源索引 */
+        public int PickSource(Vector3 point, int selected)
+        {
+            if (!WorldBounds().Contains(point)) return -1;
+            foreach (ProjectionSource source in _sources) if (source) source.RefreshGeometry();
+            ProjectionRegion region = Sample(point);
+            if (!region.Exists || (region.Colored && _config.Matches(region.Color, selected))) return -1;
+            Vector3 direction = point - ProjectionOrigin;
+            float length = direction.magnitude;
+            Ray ray = new Ray(ProjectionOrigin, direction.normalized);
+            int result = -1; float nearest = float.PositiveInfinity;
+            for (int i = 0; i < _sources.Length; i++)
+            {
+                ProjectionSource source = _sources[i];
+                if (!source || !source.gameObject.activeInHierarchy || !source.Definition || !source.Definition.Movable) continue;
+                if (!source.Intersects(ray, length)) continue;
+                if (region.Portal && region.Portal != source) continue;
+                if (!region.Colored && source.Definition.Transmissive) continue;
+                float distance = source.TryHit(ray, out float hit) ? hit : Vector3.Distance(ProjectionOrigin, source.transform.position);
+                if (distance < nearest) { nearest = distance; result = i; }
+            }
+            return result;
+        }
         /** @brief 查询指定门的光学投影是否有效，独立于目标块是否已加载。 @param source 门 @param selected 全局色 @return 是否有效 */
         public bool PortalActive(ProjectionSource source, int selected)
         {

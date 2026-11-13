@@ -276,6 +276,41 @@ namespace DelayNoMore.LightPath
                 }
             return found;
         }
+        /** @brief 投影调整时按最近可见表面选择3D物件或幕布里的最终投影，绝不改变姿态。@param pointer 屏幕指针 @param room 当前房间 @param selectedColor 背景色 @return 源索引，未命中为负一 */
+        public int PickProjectionObject(Vector2 pointer, LightRoom room, int selectedColor)
+        {
+            Ray ray = PointerRay(pointer);
+            Ray simulation = LightStageMath.InverseRay(_mapping, ray);
+            float nearest = float.PositiveInfinity;
+            int result = -1;
+            if (Physics.Raycast(ray, out RaycastHit hit, _viewCamera.farClipPlane, (1 << _config.DisplayLayer) | (1 << _config.ScreenLayer), QueryTriggerInteraction.Collide))
+            {
+                nearest = hit.distance;
+                if (hit.collider == _screenHit)
+                {
+                    Vector3 local = Quaternion.Inverse(_screenFrame.rotation) * (hit.point - _screenFrame.position);
+                    Vector2 uv = new Vector2(local.x / _config.ScreenSize.x + .5f, local.y / _config.ScreenSize.y + .5f);
+                    Ray captureRay = _capture.ViewportPointToRay(uv);
+                    Plane plane = new Plane(Vector3.forward, room.Surface.transform.position);
+                    if (plane.Raycast(captureRay, out float distance))
+                        result = room.Surface.PickSource(captureRay.GetPoint(distance), selectedColor);
+                }
+            }
+            var sources = room.Surface.Sources;
+            for (int i = 0; i < sources.Count; i++)
+            {
+                ProjectionSource source = sources[i];
+                if (!source || !source.gameObject.activeInHierarchy || !source.Definition) continue;
+                if (!source.TryHit(simulation, out float distance)) continue;
+                float stageDistance = Vector3.Dot(_mapping.MultiplyPoint3x4(simulation.GetPoint(distance)) - ray.origin, ray.direction);
+                if (stageDistance > 0 && stageDistance < nearest)
+                {
+                    nearest = stageDistance;
+                    result = source.Definition.Movable ? i : -1;
+                }
+            }
+            return result;
+        }
         /** @brief 选择顶面机关。@param layout 布局 @param pointer 指针 @return 机关索引或负一 */
         public int PickRepair(RepairLayout layout, Vector2 pointer, RepairSession session = null) => RepairStageMesh.Pick(layout, _config, _repairFrame, PointerRay(pointer), session);
         /** @brief 将维修指针转换为配置平面坐标。 */

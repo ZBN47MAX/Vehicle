@@ -425,7 +425,14 @@ namespace DelayNoMore.LightPath
                 _selected = ProjectionSelection.Next(sources, _selected, scroll > 0 ? -1 : 1);
             if (Action("Drag").WasPressedThisFrame() && !(UnityEngine.EventSystems.EventSystem.current && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()))
             {
-                Ray ray = _stage ? _stage.SimulationRay(Action("Pointer").ReadValue<Vector2>()) : _camera.ScreenPointToRay(Action("Pointer").ReadValue<Vector2>());
+                if (_stage)
+                {
+                    int picked = _stage.PickProjectionObject(Action("Pointer").ReadValue<Vector2>(), Room, _color);
+                    if (picked >= 0) _selected = picked;
+                }
+                else
+                {
+                Ray ray = _camera.ScreenPointToRay(Action("Pointer").ReadValue<Vector2>());
                 float nearest = float.PositiveInfinity;
                 for (int i = 0; i < sources.Count; i++)
                     if (sources[i] && sources[i].Definition && sources[i].Definition.Movable && sources[i].TryHit(ray, out float distance) && distance < nearest)
@@ -433,6 +440,7 @@ namespace DelayNoMore.LightPath
                         _selected = i;
                         nearest = distance;
                     }
+                }
             }
             _selected = Mathf.Clamp(_selected, 0, sources.Count - 1);
             ProjectionSource source = sources[_selected];
