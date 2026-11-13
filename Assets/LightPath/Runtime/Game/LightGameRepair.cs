@@ -9,6 +9,8 @@ namespace DelayNoMore.LightPath
         private RepairSession _repair;
         /** @brief 左键按住的连续透镜，松开或离开维修时释放。 */
         private int _repairDrag = -1;
+        /** @brief 当前指针绕节点的拖动状态。 */
+        private RepairLensDrag _lensDrag;
         /** @brief 仅包含运行时 UI 表现的兼容维修视图。 */
         private readonly RepairPanel _repairPanel = new RepairPanel();
         /** @brief 是否正在显示整局维修视图。 */
@@ -56,14 +58,16 @@ namespace DelayNoMore.LightPath
             {
                 _repairDrag = index >= 0 && _repairLayout.Devices[index].Type == RepairLayout.Kind.Lens ? index : -1;
                 if (_repairDrag < 0) _repair.Rotate(index);
+                else _lensDrag.Begin(point, valid);
                 if (!wasPowered && _repair.Powered) Notify(GameText.Get("LightGameRepair.EditRepair.002"));
                 return;
             }
             if (!Action("Drag").IsPressed()) _repairDrag = -1;
             if (_repairDrag >= 0 && Action("Drag").IsPressed())
             {
-                float delta = Action("PointerDelta").ReadValue<Vector2>().x;
-                _repair.SetLensAngle(_repairDrag, _repair.Angle(_repairDrag) - delta * _repairLayout.LensDegreesPerPixel);
+                Vector2 center = _repairLayout.Devices[_repairDrag].Position;
+                float angle = _lensDrag.Step(center, point, valid, _repair.Angle(_repairDrag), _repairLayout.NodeRadius * .25f, _repairLayout.LensDragSensitivity);
+                _repair.SetLensAngle(_repairDrag, angle);
             }
             if (!wasPowered && _repair.Powered)
                 Notify(GameText.Get("LightGameRepair.EditRepair.002"));

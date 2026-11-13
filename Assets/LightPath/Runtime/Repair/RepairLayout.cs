@@ -63,8 +63,8 @@ namespace DelayNoMore.LightPath
         public float HitRadius { get => NodeRadius; set => NodeRadius = value; }
         /** @brief 节点可见方形边框的半宽，同时用于射线命中和编辑器预览。 */
         [Min(.01f)] public float NodeRadius = .45f;
-        /** @brief 透镜每像素水平拖动的角度，正向右拖顺时针。 */
-        [Min(.001f)] public float LensDegreesPerPixel = .15f;
+        /** @brief 透镜跟随指针绕节点角位移的倍率，1为等角，较小值便于精调。 */
+        [Range(.05f, 1f)] public float LensDragSensitivity = .5f;
         /** @brief 验证运行所需内容，不修改配置。@param error 首个错误 @return 内容可用于运行时为真；不保证谜题可解 */
         public bool TryValidate(out string error)
         {
@@ -78,7 +78,7 @@ namespace DelayNoMore.LightPath
                 error = GameText.Get("RepairLayout.TryValidate.005");
             else if (!Finite(Area.x) || !Finite(Area.y) || !Finite(Area.width) || !Finite(Area.height)
                 || Area.width <= 0 || Area.height <= 0 || !Finite(HitRadius) || HitRadius <= 0
-                || !Finite(LensDegreesPerPixel) || LensDegreesPerPixel <= 0)
+                || !Finite(LensDragSensitivity) || LensDragSensitivity < .05f || LensDragSensitivity > 1)
                 error = GameText.Get("RepairLayout.TryValidate.006");
             if (error.Length > 0)
                 return false;

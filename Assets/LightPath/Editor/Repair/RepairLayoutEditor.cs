@@ -22,6 +22,8 @@ namespace DelayNoMore.LightPath.Editor
         private Vector2 _pan;
         /** @brief 拖动状态。 */
         private bool _drag;
+        /** @brief 与游戏运行共用的节点角位移拖动状态。 */
+        private RepairLensDrag _lensDrag;
         /** @brief 右栏滚动。 */
         private Vector2 _scroll;
         /** @brief 类型中文名。 */
@@ -144,15 +146,20 @@ namespace DelayNoMore.LightPath.Editor
                 if (e.type == EventType.MouseDown && e.button == 0 && (hit.Contains(e.mousePosition) || RepairPreviewSolver.AngleLineDistance(e.mousePosition, p, -direction, 19) <= 8))
                 {
                     _selected = i;
-                    if (_trial != null && device.Type == RepairLayout.Kind.Lens) _drag = true;
+                    if (_trial != null && device.Type == RepairLayout.Kind.Lens)
+                    {
+                        _drag = true;
+                        Vector2 start = (e.mousePosition - area.center - _pan) / _zoom;
+                        _lensDrag.Begin(new Vector2(start.x, -start.y));
+                    }
                     else if (_trial != null && device.Type != RepairLayout.Kind.Source && device.Type != RepairLayout.Kind.Exit) _trial[i] = RepairPreviewSolver.Next(Mathf.RoundToInt(_trial[i] / 45f), device.Allowed) * 45f;
                     else if (_trial == null) { Edit(); _drag = true; }
                     e.Use();
                 }
             }
             Handles.EndGUI();
-            if (area.Contains(e.mousePosition) && e.type == EventType.ScrollWheel) { _zoom = Mathf.Clamp(_zoom * Mathf.Exp(-e.delta.y * .08f), 8, 100); e.Use(); }
-            if (e.type == EventType.MouseDrag && e.button == 2) { _pan += e.delta; e.Use(); }
+            if (!_drag && area.Contains(e.mousePosition) && e.type == EventType.ScrollWheel) { _zoom = Mathf.Clamp(_zoom * Mathf.Exp(-e.delta.y * .08f), 8, 100); e.Use(); }
+            if (!_drag && e.type == EventType.MouseDrag && e.button == 2) { _pan += e.delta; e.Use(); }
             if (_drag && _trial == null && _selected >= 0 && e.type == EventType.MouseDrag && e.button == 0)
             {
                 Vector2 p = (e.mousePosition - area.center - _pan) / _zoom;
@@ -161,7 +168,9 @@ namespace DelayNoMore.LightPath.Editor
             if (_drag && _trial != null && _selected >= 0 && e.type == EventType.MouseDrag && e.button == 0)
             {
                 var device = _layout.Devices[_selected];
-                _trial[_selected] = RepairPreviewSolver.ClampLensAngle(device, _trial[_selected] - e.delta.x * _layout.LensDegreesPerPixel);
+                Vector2 pointer = (e.mousePosition - area.center - _pan) / _zoom;
+                float next = _lensDrag.Step(device.Position, new Vector2(pointer.x, -pointer.y), true, _trial[_selected], _layout.NodeRadius * .25f, _layout.LensDragSensitivity);
+                _trial[_selected] = RepairPreviewSolver.ClampLensAngle(device, next);
                 e.Use();
             }
             if (e.type == EventType.MouseUp) _drag = false;
@@ -208,11 +217,11 @@ namespace DelayNoMore.LightPath.Editor
             bool randomOrder = EditorGUILayout.Toggle("阶段随机循环（每轮不重复）", _layout.RandomPhaseOrder);
             float warning = EditorGUILayout.FloatField("预警秒数", _layout.WarningSeconds);
             Rect bounds = EditorGUILayout.RectField("操作范围", _layout.Area);
-            float sensitivity = EditorGUILayout.FloatField("透镜调角速度（度/像素）", _layout.LensDegreesPerPixel);
+            float sensitivity = EditorGUILayout.Slider("透镜绕心拖动灵敏度", _layout.LensDragSensitivity, .05f, 1f);
             float radius = EditorGUILayout.FloatField("节点边框半宽（同时用于命中）", _layout.NodeRadius);
             if (EditorGUI.EndChangeCheck())
             {
-                Edit(); _layout.LensDegreesPerPixel = Mathf.Max(.001f, sensitivity); _layout.WarningSeconds = Mathf.Max(.1f, warning);
+                Edit(); _layout.LensDragSensitivity = Mathf.Clamp(sensitivity, .05f, 1f); _layout.WarningSeconds = Mathf.Max(.1f, warning);
                 _layout.RandomPhaseOrder = randomOrder;
                 _layout.Interval = new Vector2(Mathf.Max(_layout.WarningSeconds + .1f, interval.x), Mathf.Max(_layout.WarningSeconds + .1f, interval.x, interval.y));
                 bounds.width = Mathf.Max(1, bounds.width); bounds.height = Mathf.Max(1, bounds.height); _layout.Area = bounds; _layout.NodeRadius = Mathf.Max(.01f, radius);

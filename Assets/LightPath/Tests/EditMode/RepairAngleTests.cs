@@ -75,6 +75,57 @@ namespace DelayNoMore.LightPath.Tests
             lens.InitialAngle = 80; Assert.That(_layout.TryValidate(out _), Is.False);
             lens.InitialAngle = 0; lens.AngleRange.x = float.NaN; Assert.That(_layout.TryValidate(out _), Is.False);
         }
+        /** @brief 任意初始朝向与点击偏移均按绕心角位移转动，不依赖水平像素。@param heading 朝向 */
+        [TestCase(0), TestCase(45), TestCase(90), TestCase(135), TestCase(180), TestCase(225), TestCase(270), TestCase(315)]
+        public void LensDrag_AllHeadingsFollowPointerArc(float heading)
+        {
+            Vector2 center = new Vector2(3, -2);
+            var drag = new RepairLensDrag();
+            drag.Begin(center + Unit(heading + 15) * 2);
+            float result = drag.Step(center, center + Unit(heading + 35) * 2, true, heading, .1f, .5f);
+            Assert.That(result, Is.EqualTo(heading + 10).Within(.001f));
+        }
+        /** @brief 跨过正负180度使用最短角差；沿半径拉远不产生旋转。 */
+        [Test] public void LensDrag_WrapsSmoothlyAndIgnoresRadialMotion()
+        {
+            var drag = new RepairLensDrag();
+            drag.Begin(Unit(179));
+            float angle = drag.Step(Vector2.zero, Unit(-179), true, 20, .1f, .5f);
+            Assert.That(angle, Is.EqualTo(21).Within(.001f));
+            Assert.That(drag.Step(Vector2.zero, Unit(-179) * 4, true, angle, .1f, .5f), Is.EqualTo(angle).Within(.001f));
+        }
+        /** @brief 点击中心、穿过中心和失去平面命中后恢复都不跳角。 */
+        [Test] public void LensDrag_CenterCrossingAndInvalidHitReanchor()
+        {
+            var drag = new RepairLensDrag();
+            drag.Begin(Vector2.zero);
+            Assert.That(drag.Step(Vector2.zero, Vector2.right, true, 30, .1f, .5f), Is.EqualTo(30));
+            Assert.That(drag.Step(Vector2.zero, Vector2.left, true, 30, .1f, .5f), Is.EqualTo(30));
+            Assert.That(drag.Step(Vector2.zero, Vector2.up, false, 30, .1f, .5f), Is.EqualTo(30));
+            Assert.That(drag.Step(Vector2.zero, Vector2.right, true, 30, .1f, .5f), Is.EqualTo(30));
+            Assert.That(drag.Step(Vector2.zero, Vector2.up, true, 30, .1f, .5f), Is.EqualTo(75).Within(.001f));
+        }
+        /** @brief 触及角度限制后反向拖动立即生效，不积累越界拖动量。 */
+        [Test] public void LensDrag_ReversesImmediatelyAtAngleLimit()
+        {
+            var device = _layout.Devices[1];
+            device.Direction = 0; device.AngleRange = new Vector2(-30, 30);
+            var drag = new RepairLensDrag(); drag.Begin(Vector2.right);
+            float angle = RepairPreviewSolver.ClampLensAngle(device, drag.Step(Vector2.zero, Vector2.up, true, 30, .1f, .5f));
+            Assert.That(angle, Is.EqualTo(30));
+            angle = RepairPreviewSolver.ClampLensAngle(device, drag.Step(Vector2.zero, Unit(80), true, angle, .1f, .5f));
+            Assert.That(angle, Is.EqualTo(25).Within(.001f));
+        }
+        /** @brief 相同角位移的不同采样次数和画布尺度得到相同转角。 */
+        [Test] public void LensDrag_IsIndependentOfZoomAndSampleCount()
+        {
+            var drag = new RepairLensDrag(); drag.Begin(Vector2.right * 5);
+            float angle = 10;
+            for (int step = 1; step <= 10; step++) angle = drag.Step(Vector2.zero, Unit(step * 2) * 5, true, angle, .1f, .5f);
+            Assert.That(angle, Is.EqualTo(20).Within(.001f));
+            drag.Begin(Vector2.right * 2);
+            Assert.That(drag.Step(Vector2.zero, Unit(20) * 2, true, 10, .1f, .5f), Is.EqualTo(angle).Within(.001f));
+        }
         /** @brief 互相回射的折镜有界终止。 */
         [Test] public void MirrorLoop_IsDetected()
         {

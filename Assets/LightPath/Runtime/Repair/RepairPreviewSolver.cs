@@ -2,6 +2,31 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace DelayNoMore.LightPath
 {
+    /** @brief 围绕透镜中心跟踪指针角位移，运行与编辑器试玩共用，不改变按下瞬间角度。 */
+    public struct RepairLensDrag
+    {
+        /** @brief 上一有效平面指针位置。 */
+        private Vector2 _previous;
+        /** @brief 是否持有有效拖动起点。 */
+        private bool _tracking;
+        /** @brief 开始拖动并保留原角度。@param point 平面指针 @param valid 平面命中是否有效 */
+        public void Begin(Vector2 point, bool valid = true) { _previous = point; _tracking = valid; }
+        /** @brief 按节点中心的指针角位移调整，穿过中心或失去平面命中时重新锚定，避免翻转。@param center 节点中心 @param point 指针 @param valid 有效平面命中 @param angle 当前透镜角 @param radius 中心死区半径 @param sensitivity 角位移倍率 @return 未裁剪的新角度 */
+        public float Step(Vector2 center, Vector2 point, bool valid, float angle, float radius, float sensitivity)
+        {
+            if (!valid) { _tracking = false; return angle; }
+            Vector2 previous = _previous;
+            _previous = point;
+            if (!_tracking) { _tracking = true; return angle; }
+            Vector2 from = previous - center, to = point - center;
+            Vector2 segment = to - from;
+            float t = Mathf.Clamp01(-Vector2.Dot(from, segment) / Mathf.Max(segment.sqrMagnitude, .000001f));
+            if ((from + segment * t).sqrMagnitude <= radius * radius) return angle;
+            float before = Mathf.Atan2(from.y, from.x) * Mathf.Rad2Deg;
+            float after = Mathf.Atan2(to.y, to.x) * Mathf.Rad2Deg;
+            return angle + Mathf.DeltaAngle(before, after) * sensitivity;
+        }
+    }
     /** @brief 八向折镜与连续透镜共用的光路查询，包含分支、最近节点和循环保护。 */
     public static class RepairPreviewSolver
     {
