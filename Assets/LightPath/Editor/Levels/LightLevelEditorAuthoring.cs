@@ -431,33 +431,38 @@ namespace DelayNoMore.LightPath.Editor
             foreach (MeshRenderer renderer in renderers)
                 bounds.Encapsulate(renderer.bounds);
             _modelPreview.BeginPreview(rect, GUIStyle.none);
-            Camera camera = _modelPreview.camera;
-            camera.fieldOfView = 35;
-            Quaternion rotation = Quaternion.Euler(-_orbit.y, _orbit.x, 0);
-            float radius = Mathf.Max(.1f, bounds.extents.magnitude);
-            camera.transform.SetPositionAndRotation(rotation * Vector3.back * radius * 4 * _previewDistance, rotation);
-            camera.nearClipPlane = .01f;
-            camera.farClipPlane = radius * 100 + 100;
-            camera.clearFlags = CameraClearFlags.Color;
-            camera.backgroundColor = new Color(.12f, .13f, .16f);
-            foreach (MeshRenderer renderer in renderers)
+            Texture previewImage;
+            try
             {
-                MeshFilter filter = renderer.GetComponent<MeshFilter>();
-                if (!filter || !filter.sharedMesh)
-                    continue;
-                for (int i = 0; i < filter.sharedMesh.subMeshCount; i++)
+                Camera camera = _modelPreview.camera;
+                camera.fieldOfView = 35;
+                Quaternion rotation = Quaternion.Euler(-_orbit.y, _orbit.x, 0);
+                float radius = Mathf.Max(.1f, bounds.extents.magnitude);
+                camera.transform.SetPositionAndRotation(rotation * Vector3.back * radius * 4 * _previewDistance, rotation);
+                camera.nearClipPlane = .01f;
+                camera.farClipPlane = radius * 100 + 100;
+                camera.clearFlags = CameraClearFlags.Color;
+                camera.backgroundColor = new Color(.12f, .13f, .16f);
+                foreach (MeshRenderer renderer in renderers)
                 {
-                    Material material = renderer.sharedMaterials.Length > i ? renderer.sharedMaterials[i] : null;
-                    if (material)
-                        _modelPreview.DrawMesh(filter.sharedMesh, Matrix4x4.Translate(-bounds.center) * filter.transform.localToWorldMatrix, material, i);
+                    MeshFilter filter = renderer.GetComponent<MeshFilter>();
+                    if (!filter || !filter.sharedMesh)
+                        continue;
+                    for (int i = 0; i < filter.sharedMesh.subMeshCount; i++)
+                    {
+                        Material material = renderer.sharedMaterials.Length > i ? renderer.sharedMaterials[i] : null;
+                        if (material)
+                            _modelPreview.DrawMesh(filter.sharedMesh, Matrix4x4.Translate(-bounds.center) * filter.transform.localToWorldMatrix, material, i);
+                    }
                 }
+                _markerPreview ??= new ProjectionObjectMarkers();
+                if (!_markerMaterial) _markerMaterial = new Material(Shader.Find("Light Path/Repair Stage")) { hideFlags = HideFlags.HideAndDontSave };
+                Mesh markers = _markerPreview.BuildPreview(target.GetComponentsInChildren<ProjectionSource>(true), Matrix4x4.Translate(-bounds.center), camera, PreviewBidirectional, target.GetComponentsInChildren<RoomPortalLink>(true));
+                _modelPreview.DrawMesh(markers, Matrix4x4.identity, _markerMaterial, 0);
+                _modelPreview.Render(true);
             }
-            _markerPreview ??= new ProjectionObjectMarkers();
-            if (!_markerMaterial) _markerMaterial = new Material(Shader.Find("Light Path/Repair Stage")) { hideFlags = HideFlags.HideAndDontSave };
-            Mesh markers = _markerPreview.BuildPreview(target.GetComponentsInChildren<ProjectionSource>(true), Matrix4x4.Translate(-bounds.center), camera, PreviewBidirectional);
-            _modelPreview.DrawMesh(markers, Matrix4x4.identity, _markerMaterial, 0);
-            _modelPreview.Render(true);
-            GUI.DrawTexture(rect, _modelPreview.EndPreview(), ScaleMode.StretchToFill, false);
+            finally { previewImage = _modelPreview.EndPreview(); }
+            GUI.DrawTexture(rect, previewImage, ScaleMode.StretchToFill, false);
         }
         /** @brief 从编辑关卡解析双向门，包括自动回程端。@param source 门 @return 是否双向 */
         private bool PreviewBidirectional(ProjectionSource source)

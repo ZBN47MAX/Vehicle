@@ -320,6 +320,12 @@ namespace DelayNoMore.LightPath.Editor
         /** @brief 使用本地形状角点与真实变换绘制2D对象，保留旋转。 @param root 对象 @param canvas 画布 @return 画布四角 */
         private Vector3[] ObjectPreviewOutline(GameObject root, Rect canvas)
         {
+            if (root.GetComponent<RoomPortalLink>() && root.TryGetComponent(out Collider2D portalShape))
+            {
+                var points = new List<Vector2>();
+                foreach (Vector3 point in ProjectionObjectMarkers.FixedPortalOutline(portalShape)) points.Add(ToCanvas(point, canvas));
+                return ProjectionContours.Hull(points).Select(point => (Vector3)point).ToArray();
+            }
             Transform shapeTransform = root.transform;
             Bounds bounds = new Bounds(Vector3.zero, Vector3.one);
             if (root.GetComponent<RoomDecoration>() && root.transform is RectTransform rect)
