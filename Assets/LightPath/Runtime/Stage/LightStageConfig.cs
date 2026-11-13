@@ -28,8 +28,6 @@ namespace DelayNoMore.LightPath
         [Min(.2f)] public float ScreenDistance = 2;
         /** @brief 聚焦顶面时相机距平面的世界距离。 */
         [Min(.2f)] public float RepairDistance = 3;
-        /** @brief 布局坐标中的维修节点半宽，同时作为点击容差。 */
-        [Min(.01f)] public float NodeRadius = .45f;
         /** @brief 布局坐标中的光线宽度。 */
         [Min(.001f)] public float BeamWidth = .08f;
         /** @brief 两个世界共用的选中描边颜色。 */
@@ -52,7 +50,7 @@ namespace DelayNoMore.LightPath
                 error = GameText.Get("LightStageConfig.TryValidate.005");
             else if (!Positive(FieldOfView) || FieldOfView < 15 || FieldOfView > 100 || !Positive(TransitionSeconds)
                 || !Positive(FramePadding) || FramePadding < 1 || !Positive(ScreenDistance) || !Positive(RepairDistance)
-                || !Positive(NodeRadius) || !Positive(BeamWidth) || !Positive(SelectionWidth))
+                || !Positive(BeamWidth) || !Positive(SelectionWidth))
                 error = GameText.Get("LightStageConfig.TryValidate.006");
             return error.Length == 0;
         }

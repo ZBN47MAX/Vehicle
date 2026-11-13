@@ -77,7 +77,8 @@ namespace DelayNoMore.LightPath
                 || Interval.x <= WarningSeconds || Interval.y < Interval.x)
                 error = GameText.Get("RepairLayout.TryValidate.005");
             else if (!Finite(Area.x) || !Finite(Area.y) || !Finite(Area.width) || !Finite(Area.height)
-                || Area.width <= 0 || Area.height <= 0 || !Finite(HitRadius) || HitRadius <= 0)
+                || Area.width <= 0 || Area.height <= 0 || !Finite(HitRadius) || HitRadius <= 0
+                || !Finite(LensDegreesPerPixel) || LensDegreesPerPixel <= 0)
                 error = GameText.Get("RepairLayout.TryValidate.006");
             if (error.Length > 0)
                 return false;
