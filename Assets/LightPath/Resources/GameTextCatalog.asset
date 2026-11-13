@@ -2332,125 +2332,125 @@ MonoBehaviour:
     NormalPlay: 1
     Component: TMP
     Title: Projection clearance
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u6295\u5F71\u8D85\u51FA\u53EF\u7528\u8303\u56F4"
   - Key: Debug.NoclipBlocked
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.NoclipBlocked
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u8BF7\u5148\u79FB\u52A8\u5230\u623F\u95F4\u5185\u7684\u7A7A\u5904\uFF0C\u518D\u5173\u95ED Noclip"
   - Key: Debug.NoclipActive
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.NoclipActive
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "Debug \xB7 Noclip \u6D6E\u7A7A\u7A7F\u5899"
   - Key: Debug.Tools.AllOn
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.AllOn
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u5168\u90E8\u5F00\u542F"
   - Key: Debug.Tools.AllOff
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.AllOff
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u5168\u90E8\u5173\u95ED"
   - Key: Debug.Tools.Restore
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.Restore
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u6062\u590D\u8FDB\u5EA6"
   - Key: Debug.Tools.PrevLevel
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.PrevLevel
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u4E0A\u4E00\u5173"
   - Key: Debug.Tools.NextLevel
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.NextLevel
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u4E0B\u4E00\u5173"
   - Key: Debug.Tools.PrevRoom
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.PrevRoom
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u4E0A\u4E00\u623F\u95F4"
   - Key: Debug.Tools.NextRoom
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.NextRoom
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u4E0B\u4E00\u623F\u95F4"
   - Key: Debug.Tools.Jump
     Screen: Debug
     NormalPlay: 0
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.Jump
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u8DF3\u8F6C\u5230\u6240\u9009\u623F\u95F4"
   - Key: View.World
     Screen: HUD
     NormalPlay: 1
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: View.World
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "2D \u5173\u6CE8"
   - Key: View.Repair
     Screen: HUD
     NormalPlay: 1
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: View.Repair
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u6295\u5F71\u4EEA"
   - Key: View.Projection
     Screen: HUD
     NormalPlay: 1
     Component: TMP
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: View.Projection
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u6295\u5F71\u9762\u677F"
   - Key: Debug.PowerForcedOn
@@ -2475,9 +2475,9 @@ MonoBehaviour:
     Screen: Debug
     NormalPlay: 0
     Component: Toggle
-    Title: 
-    Purpose: "运行状态与操作反馈"
-    Location: "游戏界面与调试反馈"
+    Title: Debug.Tools.Blackout
+    Purpose: "\u8FD0\u884C\u72B6\u6001\u4E0E\u64CD\u4F5C\u53CD\u9988"
+    Location: "\u6E38\u620F\u754C\u9762\u4E0E\u8C03\u8BD5\u53CD\u9988"
     Parameters: 
     Value: "\u65AD\u5149"
   - Key: Debug.Tools.RecordSession
@@ -2742,11 +2742,11 @@ MonoBehaviour:
     Parameters: 
     Value: 
   - Key: Checkpoint.Label
-    Screen: "2D世界"
+    Screen: "2D\u4E16\u754C"
     NormalPlay: 1
     Component: TextMeshPro
-    Title: "存档点标识"
-    Purpose: "标识可接触激活的存档点"
-    Location: "存档点顶部"
-    Parameters:
+    Title: "\u5B58\u6863\u70B9\u6807\u8BC6"
+    Purpose: "\u6807\u8BC6\u53EF\u63A5\u89E6\u6FC0\u6D3B\u7684\u5B58\u6863\u70B9"
+    Location: "\u5B58\u6863\u70B9\u9876\u90E8"
+    Parameters: 
     Value: Checkpoint
