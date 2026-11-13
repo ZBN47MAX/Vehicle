@@ -71,28 +71,16 @@ namespace DelayNoMore.LightPath
         public float PortalCooldown => _portalCooldown;
         /** @brief 获取坠落高度。 */
         public float DeathHeight => _deathHeight;
-        /** @brief 镜头跟随配置。 */
-        [SerializeField, Tooltip("启用连续卷轴镜头；旧演示默认固定镜头")] private bool _scrollingCamera;
         /** @brief 观看相机高度。 */
         [SerializeField, Min(1), Tooltip("正交相机半高，世界米")] private float _cameraHalfHeight = 6.2f;
-        /** @brief 镜头跟随死区。 */
-        [SerializeField, Tooltip("角色在镜头中心附近移动时的XY半死区")] private Vector2 _cameraDeadZone = new Vector2(2, 1);
-        /** @brief 镜头中心世界边界。 */
-        [SerializeField, Tooltip("卷轴镜头中心可移动的世界XY矩形")] private Rect _cameraBounds = new Rect(0, 3.7f, 100, 0);
         /** @brief 投影块边长。 */
         [SerializeField, Min(1), Tooltip("投影缓存块边长，世界米")] private float _chunkSize = 8;
         /** @brief 活动区半径。 */
         [SerializeField, Min(4), Tooltip("围绕角色的投影激活半径，需覆盖相机视野并留预加载距离")] private float _activeRadius = 24;
         /** @brief 边界细化次数。 */
         [SerializeField, Range(0, 4), Tooltip("混合区域边界递归细分次数；内部一致区域不继续细分")] private int _edgeRefinement = 2;
-        /** @brief 获取卷轴开关。 */
-        public bool ScrollingCamera => _scrollingCamera;
         /** @brief 获取相机半高。 */
         public float CameraHalfHeight => _cameraHalfHeight;
-        /** @brief 获取死区。 */
-        public Vector2 CameraDeadZone => _cameraDeadZone;
-        /** @brief 获取相机中心边界。 */
-        public Rect CameraBounds => _cameraBounds;
         /** @brief 获取块尺寸。 */
         public float ChunkSize => Mathf.Max(1, _chunkSize);
         /** @brief 获取预加载范围。 */
