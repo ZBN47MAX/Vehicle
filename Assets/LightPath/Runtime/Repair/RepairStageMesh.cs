@@ -31,13 +31,13 @@ namespace DelayNoMore.LightPath
                 _vertices.Clear(); _indices.Clear(); _colors.Clear();
                 foreach (var node in layout.Devices) AddDirections(node, layout, config);
                 foreach (RepairPreviewSolver.Segment segment in session.Result.Segments)
-                    AddLine(segment.From, segment.To, config.BeamWidth, Color.yellow);
+                    AddLine(segment.From, segment.To, config.BeamWidth, layout.BeamColor(segment.SourceIndex));
                 for (int i = 0; i < layout.Devices.Length; i++)
                 {
                     RepairLayout.Device node = layout.Devices[i];
-                    AddSquare(node.Position, layout.NodeRadius, session.IsTarget(node.Id, session.Warning) ? new Color(1, .5f, .1f) : Color.white);
+                    AddSquare(node.Position, layout.NodeRadius, session.IsTarget(node.Id) ? Color.yellow : Color.white);
                     AddSquare(node.Position, layout.NodeRadius * .9f, new Color(.08f, .12f, .16f));
-                    Color color = session.Result.Lit.Contains(node.Id) ? Color.green : node.Type == RepairLayout.Kind.Source ? Color.yellow : Color.cyan;
+                    Color color = layout.NodeColor(node, session.Result, session.IsTarget(node.Id));
                     if (node.Type == RepairLayout.Kind.Lens)
                     {
                         Vector2 a = Unit(node.Direction * 45) * layout.NodeRadius * .8f;

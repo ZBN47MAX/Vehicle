@@ -16,8 +16,9 @@ namespace DelayNoMore.LightPath
         [Min(1)] public float NoclipBoost = 3;
         /** @brief 能力解锁通知的淡出秒数。 */
         [Min(.01f)] public float UnlockFadeSeconds = .4f;
-        /** @brief 能力解锁通知颜色。 */
-        public Color UnlockNoticeColor = new Color(1, .88f, .63f);
+        /** @brief 能力通知的A通道控制基础透明度，RGB统一使用成功绿色。 */
+        [Tooltip("能力通知统一绿色；此字段的A通道控制基础透明度。")]
+        public Color UnlockNoticeColor = Color.green;
         /** @brief 存档点专用正红色色号，不属于玩家手动滤镜。 */
         public const int RedColorIndex = 4;
         /** @brief 判断是否为玩家可手动选择的色号，解锁状态另外检查。@param index 色号 @return 是否允许手动选择 */

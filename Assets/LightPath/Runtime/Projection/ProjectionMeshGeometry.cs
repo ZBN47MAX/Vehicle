@@ -14,6 +14,8 @@ namespace DelayNoMore.LightPath
         private readonly List<Part> _parts = new List<Part>();
         /** @brief 复用组件查询列表。 */
         private readonly List<MeshFilter> _filters = new List<MeshFilter>();
+        /** @brief 蒙皮模型查询缓冲，避免重复刷新时分配数组。 */
+        private readonly List<SkinnedMeshRenderer> _skins = new List<SkinnedMeshRenderer>();
         /** @brief 子模型的几何与逆矩阵。 */
         private struct Part
         {
@@ -26,10 +28,10 @@ namespace DelayNoMore.LightPath
         }
         /** @brief 是否有模型；有模型时不可退化成简化Collider。 */
         public bool HasMeshes { get; private set; }
-        /** @brief 枚举实际网格的世界顶点。 @return 世界顶点序列 */
-        public IEnumerable<Vector3> WorldVertices()
+        /** @brief 枚举实际网格的世界顶点。@param refresh 是否先刷新几何；调用者已刷新同一快照时可关闭 @return 世界顶点序列 */
+        public IEnumerable<Vector3> WorldVertices(bool refresh = true)
         {
-            Refresh();
+            if (refresh) Refresh();
             foreach (Part part in _parts)
             {
                 Matrix4x4 matrix = part.Forward;
@@ -92,7 +94,8 @@ namespace DelayNoMore.LightPath
         public bool Refresh()
         {
             _parts.Clear(); _filters.Clear(); HasMeshes = false; MissingMeshes = 0;
-            foreach (SkinnedMeshRenderer skin in _source.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            _source.GetComponentsInChildren(true, _skins);
+            foreach (SkinnedMeshRenderer skin in _skins)
                 if (skin.GetComponentInParent<ProjectionSource>(true) == _source)
                 {
                     HasMeshes = true;

@@ -86,7 +86,8 @@ namespace DelayNoMore.LightPath
             }
             if (Time.unscaledTime >= _unlockUntil)
                 return "";
-            Color color = _config.UnlockNoticeColor;
+            Color color = Color.green;
+            color.a = _config.UnlockNoticeColor.a;
             color.a *= Mathf.Clamp01((_unlockUntil - Time.unscaledTime) / Mathf.Max(.01f, _config.UnlockFadeSeconds));
             return "<size=115%><color=#" + ColorUtility.ToHtmlStringRGBA(color) + ">" + _unlockNotice + "</color></size>";
         }
@@ -232,7 +233,7 @@ namespace DelayNoMore.LightPath
                 {
                     _preview = false;
                     _jumpUntil = 0;
-                    Notify(_stage ? GameText.Get("LightGame.Update.004", Label("Mode")) : GameText.Get("LightGame.Update.005", Label("Mode")));
+                    Notify(_stage ? GameText.Get("LightGame.Update.004", Label("Mode")) : GameText.Get("LightGame.Update.005", Label("Mode")), success: false);
                 }
                 if (Room.Powered && _player.position.y < Room.transform.position.y + _config.DeathHeight)
                     Respawn(true, "跌落死亡");
@@ -360,7 +361,7 @@ namespace DelayNoMore.LightPath
             if (!CorrectProjectionClearance(source))
             {
                 source.SetWorldPose(previousPosition, previousRotation);
-                Notify(GameText.Get("Projection.ClearanceBlocked"));
+                Notify(GameText.Get("Projection.ClearanceBlocked"), success: false);
             }
             TelemetryObjectMotion(source, movement, rotation, previousPosition, previousRotation);
             Room.Surface.Invalidate(source);
@@ -477,7 +478,7 @@ namespace DelayNoMore.LightPath
                 _roomIndex = _levelFirst[nextLevel];
                 Room.gameObject.SetActive(true);
                 Respawn(false, "下一关");
-                Notify(GameText.Get("LightGame.CollectAndTravel.035"));
+                Notify(GameText.Get("LightGame.CollectAndTravel.035"), success: true);
             }
         }
         /** @brief 从当前存档点恢复并保留已获取内容。 @param countDeath 是否计入死亡 @param reason 可识别的恢复原因，供本次记录使用 */
@@ -625,10 +626,10 @@ namespace DelayNoMore.LightPath
             _camera.orthographicSize = _config.CameraHalfHeight;
             _camera.transform.SetPositionAndRotation(Room.transform.position + new Vector3(0, 3.7f, -22), Quaternion.identity);
         }
-        /** @brief 显示短时反馈。 @param message 内容 @param seconds 持续秒数 */
-        private void Notify(string message, float seconds = 3)
+        /** @brief 显示短时反馈。@param message 内容 @param success 成功为绿色、失败为红色 @param seconds 持续秒数 */
+        private void Notify(string message, bool success, float seconds = 3)
         {
-            _notice = message;
+            _notice = GameText.Feedback(message, success);
             _noticeUntil = Time.unscaledTime + seconds;
         }
         /** @brief 禁用会话时释放记录绑定与调试状态。 */
@@ -650,9 +651,13 @@ namespace DelayNoMore.LightPath
         /** @brief 失去窗口焦点时释放维修调角，防止返回后继续拖动。 @param focused 是否有焦点 */
         private void OnApplicationFocus(bool focused)
         {
-            RecordTelemetry(focused ? "窗口获得焦点" : "窗口失去焦点");
-            if (!focused) PlaytestRecording.Recorder?.Flush(Time.realtimeSinceStartupAsDouble);
             if (!focused) _repairDrag = -1;
+            RecordTelemetry(focused ? "窗口获得焦点" : "窗口失去焦点");
+            if (PlaytestRecording.Enabled)
+                PlaytestRecording.Diagnostic("窗口焦点", "获得=" + focused + " 转场=" + _transitioning
+                    + " 房间=" + (_ready ? TelemetryRoom(_roomIndex) : "未就绪")
+                    + " 窗口=" + Screen.width + "x" + Screen.height + " 显示模式=" + Screen.fullScreenMode);
+            if (!focused) PlaytestRecording.Recorder?.Flush(Time.realtimeSinceStartupAsDouble);
         }
     }
 }

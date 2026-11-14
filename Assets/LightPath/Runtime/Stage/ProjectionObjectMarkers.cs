@@ -29,27 +29,40 @@ namespace DelayNoMore.LightPath
         private int _displaySignature, _worldSignature;
         /** @brief 对应缓存是否有效。 */
         private bool _displayReady, _worldReady;
+        /** @brief 两种空间共用的门查询缓冲，避免每帧创建数组。 */
+        private readonly List<RoomPortalLink> _portals = new List<RoomPortalLink>();
+        /** @brief 当前边的虚线可见区间。 */
+        private readonly List<Vector2> _dashIntervals = new List<Vector2>();
         /** @brief 提交两个空间的标识，姿态与可见状态不变时复用网格。 */
         public void Draw(LightRoom room, Matrix4x4 mapping, Camera view, Camera capture, LightStageConfig config, Material material, LightGame game, ProjectionSource selected = null)
         {
             int color = game ? game.SelectedColor : -1;
-            Build(_display, room, mapping, view, false, config, game, selected, color);
-            Build(_world, room, Matrix4x4.identity, capture, true, config, game, selected, color);
-            Graphics.DrawMesh(_display, Matrix4x4.identity, material, config.DisplayLayer, view, 0, null, ShadowCastingMode.Off, false);
-            if (room.Powered) Graphics.DrawMesh(_world, Matrix4x4.identity, material, room.Surface.gameObject.layer, capture, 0, null, ShadowCastingMode.Off, false);
+            bool displayVisible = (view.cullingMask & (1 << config.DisplayLayer)) != 0;
+            if (!displayVisible && !room.Powered) return;
+            room.GetComponentsInChildren(false, _portals);
+            foreach (ProjectionSource source in room.Surface.Sources)
+                if (source && source.Definition) source.RefreshGeometry();
+            if (displayVisible)
+            {
+                Build(_display, room, mapping, view, false, config, game, selected, color);
+                Graphics.DrawMesh(_display, Matrix4x4.identity, material, config.DisplayLayer, view, 0, null, ShadowCastingMode.Off, false);
+            }
+            if (room.Powered)
+            {
+                Build(_world, room, Matrix4x4.identity, capture, true, config, game, selected, color);
+                Graphics.DrawMesh(_world, Matrix4x4.identity, material, room.Surface.gameObject.layer, capture, 0, null, ShadowCastingMode.Off, false);
+            }
         }
         /** @brief 构造当前相机的轮廓；最终投影的线条和箭头统一按真实混色结果遮罩。 */
         private void Build(Mesh mesh, LightRoom room, Matrix4x4 mapping, Camera camera, bool projected, LightStageConfig config, LightGame game, ProjectionSource selected, int color)
         {
-            var portals = room.GetComponentsInChildren<RoomPortalLink>();
-            int hash = camera.worldToCameraMatrix.GetHashCode() ^ mapping.GetHashCode() ^ room.Surface.ProjectionOrigin.GetHashCode() ^ color ^ room.GetHashCode() ^ (selected ? selected.GetHashCode() : 0) ^ config.SelectionColor.GetHashCode() ^ config.MarkerWidth.GetHashCode() ^ room.Surface.Bounds.GetHashCode() ^ room.Surface.transform.position.z.GetHashCode();
+            int hash = camera.worldToCameraMatrix.GetHashCode() ^ camera.orthographic.GetHashCode() ^ camera.nearClipPlane.GetHashCode() ^ mapping.GetHashCode() ^ room.Surface.ProjectionOrigin.GetHashCode() ^ color ^ room.GetHashCode() ^ (selected ? selected.GetHashCode() : 0) ^ config.SelectionColor.GetHashCode() ^ config.MarkerWidth.GetHashCode() ^ room.Surface.Bounds.GetHashCode() ^ room.Surface.transform.position.z.GetHashCode();
             foreach (ProjectionSource source in room.Surface.Sources)
                 if (source && source.Definition)
                 {
-                    source.RefreshGeometry();
                     hash = unchecked(hash * 31 + source.Geometry.Signature + source.transform.localToWorldMatrix.GetHashCode() + source.Definition.Movable.GetHashCode() + source.Definition.Portal.GetHashCode() + source.Definition.MarkerWidth.GetHashCode() + source.Definition.GetColor(room.Surface.Configuration).GetHashCode() + source.gameObject.activeInHierarchy.GetHashCode());
                 }
-            foreach (RoomPortalLink portal in portals)
+            foreach (RoomPortalLink portal in _portals)
                 hash = unchecked(hash * 31 + portal.transform.localToWorldMatrix.GetHashCode() + (portal.TryGetComponent(out Collider2D collider) ? collider.enabled.GetHashCode() : 0) + portal.Bidirectional.GetHashCode());
             if (projected ? _worldReady && _worldSignature == hash : _displayReady && _displaySignature == hash) return;
             Clear(); _selectedColor = color;
@@ -58,11 +71,11 @@ namespace DelayNoMore.LightPath
             {
                 if (!source || !source.isActiveAndEnabled || !source.Definition) continue;
                 _lineColor = selected == source ? config.SelectionColor : Color.white;
-                AddSource(source, room.Surface, mapping, camera, projected, game && game.PortalBidirectional(source.gameObject));
+                AddSource(source, room.Surface, mapping, camera, projected, game && game.PortalBidirectional(source.gameObject), false);
             }
             _maskSurface = null; _lineColor = Color.white;
             if (projected)
-                foreach (RoomPortalLink portal in portals)
+                foreach (RoomPortalLink portal in _portals)
                     if (!portal.GetComponent<ProjectionSource>() && portal.TryGetComponent(out Collider2D shape) && shape.enabled)
                         AddFixedPortal(shape, Matrix4x4.identity, camera, config.MarkerWidth, game && game.PortalBidirectional(portal.gameObject));
             Upload(mesh);
@@ -79,13 +92,13 @@ namespace DelayNoMore.LightPath
             Upload(_display); _displayReady = false;
             return _display;
         }
-        /** @brief 获取投影源的实际可见外轮廓，圆模型不再使用矩形包围。 */
-        private void AddSource(ProjectionSource source, ProjectionSurface surface, Matrix4x4 mapping, Camera camera, bool projected, bool bidirectional)
+        /** @brief 获取投影源的实际可见外轮廓。@param source 投影源 @param surface 二维投影面 @param mapping 空间映射 @param camera 标识相机 @param projected 是否为二维投影 @param bidirectional 是否双向通行 @param refreshGeometry 是否先刷新模型快照 */
+        private void AddSource(ProjectionSource source, ProjectionSurface surface, Matrix4x4 mapping, Camera camera, bool projected, bool bidirectional, bool refreshGeometry = true)
         {
             bool portal = source.Definition.Portal && !source.GetComponent<ColorAbilityKey>() && !source.GetComponent<ProjectionAbilityKey>() && !source.GetComponent<LevelExit>();
             if (!source.Definition.Movable && !portal) return;
             var cameraPoints = new List<Vector3>(); float depth = float.PositiveInfinity;
-            foreach (Vector3 vertex in source.Geometry.WorldVertices())
+            foreach (Vector3 vertex in source.Geometry.WorldVertices(refreshGeometry))
             {
                 Vector3 point = camera.transform.InverseTransformPoint(projected ? surface.ProjectPoint(vertex) : mapping.MultiplyPoint3x4(vertex));
                 cameraPoints.Add(point); depth = Mathf.Min(depth, point.z);
@@ -126,25 +139,35 @@ namespace DelayNoMore.LightPath
         /** @brief 虚线环绕完整轮廓，明显折角额外补实线角；圆门保留连续圆弧。 */
         private void DrawContour(Vector2[] hull, float depth, Camera camera, float width, bool movable, bool portal, bool bidirectional)
         {
-            if (hull.Length < 3) return;
-            Vector2 min = hull[0], max = hull[0], center = Vector2.zero; float perimeter = 0;
-            for (int i = 0; i < hull.Length; i++) { min = Vector2.Min(min, hull[i]); max = Vector2.Max(max, hull[i]); center += hull[i]; perimeter += Vector2.Distance(hull[i], hull[(i + 1) % hull.Length]); }
-            center /= hull.Length;
-            _maskCenter = camera.transform.TransformPoint(new Vector3(center.x, center.y, depth));
-            float phase = 0, dash = Mathf.Max(width * 6, perimeter / 48);
+            if (hull.Length < 3 || width <= 0 || float.IsNaN(width) || float.IsInfinity(width)) return;
+            Vector2 min = hull[0], max = hull[0];
+            double centerX = 0, centerY = 0, perimeter = 0;
             for (int i = 0; i < hull.Length; i++)
             {
-                Vector2 a = hull[i], b = hull[(i + 1) % hull.Length]; float length = Vector2.Distance(a, b), done = 0;
+                Vector2 point = hull[i];
+                float length = Vector2.Distance(point, hull[(i + 1) % hull.Length]);
+                if (float.IsNaN(length) || float.IsInfinity(length)) return;
+                min = Vector2.Min(min, point);
+                max = Vector2.Max(max, point);
+                centerX += point.x;
+                centerY += point.y;
+                perimeter += length;
+            }
+            Vector2 center = new Vector2((float)(centerX / hull.Length), (float)(centerY / hull.Length));
+            _maskCenter = camera.transform.TransformPoint(new Vector3(center.x, center.y, depth));
+            double phase = 0, dash = System.Math.Max((double)width * 6, perimeter / 48);
+            for (int i = 0; i < hull.Length; i++)
+            {
+                Vector2 a = hull[i], b = hull[(i + 1) % hull.Length]; float length = Vector2.Distance(a, b);
                 if (!movable) CameraStroke(a, b, depth, camera, width);
                 else
                 {
-                    while (done < length - .000001f)
+                    LightStageMath.MarkerDashIntervals(phase, length, dash, _dashIntervals);
+                    foreach (Vector2 interval in _dashIntervals)
                     {
-                        float cell = Mathf.Floor((phase + .000001f) / dash);
-                        float amount = Mathf.Min(length - done, Mathf.Max(.000001f, (cell + 1) * dash - phase));
-                        if ((int)cell % 2 == 0) CameraStroke(Vector2.Lerp(a, b, done / length), Vector2.Lerp(a, b, (done + amount) / length), depth, camera, width);
-                        done += amount; phase += amount;
+                        CameraStroke(Vector2.Lerp(a, b, interval.x), Vector2.Lerp(a, b, interval.y), depth, camera, width);
                     }
+                    phase += length;
                     Vector2 before = hull[(i + hull.Length - 1) % hull.Length] - a, after = b - a;
                     if (Vector2.Angle(before, after) < 150)
                     {

@@ -18,6 +18,24 @@ namespace DelayNoMore.LightPath.Tests
         private PlaytestSession Session() => new PlaytestSession(_folder, "test", _launch, 0);
         /** @brief 正常游玩快照。 */
         private static PlaytestRecorder.Snapshot State(string room, string view = "World", bool paused = false) => new PlaytestRecorder.Snapshot { Room = room, View = view, Color = "无选色", Playing = true, Paused = paused, Powered = true, Active = true };
+        /** @brief 实际硬件采集可在主线程执行，基线在CSV与报告均保留，重复设置不覆盖。 */
+        [Test] public void HardwareEnvironment_ExportsOnceToCsvAndReport()
+        {
+            var capture = typeof(PlaytestRecording).GetMethod("CaptureEnvironment", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            string environment = (string)capture.Invoke(null, null);
+            Assert.That(environment, Does.Contain("CPU=").And.Contain("逻辑处理器=").And.Contain("RAMMiB=")
+                .And.Contain("GPU=").And.Contain("驱动=").And.Contain("后端=").And.Contain("显示模式="));
+            var session = Session();
+            Assert.That(session.Enabled, Is.False);
+            session.SetEnabled(true, 1);
+            session.Recorder.SetEnvironment(2, environment);
+            session.Recorder.SetEnvironment(3, "不应覆盖基线");
+            session.Finish(4);
+            string csv = File.ReadAllText(Directory.GetFiles(_folder, "*.csv").Single());
+            string report = File.ReadAllText(Directory.GetFiles(_folder, "*.md").Single());
+            Assert.That(csv, Does.Contain("硬件与运行环境").And.Contain("CPU=").And.Not.Contain("不应覆盖基线"));
+            Assert.That(report, Does.Contain("## 硬件与运行环境").And.Contain(environment).And.Not.Contain("不应覆盖基线"));
+        }
         /** @brief 异常结束保留已刷盘线索，关闭许可则删除，正常结束产生完成标记。 */
         [Test] public void DiagnosticJournal_PreservesOnlyAuthorizedInterval()
         {

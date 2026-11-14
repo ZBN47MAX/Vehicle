@@ -5,6 +5,45 @@ namespace DelayNoMore.LightPath.Tests
     /** @brief 多光源、启动供光与严格目标集合的纯数据回归。 */
     public sealed class RepairPowerTests
     {
+        /** @brief 开局限定次数包含首阶段，预告在边界使用正确阶段池，新局重置次数。@param count 限定阶段次数 */
+        [TestCase(1), TestCase(3), TestCase(8)]
+        public void InitialPhases_RestrictThenUseFullPool(int count)
+        {
+            _layout.RandomPhaseOrder = true;
+            _layout.InitialPhaseCount = count;
+            foreach (RepairLayout.Phase phase in _layout.Phases) phase.Targets = new[] { "a", "b" };
+            _layout.Phases[1].AllowInitially = true;
+            string before = JsonUtility.ToJson(_layout);
+            var session = new RepairSession(_layout, (min, max) => min);
+            for (int occurrence = 1; occurrence <= count; occurrence++)
+            {
+                Assert.That(session.PhaseIndex, Is.EqualTo(1));
+                int expectedNext = occurrence < count ? 1 : 0;
+                Assert.That(session.NextPhaseIndex, Is.EqualTo(expectedNext));
+                Assert.That(session.NextPhaseIndex, Is.EqualTo(expectedNext));
+                session.Tick(1000);
+            }
+            Assert.That(session.PhaseIndex, Is.Zero);
+            Assert.That(JsonUtility.ToJson(_layout), Is.EqualTo(before));
+            Assert.That(new RepairSession(_layout, (min, max) => min).PhaseIndex, Is.EqualTo(1));
+        }
+        /** @brief 限定次数及阶段池校验，顺序模式继续遵循索引。 */
+        [Test] public void InitialPhases_ValidateSelectionAndSequentialMode()
+        {
+            _layout.RandomPhaseOrder = true;
+            _layout.InitialPhaseCount = 2;
+            Assert.That(_layout.TryValidate(out _), Is.False);
+            _layout.Phases[1].AllowInitially = true;
+            _layout.Phases[1].Weight = 0;
+            Assert.That(_layout.TryValidate(out _), Is.False);
+            _layout.Phases[1].Weight = 1;
+            Assert.That(_layout.TryValidate(out _), Is.True);
+            _layout.InitialPhaseCount = -1;
+            Assert.That(_layout.TryValidate(out _), Is.False);
+            _layout.InitialPhaseCount = 2;
+            _layout.RandomPhaseOrder = false;
+            Assert.That(new RepairSession(_layout).PhaseIndex, Is.Zero);
+        }
         /** @brief 本用例独立配置。 */
         private RepairLayout _layout;
         /** @brief 两光源各自照亮一个出口，第一阶段只需要其中一个。 */
@@ -21,35 +60,30 @@ namespace DelayNoMore.LightPath.Tests
         }
         /** @brief 释放临时配置。 */
         [TearDown] public void TearDown() => Object.DestroyImmediate(_layout);
-        /** @brief 五阶段洗牌每轮各出现一次，预警目标稳定，轮界不重复且SO顺序不变。 */
-        [Test] public void RandomPhases_VisitAllFiveBeforeRepeating()
+        /** @brief 独立加权抽取遵守区间边界，权重0不出现，预告稳定且配置只读。@param sample 单位采样 @param expected 预期阶段 */
+        [TestCase(0f, 1), TestCase(.249f, 1), TestCase(.25f, 2), TestCase(1f, 2)]
+        public void RandomPhases_UseWeights(float sample, int expected)
         {
             _layout.RandomPhaseOrder = true;
-            _layout.Phases = new RepairLayout.Phase[5];
-            for (int i = 0; i < 5; i++)
-                _layout.Phases[i] = new RepairLayout.Phase { Name = i.ToString(), Targets = new[] { "a", "b" } };
-            var random = new System.Random(2718);
-            var session = new RepairSession(_layout, (min, max) => min + (float)random.NextDouble() * (max - min));
-            Assert.That(session.PhaseIndex, Is.Zero);
-            int previous = -1;
-            for (int round = 0; round < 4; round++)
+            _layout.Phases = new[]
             {
-                var visited = new System.Collections.Generic.HashSet<int>();
-                for (int i = 0; i < 5; i++)
-                {
-                    Assert.That(visited.Add(session.PhaseIndex), Is.True);
-                    Assert.That(session.PhaseIndex, Is.Not.EqualTo(previous));
-                    previous = session.PhaseIndex;
-                    int next = session.NextPhaseIndex;
-                    Assert.That(session.NextPhaseIndex, Is.EqualTo(next));
-                    session.Tick(1000);
-                    Assert.That(session.PhaseIndex, Is.EqualTo(next));
-                }
-                Assert.That(visited.Count, Is.EqualTo(5));
+                new RepairLayout.Phase { Weight = 0, Targets = new[] { "a", "b" } },
+                new RepairLayout.Phase { Weight = 1, Targets = new[] { "a", "b" } },
+                new RepairLayout.Phase { Weight = 3, Targets = new[] { "a", "b" } }
+            };
+            string before = JsonUtility.ToJson(_layout);
+            var session = new RepairSession(_layout, (min, max) => min == 0 ? sample : min);
+            Assert.That(session.PhaseIndex, Is.Zero);
+            for (int i = 0; i < 10; i++)
+            {
+                Assert.That(session.NextPhaseIndex, Is.EqualTo(expected));
+                Assert.That(session.NextPhaseIndex, Is.EqualTo(expected));
+                session.Tick(1000);
+                Assert.That(session.PhaseIndex, Is.EqualTo(expected));
             }
-            for (int i = 0; i < 5; i++) Assert.That(_layout.Phases[i].Name, Is.EqualTo(i.ToString()));
+            Assert.That(JsonUtility.ToJson(_layout), Is.EqualTo(before));
         }
-        /** @brief 不同阶段数量与随机种子都从0开始，单阶段保持0，首轮其余阶段不重复。@param count 阶段数量 */
+        /** @brief 不同阶段数量与随机种子都从0开始，单阶段保持0。@param count 阶段数量 */
         [TestCase(1), TestCase(2), TestCase(5), TestCase(6)]
         public void RandomPhases_AlwaysStartAtZero(int count)
         {
@@ -62,19 +96,48 @@ namespace DelayNoMore.LightPath.Tests
                 var random = new System.Random(seed);
                 var session = new RepairSession(_layout, (min, max) => min + (float)random.NextDouble() * (max - min));
                 Assert.That(session.PhaseIndex, Is.Zero);
-                var visited = new System.Collections.Generic.HashSet<int> { 0 };
                 for (int i = 1; i < count; i++)
                 {
                     int next = session.NextPhaseIndex;
-                    Assert.That(next, Is.Not.Zero);
+                    Assert.That(next, Is.InRange(0, count - 1));
                     session.Tick(1000);
                     Assert.That(session.PhaseIndex, Is.EqualTo(next));
-                    Assert.That(visited.Add(session.PhaseIndex), Is.True);
                 }
-                Assert.That(visited.Count, Is.EqualTo(count));
                 session.Tick(1000);
                 if (count == 1) Assert.That(session.PhaseIndex, Is.Zero);
             }
+        }
+        /** @brief 权重必须有限非负，随机模式全部为0时拒绝启动。@param weight 待验证权重 */
+        [TestCase(-1f), TestCase(float.NaN), TestCase(float.PositiveInfinity), TestCase(0f)]
+        public void RandomPhases_RejectInvalidWeights(float weight)
+        {
+            _layout.RandomPhaseOrder = true;
+            foreach (RepairLayout.Phase phase in _layout.Phases) phase.Weight = weight;
+            Assert.That(_layout.TryValidate(out _), Is.False);
+        }
+        /** @brief 两个光源在同一节点合流后，全部下游光段带合流标记，两个入射段保留来源。 */
+        [Test] public void MultipleSources_ColorMergedOutputAndUnexpectedExit()
+        {
+            _layout.Devices = new[]
+            {
+                new RepairLayout.Device { Id = "s1", Type = RepairLayout.Kind.Source, Position = new Vector2(-4, 0) },
+                new RepairLayout.Device { Id = "s2", Type = RepairLayout.Kind.Source, Position = new Vector2(0, -4), Direction = 2 },
+                new RepairLayout.Device { Id = "m", Type = RepairLayout.Kind.Splitter, Position = Vector2.zero },
+                new RepairLayout.Device { Id = "a", Type = RepairLayout.Kind.Exit, Position = new Vector2(4, 0) }
+            };
+            var result = RepairPreviewSolver.TraceAngles(_layout, null);
+            Assert.That(result.Segments.FindAll(segment => segment.From == Vector2.zero).Count, Is.EqualTo(2));
+            foreach (RepairPreviewSolver.Segment segment in result.Segments)
+            {
+                if (segment.From == Vector2.zero)
+                    Assert.That(segment.SourceIndex, Is.EqualTo(-1));
+                else
+                    Assert.That(segment.SourceIndex, Is.GreaterThanOrEqualTo(0));
+            }
+            Assert.That(_layout.BeamColor(0), Is.Not.EqualTo(_layout.BeamColor(1)));
+            Assert.That(_layout.BeamColor(-1), Is.EqualTo(_layout.MergedBeamColor));
+            Assert.That(_layout.NodeColor(_layout.Devices[3], result, false), Is.EqualTo(_layout.UnexpectedExitColor));
+            Assert.That(_layout.NodeColor(_layout.Devices[3], result, true), Is.EqualTo(Color.green));
         }
         /** @brief 多光源均被追踪，额外出口在阶段0初始化时立即断光。@param random 是否随机循环 */
         [TestCase(false), TestCase(true)] public void MultipleSources_ExtraExitBlocksStartup(bool random)

@@ -49,10 +49,8 @@ namespace DelayNoMore.LightPath
             {
                 try
                 {
-                    string environment = "版本=" + Application.version + " build=" + Application.buildGUID + " Unity=" + Application.unityVersion
-                        + "\n系统=" + SystemInfo.operatingSystem + " CPU=" + SystemInfo.processorType + " RAMMiB=" + SystemInfo.systemMemorySize
-                        + "\nGPU=" + SystemInfo.graphicsDeviceName + " 驱动=" + SystemInfo.graphicsDeviceVersion + " 后端=" + SystemInfo.graphicsDeviceType
-                        + " VRAMMiB=" + SystemInfo.graphicsMemorySize + " 最大纹理=" + SystemInfo.maxTextureSize;
+                    string environment = CaptureEnvironment();
+                    Recorder.SetEnvironment(Time.realtimeSinceStartupAsDouble, environment);
                     _diagnostics = new PlaytestDiagnosticJournal(Recorder.PendingPath.Replace(".pending.csv", ".diagnostic.pending.log"), environment);
                     Application.logMessageReceivedThreaded += CaptureLog;
                     Recorder.Record(Time.realtimeSinceStartupAsDouble, "故障诊断文件", "同编号diagnostic.log", "未正常退出时保留diagnostic.pending.log，可直接读取");
@@ -67,6 +65,25 @@ namespace DelayNoMore.LightPath
                 _rooms.Clear();
             }
             return Enabled;
+        }
+        /** @brief 在授权启用时从Unity主线程采集硬件与实际图形、显示运行参数。@return 环境快照 */
+        private static string CaptureEnvironment()
+        {
+            Resolution display = Screen.currentResolution;
+            return "版本=" + Application.version + " build=" + Application.buildGUID + " Unity=" + Application.unityVersion
+                + "\n系统=" + SystemInfo.operatingSystem + " 进程位数=" + (Environment.Is64BitProcess ? 64 : 32)
+                + "\nCPU=" + SystemInfo.processorType + " 逻辑处理器=" + SystemInfo.processorCount + " 频率MHz=" + SystemInfo.processorFrequency
+                + " RAMMiB=" + SystemInfo.systemMemorySize
+                + "\nGPU=" + SystemInfo.graphicsDeviceName + " 厂商=" + SystemInfo.graphicsDeviceVendor
+                + " 设备ID=" + SystemInfo.graphicsDeviceID + " 厂商ID=" + SystemInfo.graphicsDeviceVendorID
+                + " VRAMMiB=" + SystemInfo.graphicsMemorySize
+                + "\n驱动=" + SystemInfo.graphicsDeviceVersion + " 后端=" + SystemInfo.graphicsDeviceType
+                + " 图形多线程=" + SystemInfo.graphicsMultiThreaded + " Shader级别=" + SystemInfo.graphicsShaderLevel
+                + " 最大纹理=" + SystemInfo.maxTextureSize
+                + "\n显示器=" + display.width + "x" + display.height + " 刷新率Hz=" + display.refreshRateRatio.value.ToString("F2", System.Globalization.CultureInfo.InvariantCulture)
+                + " 窗口=" + Screen.width + "x" + Screen.height + " 显示模式=" + Screen.fullScreenMode
+                + " 焦点=" + Application.isFocused + " 后台运行=" + Application.runInBackground
+                + "\n垂直同步=" + QualitySettings.vSyncCount + " 目标帧率=" + Application.targetFrameRate;
         }
         /** @brief 注册当前正式房间的性能归属。 @param surface 所属投影面 @param room 稳定房间标识 */
         public static void BindRoom(ProjectionSurface surface, string room) { if (Enabled && surface) _rooms[surface] = room; }

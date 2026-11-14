@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 namespace DelayNoMore.LightPath
 {
     /** @brief 投影操作能力获取、显示与整局状态。 */
@@ -46,13 +47,18 @@ namespace DelayNoMore.LightPath
             if (dirty)
                 room.Surface.Rebuild();
         }
-        /** @brief 为HUD组合当前键位及锁定状态。 @param ability 能力 @param action 动作 @return 提示 */
-        private string AbilityHelp(ProjectionAbility ability, string action)
+        /** @brief 从唯一UIS复合绑定读取单个按键。@param action 动作 @param part 复合绑定中的方向部分 @return 实际绑定显示文字 */
+        public string ProjectionBindingLabel(string action, string part)
         {
-            bool unlocked = HasProjectionAbility(ability);
-            string color = unlocked ? "8DE4AC" : "FFFFFF";
-            return "<color=#" + color + ">" + Label(action) + " " + ProjectionAbilityState.Label(ability)
-                + (unlocked ? "" : GameText.Get("LightGameAbilities.AbilityHelp.003")) + "</color>";
+            var input = Action(action);
+            string key = input.GetBindingDisplayString();
+            for (int i = 0; i < input.bindings.Count; i++)
+                if (input.bindings[i].isPartOfComposite && string.Equals(input.bindings[i].name, part, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    key = input.GetBindingDisplayString(i);
+                    break;
+                }
+            return key;
         }
     }
 }

@@ -1,0 +1,176 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96e48cb434544a4c8c159f07e251dc13, type: 3}
+  m_Name: Repair Layout1
+  m_EditorClassIdentifier: LightPath.Runtime::DelayNoMore.LightPath.RepairLayout
+  Devices:
+  - Id: 8402c778-0468-446c-8b91-16ee48938699
+    TextKey: 
+    Name: "\u5149\u6E901"
+    Type: 0
+    Position: {x: -10, y: 0.3125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 63e46460-6f9d-4941-9a8c-172f9d4ef825
+    TextKey: 
+    Name: "\u51FA\u53E32"
+    Type: 4
+    Position: {x: 10, y: 0.28125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 6a8428d5-6b88-444c-889b-cc525263eddd
+    TextKey: 
+    Name: "\u51FA\u53E33"
+    Type: 4
+    Position: {x: 3.0625, y: 6}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: b18a220e-8f46-4da7-b189-1e8ef195553d
+    TextKey: 
+    Name: "\u51FA\u53E34"
+    Type: 4
+    Position: {x: -9.375, y: -6}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 6e6c7f0a-a4be-499d-99f3-8150859c68fb
+    TextKey: 
+    Name: "\u6298\u955C\u8282\u70B95"
+    Type: 3
+    Position: {x: -4.78125, y: -1.40625}
+    Direction: 6
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 69e440bd-51eb-4826-a01d-2b4e086c5660
+    TextKey: 
+    Name: "\u5206\u5149\u56686"
+    Type: 2
+    Position: {x: -0.03125, y: 3.0625}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 8d05fb3d-d82b-4d08-a77b-04cdbf43b57b
+    TextKey: 
+    Name: "\u51FA\u53E37"
+    Type: 4
+    Position: {x: 10, y: -3.84375}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: d758e55c-9401-42e7-a4e2-3716935e22e0
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C8"
+    Type: 1
+    Position: {x: 5.53125, y: 3.125}
+    Direction: 6
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 29.2
+  - Id: 623b2b64-89b1-4c02-9da0-097f37af5c8f
+    TextKey: 
+    Name: "\u53D1\u5C04\u900F\u955C9"
+    Type: 1
+    Position: {x: 0.03125, y: -2.78125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: -13.7
+  - Id: 887f3c48-396e-4f4d-9303-8feb369d33ba
+    TextKey: 
+    Name: "\u5206\u5149\u566810"
+    Type: 2
+    Position: {x: 5.25, y: -3.875}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: 4e827812-f6a9-4268-8236-61cc3f1e9f2c
+    TextKey: 
+    Name: "\u5149\u6E9011"
+    Type: 0
+    Position: {x: -4.78125, y: 6}
+    Direction: 6
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  - Id: af450ce1-92d3-458c-9416-3b6e8096d73d
+    TextKey: 
+    Name: "\u6298\u955C\u8282\u70B912"
+    Type: 3
+    Position: {x: 0, y: 0.3125}
+    Direction: 0
+    Allowed: 255
+    AngleRange: {x: -30, y: 30}
+    InitialAngle: 0
+  Phases:
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 63e46460-6f9d-4941-9a8c-172f9d4ef825
+    Weight: 1
+    AllowInitially: 0
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 6a8428d5-6b88-444c-889b-cc525263eddd
+    - 8d05fb3d-d82b-4d08-a77b-04cdbf43b57b
+    Weight: 1
+    AllowInitially: 0
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 63e46460-6f9d-4941-9a8c-172f9d4ef825
+    - 8d05fb3d-d82b-4d08-a77b-04cdbf43b57b
+    Weight: 1
+    AllowInitially: 0
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 6a8428d5-6b88-444c-889b-cc525263eddd
+    - 63e46460-6f9d-4941-9a8c-172f9d4ef825
+    - 8d05fb3d-d82b-4d08-a77b-04cdbf43b57b
+    Weight: 1
+    AllowInitially: 0
+  - TextKey: 
+    Name: "\u9636\u6BB5"
+    Targets:
+    - 63e46460-6f9d-4941-9a8c-172f9d4ef825
+    - b18a220e-8f46-4da7-b189-1e8ef195553d
+    - 8d05fb3d-d82b-4d08-a77b-04cdbf43b57b
+    Weight: 1
+    AllowInitially: 0
+  RandomPhaseOrder: 1
+  InitialPhaseCount: 0
+  FirstBeamColor: {r: 0.1, g: 0.7, b: 1, a: 1}
+  SecondBeamColor: {r: 1, g: 0.2, b: 0.7, a: 1}
+  MergedBeamColor: {r: 1, g: 1, b: 1, a: 1}
+  UnexpectedExitColor: {r: 1, g: 0.15, b: 0.1, a: 1}
+  Interval: {x: 60, y: 90}
+  WarningSeconds: 8
+  Area:
+    serializedVersion: 2
+    x: -10
+    y: -6
+    width: 20
+    height: 12
+  NodeRadius: 0.45
+  LensDragSensitivity: 0.5

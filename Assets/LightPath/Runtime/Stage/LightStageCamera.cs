@@ -29,8 +29,11 @@ namespace DelayNoMore.LightPath
             View = view;
             _fromPosition = _viewCamera.transform.position;
             _fromRotation = _viewCamera.transform.rotation;
-            _fromProjection = _viewCamera.projectionMatrix;
-            _aspect = _viewCamera.aspect;
+            float observedAspect = _viewCamera.aspect;
+            _aspect = LightStageMath.ResolveAspect(observedAspect, _aspect);
+            _fromProjection = LightStageMath.ValidAspect(observedAspect)
+                ? _viewCamera.projectionMatrix
+                : Matrix4x4.Perspective(_config.FieldOfView, _aspect, _viewCamera.nearClipPlane, _viewCamera.farClipPlane);
             if (view == StageView.World || view == StageView.Repair)
             {
                 Transform frame = view == StageView.World ? _screenFrame : _repairFrame;
@@ -50,17 +53,18 @@ namespace DelayNoMore.LightPath
             }
             _elapsed = snap ? _config.TransitionSeconds : 0;
             Moving = !snap;
-            Animate(0);
+            ApplyCamera(0);
         }
         /** @brief 沿固定机位方向后退，包住屏幕与全部实际物件边界。 */
         private void FitPerspective()
         {
             float retreat = 0;
+            Quaternion inverseRotation = Quaternion.Inverse(_toRotation);
             foreach (Vector3 point in _framePoints)
             {
-                Vector3 local = Quaternion.Inverse(_toRotation) * (point - _toPosition);
+                Vector3 local = inverseRotation * (point - _toPosition);
                 local.x *= _config.FramePadding; local.y *= _config.FramePadding;
-                retreat = Mathf.Max(retreat, LightStageMath.Retreat(local, _config.FieldOfView, _viewCamera.aspect, _viewCamera.nearClipPlane + .1f));
+                retreat = Mathf.Max(retreat, LightStageMath.Retreat(local, _config.FieldOfView, _aspect, _viewCamera.nearClipPlane + .1f));
             }
             _toPosition -= _toRotation * Vector3.forward * retreat;
         }
@@ -69,11 +73,18 @@ namespace DelayNoMore.LightPath
         {
             if (!Ready)
                 return;
-            if (!Mathf.Approximately(_aspect, _viewCamera.aspect))
+            float aspect = _viewCamera.aspect;
+            if (LightStageMath.ValidAspect(aspect) && !Mathf.Approximately(_aspect, aspect))
             {
                 SetView(View, true);
                 return;
             }
+            if (!Moving && View != StageView.Projection) return;
+            ApplyCamera(seconds);
+        }
+        /** @brief 提交相机过渡；不回调SetView，避免窗口尺寸变化时形成递归。@param seconds 无缩放秒数 */
+        private void ApplyCamera(float seconds)
+        {
             if (!Moving && View == StageView.Projection)
                 FitPerspective();
             _elapsed = Mathf.Min(_config.TransitionSeconds, _elapsed + seconds);
@@ -86,8 +97,9 @@ namespace DelayNoMore.LightPath
             Matrix4x4 target = ortho
                 ? Matrix4x4.Ortho(-_halfHeight * _aspect, _halfHeight * _aspect, -_halfHeight, _halfHeight, _viewCamera.nearClipPlane, _viewCamera.farClipPlane)
                 : Matrix4x4.Perspective(_config.FieldOfView, _aspect, _viewCamera.nearClipPlane, _viewCamera.farClipPlane);
-            Matrix4x4 blended = new Matrix4x4();
-            for (int i = 0; i < 16; i++) blended[i] = Mathf.Lerp(_fromProjection[i], target[i], t);
+            Matrix4x4 blended = target;
+            if (t < 1)
+                for (int i = 0; i < 16; i++) blended[i] = Mathf.Lerp(_fromProjection[i], target[i], t);
             _viewCamera.projectionMatrix = blended;
             Moving = _elapsed < _config.TransitionSeconds;
             _viewCamera.cullingMask = (View == StageView.World && !Moving ? 0 : 1 << _config.DisplayLayer) | (1 << _config.ScreenLayer);
@@ -96,7 +108,8 @@ namespace DelayNoMore.LightPath
                 _viewCamera.orthographic = ortho;
                 _viewCamera.orthographicSize = Mathf.Max(.01f, _halfHeight);
                 _viewCamera.fieldOfView = _config.FieldOfView;
-                _viewCamera.ResetProjectionMatrix();
+                if (LightStageMath.ValidAspect(_viewCamera.aspect))
+                    _viewCamera.ResetProjectionMatrix();
             }
         }
     }

@@ -17,15 +17,15 @@ namespace DelayNoMore.LightPath
         /** @brief 从鼠标按钮请求关注视角，复用原入口验证。 @param view 目标视角 */
         public void ChooseStageView(StageView view)
         {
-            if (!ShowViewButtons || _stage.Moving)
+            if (!ShowViewButtons || _stage.Moving || view == _stage.View)
                 return;
             if (view == StageView.World && !Noclip)
             {
-                if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009")); return; }
+                if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009"), success: false); return; }
                 Room.Surface.Rebuild();
                 if (Room.Overlaps(_body.bounds, _color, false))
                 {
-                    Notify(GameText.Get("LightGameStage.EditStage.010"));
+                    Notify(GameText.Get("LightGameStage.EditStage.010"), success: false);
                     return;
                 }
             }
@@ -107,11 +107,11 @@ namespace DelayNoMore.LightPath
                 return;
             if (view == StageView.World && !Noclip)
             {
-                if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009")); return; }
+                if (!Room.Powered) { Notify(GameText.Get("LightGameStage.EditStage.009"), success: false); return; }
                 Room.Surface.Rebuild();
                 if (Room.Overlaps(_body.bounds, _color, false))
                 {
-                    Notify(GameText.Get("LightGameStage.EditStage.010"));
+                    Notify(GameText.Get("LightGameStage.EditStage.010"), success: false);
                     return;
                 }
             }
@@ -127,7 +127,7 @@ namespace DelayNoMore.LightPath
             if (_stage.View == StageView.Repair)
                 return GameText.Get("LightGameStage.StageHelp.013", Label("Drag"), Label("Mode"));
             if (_stage.View == StageView.Projection)
-                return GameText.Get("LightGameStage.StageHelp.014", Label("Drag"), Label("Mode"), AbilityHelp(ProjectionAbility.MoveX, "DeviceHorizontal"), AbilityHelp(ProjectionAbility.MoveY, "DeviceVertical"), AbilityHelp(ProjectionAbility.MoveZ, "DeviceDepth"), AbilityHelp(ProjectionAbility.RotateX, "DeviceRotationX"), AbilityHelp(ProjectionAbility.RotateY, "DeviceRotationY"), AbilityHelp(ProjectionAbility.RotateZ, "DeviceRotation"), Label("Scroll"));
+                return GameText.Get("LightGameStage.StageHelp.014", Label("Drag"));
             if (!Room.Powered)
                 return GameText.Get("LightGameStage.StageHelp.015", Label("Mode"), Label("Pause"));
             return GameText.Get("LightGameStage.StageHelp.016", Label("Move"), Label("Jump"), Label("Palette"), Label("Mode"), Label("Interact"));
@@ -151,7 +151,7 @@ namespace DelayNoMore.LightPath
             _stage.Animate(_paused ? 0 : Time.unscaledDeltaTime);
             var sources = Room.Surface.Sources;
             _stage.Draw(_repairLayout, _repair, sources != null && _selected >= 0 && _selected < sources.Count ? sources[_selected] : null, this);
-            _stage.ShowBlackout(!Room.Powered, GameText.Get("LightGameStage.LateUpdate.018", Label("Mode")), _menu.HudFont);
+            _stage.ShowBlackout(!Room.Powered, GameText.Feedback(GameText.Get("LightGameStage.LateUpdate.018", Label("Mode")), false), _menu.HudFont);
             ApplyState();
         }
     }

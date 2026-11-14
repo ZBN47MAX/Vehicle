@@ -8,6 +8,56 @@ namespace DelayNoMore.LightPath.Tests
     /** @brief 不组装场景的四视角数学、配置与着色器检查。 */
     public sealed class StageGeometryTests
     {
+        /** @brief 成功与失败反馈分别使用统一绿色与红色富文本。 */
+        [Test] public void Feedback_UsesUnifiedSemanticColors()
+        {
+            Assert.That(GameText.Feedback("ok", true), Is.EqualTo("<color=#00FF00>ok</color>"));
+            Assert.That(GameText.Feedback("blocked", false), Is.EqualTo("<color=#FF0000>blocked</color>"));
+        }
+        /** @brief 旧虚线浮点累加停滞的参数现在以有限区间返回。 */
+        [Test]
+        public void MarkerDashes_FloatStallRegressionTerminates()
+        {
+            var intervals = new System.Collections.Generic.List<Vector2>();
+            LightStageMath.MarkerDashIntervals(218.01551818847656, 166.82298278808594, 8.975825309753418, intervals);
+            Assert.That(intervals.Count, Is.GreaterThan(0).And.LessThanOrEqualTo(32));
+            float previous = 0;
+            foreach (Vector2 interval in intervals)
+            {
+                Assert.That(interval.x, Is.InRange(previous, 1f));
+                Assert.That(interval.y, Is.InRange(interval.x, 1f));
+                previous = interval.y;
+            }
+        }
+        /** @brief 虚线边界遵循交替格规则，异常输入返回且每边工作量有界。 */
+        [Test]
+        public void MarkerDashes_BoundariesAndInvalidInputsAreBounded()
+        {
+            var intervals = new System.Collections.Generic.List<Vector2>();
+            LightStageMath.MarkerDashIntervals(0, 4, 1, intervals);
+            Assert.That(intervals, Is.EqualTo(new[] { new Vector2(0, .25f), new Vector2(.5f, .75f) }));
+            LightStageMath.MarkerDashIntervals(1, 1, 1, intervals);
+            Assert.That(intervals, Is.Empty);
+            foreach (double invalid in new[] { 0d, -1d, double.NaN, double.PositiveInfinity })
+            {
+                LightStageMath.MarkerDashIntervals(0, 10, invalid, intervals);
+                Assert.That(intervals, Is.Empty);
+            }
+            LightStageMath.MarkerDashIntervals(0, 1e20, 1, intervals);
+            Assert.That(intervals.Count, Is.LessThanOrEqualTo(32));
+        }
+        /** @brief 切窗口时的无效宽高比沿用上次有效值，恢复后接受新的窗口比例。@param observed 异常采样 */
+        [TestCase(0f), TestCase(-1f), TestCase(float.NaN), TestCase(float.PositiveInfinity), TestCase(float.NegativeInfinity)]
+        public void Aspect_InvalidWindowSamplePreservesFraming(float observed)
+        {
+            float previous = 16f / 9;
+            Assert.That(LightStageMath.ValidAspect(observed), Is.False);
+            Assert.That(LightStageMath.ResolveAspect(observed, previous), Is.EqualTo(previous));
+            Assert.That(LightStageMath.ResolveAspect(observed, float.NaN), Is.EqualTo(1f));
+            Assert.That(LightStageMath.ResolveAspect(4f / 3, previous), Is.EqualTo(4f / 3));
+            Assert.That(float.IsInfinity(LightStageMath.Retreat(new Vector3(20, 12, 1), 55,
+                LightStageMath.ResolveAspect(observed, previous), .3f)), Is.False);
+        }
         /** @brief 运行几何与配置回归，仅创建内存临时SO。 */
         [Test]
         public void Mapping_PreservesShapeRayAlignmentAndFraming()

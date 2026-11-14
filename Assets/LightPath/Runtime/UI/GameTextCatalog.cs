@@ -54,6 +54,12 @@ namespace DelayNoMore.LightPath
     /** @brief 文案读取入口；键位及数值由调用方提供，模板全部来自唯一SO。 */
     public static class GameText
     {
+        /** @brief 成功反馈统一使用的绿色RGB。 */
+        public const string SuccessColor = "00FF00";
+        /** @brief 错误与失败反馈统一使用的红色RGB。 */
+        public const string FailureColor = "FF0000";
+        /** @brief 为反馈正文应用统一语义颜色。@param text 正文 @param success 是否成功 @return TMP富文本 */
+        public static string Feedback(string text, bool success) => "<color=#" + (success ? SuccessColor : FailureColor) + ">" + text + "</color>";
         /** @brief 当前只读文案表。 */
         private static GameTextCatalog _catalog;
         /** @brief 当前统一字体；不会修改共享文案资产。 */

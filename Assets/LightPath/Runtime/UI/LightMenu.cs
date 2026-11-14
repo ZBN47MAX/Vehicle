@@ -44,7 +44,179 @@ namespace DelayNoMore.LightPath
         /** @brief 三个关注入口。 */
         private Button[] _viewChoices;
         /** @brief 按钮对应的视角。 */
-        private readonly StageView[] _views = { StageView.World, StageView.Repair, StageView.Projection };
+        private readonly StageView[] _views = { StageView.World, StageView.Projection, StageView.Repair };
+        /** @brief 左侧移动、右侧旋转的两行三列键盘显示顺序，键名继续读取UIS。 */
+        private static readonly (ProjectionAbility Ability, string Action, string Part)[] _axisKeys =
+        {
+            (ProjectionAbility.MoveZ, "DeviceDepth", "Negative"),
+            (ProjectionAbility.MoveY, "DeviceVertical", "Positive"),
+            (ProjectionAbility.MoveZ, "DeviceDepth", "Positive"),
+            (ProjectionAbility.MoveX, "DeviceHorizontal", "Negative"),
+            (ProjectionAbility.MoveY, "DeviceVertical", "Negative"),
+            (ProjectionAbility.MoveX, "DeviceHorizontal", "Positive"),
+            (ProjectionAbility.RotateZ, "DeviceRotation", "Positive"),
+            (ProjectionAbility.RotateX, "DeviceRotationX", "Positive"),
+            (ProjectionAbility.RotateZ, "DeviceRotation", "Negative"),
+            (ProjectionAbility.RotateY, "DeviceRotationY", "Positive"),
+            (ProjectionAbility.RotateX, "DeviceRotationX", "Negative"),
+            (ProjectionAbility.RotateY, "DeviceRotationY", "Negative")
+        };
+        /** @brief 本菜单拥有的键盘示意UI。 */
+        private GameObject _axisGuide;
+        /** @brief 对应十二个键框和键名。 */
+        private readonly Image[] _axisKeyBorders = new Image[12];
+        /** @brief 十二个键位文字。 */
+        private readonly TMP_Text[] _axisKeyLabels = new TMP_Text[12];
+        /** @brief 返回总览的实际绑定文字。 */
+        private TMP_Text _returnKeyLabel;
+        /** @brief 切换物件的实际滚轮绑定文字。 */
+        private TMP_Text _scrollKeyLabel;
+        /** @brief 输入绑定变化后才重新生成键名。 */
+        private bool _axisBindingsDirty = true;
+        /** @brief 是否已应用投影调整时的底部布局。 */
+        private bool _axisLayoutApplied;
+        /** @brief 原底部说明的坐标。 */
+        private Vector2 _statusPosition;
+        /** @brief 原底部说明的尺寸。 */
+        private Vector2 _statusSize;
+        /** @brief 原底部说明的对齐方式。 */
+        private TextAlignmentOptions _statusAlignment;
+        /** @brief 创建不接收点击的键位或分组文字。@param parent 父级 @param name UI名称 @param position 顶部坐标 @param size 文字区域 @return 文字组件 */
+        private TMP_Text CreateAxisLabel(Transform parent, string name, Vector2 position, Vector2 size)
+        {
+            var label = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+            label.gameObject.layer = _status.gameObject.layer;
+            label.transform.SetParent(parent, false);
+            label.rectTransform.anchorMin = label.rectTransform.anchorMax = label.rectTransform.pivot = new Vector2(0, 1);
+            label.rectTransform.anchoredPosition = position;
+            label.rectTransform.sizeDelta = size;
+            GameText.ApplyFont(label);
+            label.fontSize = 20;
+            label.alignment = TextAlignmentOptions.Center;
+            label.raycastTarget = false;
+            return label;
+        }
+        /** @brief 创建非交互的线框按键。@param parent 父级 @param name UI名称 @param position 顶部坐标 @param size 按键尺寸 @param border 返回外框图像 @return 键名文字 */
+        private TMP_Text CreateAxisKey(Transform parent, string name, Vector2 position, Vector2 size, out Image border)
+        {
+            var key = new GameObject(name, typeof(RectTransform), typeof(Image));
+            key.layer = _status.gameObject.layer;
+            var rect = (RectTransform)key.transform;
+            rect.SetParent(parent, false);
+            rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0, 1);
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            border = key.GetComponent<Image>();
+            border.raycastTarget = false;
+            var fill = new GameObject("Fill", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            fill.gameObject.layer = _status.gameObject.layer;
+            fill.transform.SetParent(rect, false);
+            fill.rectTransform.anchorMin = Vector2.zero;
+            fill.rectTransform.anchorMax = Vector2.one;
+            fill.rectTransform.offsetMin = Vector2.one;
+            fill.rectTransform.offsetMax = -Vector2.one;
+            fill.color = new Color(.04f, .07f, .1f, .95f);
+            fill.raycastTarget = false;
+            TMP_Text label = CreateAxisLabel(rect, "Label", Vector2.zero, size);
+            label.enableAutoSizing = true;
+            label.fontSizeMin = 10;
+            label.fontSizeMax = 20;
+            return label;
+        }
+        /** @brief 在现有底部HUD中创建左右两组两行三列的键盘图示。 */
+        private void CreateAxisGuide()
+        {
+            if (_axisGuide || !_status) return;
+            _statusPosition = _status.rectTransform.anchoredPosition;
+            _statusSize = _status.rectTransform.sizeDelta;
+            _statusAlignment = _status.alignment;
+            _axisGuide = new GameObject("AxisKeyboardGuide", typeof(RectTransform));
+            _axisGuide.layer = _status.gameObject.layer;
+            var root = (RectTransform)_axisGuide.transform;
+            root.SetParent(_status.transform, false);
+            root.anchorMin = root.anchorMax = root.pivot = new Vector2(.5f, .5f);
+            root.sizeDelta = new Vector2(640, 100);
+            root.anchoredPosition = new Vector2(0, -72);
+            for (int group = 0; group < 2; group++)
+            {
+                TMP_Text title = CreateAxisLabel(root, group == 0 ? "MoveTitle" : "RotateTitle", new Vector2(160 + group * 192, 0), new Vector2(128, 22));
+                title.fontSize = 18;
+                title.text = GameText.Get(group == 0 ? "LightMenu.AxisGuide.Move" : "LightMenu.AxisGuide.Rotate");
+            }
+            for (int i = 0; i < _axisKeys.Length; i++)
+            {
+                _axisKeyLabels[i] = CreateAxisKey(root, "Key" + i,
+                    new Vector2(160 + i / 6 * 192 + i % 3 * 44, -26 - i % 6 / 3 * 38),
+                    new Vector2(40, 34), out _axisKeyBorders[i]);
+            }
+            TMP_Text returnTitle = CreateAxisLabel(root, "ReturnTitle", Vector2.zero, new Vector2(112, 22));
+            returnTitle.fontSize = 18;
+            returnTitle.text = GameText.Get("LightMenu.AxisGuide.Return");
+            _returnKeyLabel = CreateAxisKey(root, "ReturnKey", new Vector2(0, -26), new Vector2(112, 34), out _);
+            TMP_Text scrollTitle = CreateAxisLabel(root, "ScrollTitle", new Vector2(528, 0), new Vector2(112, 22));
+            scrollTitle.fontSize = 18;
+            scrollTitle.text = GameText.Get("LightMenu.AxisGuide.Select");
+            _scrollKeyLabel = CreateAxisKey(root, "ScrollControl", new Vector2(528, -26), new Vector2(112, 72), out _);
+            _axisBindingsDirty = true;
+        }
+        /** @brief 仅投影调整显示键盘图示，退出后恢复原HUD布局。 */
+        private void UpdateAxisGuide()
+        {
+            bool visible = _game && _game.ShowViewButtons && _game.CurrentView == StageView.Projection && _status;
+            if (visible) CreateAxisGuide();
+            if (_axisGuide && _axisGuide.activeSelf != visible) _axisGuide.SetActive(visible);
+            if (_status && visible != _axisLayoutApplied)
+            {
+                _status.rectTransform.anchoredPosition = visible ? _statusPosition + Vector2.up * 72 : _statusPosition;
+                _status.rectTransform.sizeDelta = visible ? new Vector2(_statusSize.x, 28) : _statusSize;
+                _status.alignment = visible ? TextAlignmentOptions.Center : _statusAlignment;
+                _axisLayoutApplied = visible;
+            }
+            if (!visible) return;
+            for (int i = 0; i < _axisKeys.Length; i++)
+            {
+                var binding = _axisKeys[i];
+                Color color = _game.HasProjectionAbility(binding.Ability) ? Color.green : Color.white;
+                if (_axisKeyBorders[i].color != color) _axisKeyBorders[i].color = color;
+                if (_axisKeyLabels[i].color != color) _axisKeyLabels[i].color = color;
+                if (_axisBindingsDirty) _axisKeyLabels[i].text = _game.ProjectionBindingLabel(binding.Action, binding.Part);
+            }
+            if (_axisBindingsDirty)
+            {
+                _returnKeyLabel.text = _game.ProjectionBindingLabel("Mode", null);
+                _scrollKeyLabel.text = _game.ProjectionBindingLabel("Scroll", null);
+            }
+            _axisBindingsDirty = false;
+        }
+        /** @brief 动作重新绑定后刷新键盘文字。@param changed 变化对象 @param change 变化类型 */
+        private void OnAxisBindingChanged(object changed, InputActionChange change)
+        {
+            if (change == InputActionChange.BoundControlsChanged) _axisBindingsDirty = true;
+        }
+        /** @brief 监听输入绑定变化。 */
+        private void OnEnable()
+        {
+            InputSystem.onActionChange += OnAxisBindingChanged;
+            _axisBindingsDirty = true;
+        }
+        /** @brief 取消监听并恢复底部说明位置。 */
+        private void OnDisable()
+        {
+            InputSystem.onActionChange -= OnAxisBindingChanged;
+            if (_axisGuide) _axisGuide.SetActive(false);
+            if (_axisLayoutApplied && _status)
+            {
+                _status.rectTransform.anchoredPosition = _statusPosition;
+                _status.rectTransform.sizeDelta = _statusSize;
+                _status.alignment = _statusAlignment;
+            }
+            _axisLayoutApplied = false;
+        }
+        /** @brief 释放本菜单拥有的键盘图示。 */
+        private void OnDestroy()
+        {
+            if (_axisGuide) Destroy(_axisGuide);
+        }
         /** @brief 创建仅属于本菜单的鼠标入口，不安装玩法组件。 */
         private void CreateViewButtons()
         {
@@ -58,7 +230,7 @@ namespace DelayNoMore.LightPath
             rect.anchoredPosition = new Vector2(-24, 0);
             rect.sizeDelta = new Vector2(220, 192);
             _viewChoices = new Button[3];
-            string[] labels = { GameText.Get("View.World"), GameText.Get("View.Repair"), GameText.Get("View.Projection") };
+            string[] labels = { GameText.Get("View.World"), GameText.Get("View.Projection"), GameText.Get("View.Repair") };
             for (int i = 0; i < _views.Length; i++)
             {
                 var item = new GameObject(labels[i], typeof(RectTransform), typeof(Image), typeof(Button));
@@ -89,6 +261,7 @@ namespace DelayNoMore.LightPath
         /** @brief 按游戏生命周期更新入口，菜单和二维关注期间隐藏。 */
         private void LateUpdate()
         {
+            UpdateAxisGuide();
             CreateViewButtons();
             if (!_viewButtons)
                 return;
@@ -305,7 +478,7 @@ namespace DelayNoMore.LightPath
             _palette.SetActive(preview);
             if (!preview)
                 return;
-            _wheelStatus.text = allowed ? GameText.Get("LightMenu.UpdateGame.011") : GameText.Get("LightMenu.UpdateGame.012");
+            _wheelStatus.text = allowed ? GameText.Get("LightMenu.UpdateGame.011") : GameText.Feedback(GameText.Get("LightMenu.UpdateGame.012"), false);
             for (int i = 0; i < 4; i++)
             {
                 bool unlocked = !_game || _game.IsUnlocked(i);

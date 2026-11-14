@@ -225,22 +225,26 @@ namespace DelayNoMore.LightPath
         /** @brief 绘制同一批模拟物件与顶面维修内容，仅提交给演示相机。@param layout 维修配置 @param repair 整局状态 */
         public void Draw(RepairLayout layout, RepairSession repair, ProjectionSource selected = null, LightGame game = null)
         {
-            foreach (Part part in _parts)
-                if (part.Filter && part.Renderer && part.Filter.gameObject.activeInHierarchy)
-                {
-                    part.Renderer.GetPropertyBlock(_properties);
-                    Mesh mesh = part.Filter.sharedMesh;
-                    for (int sub = 0; sub < mesh.subMeshCount && sub < part.Materials.Length; sub++)
-                        if (part.Materials[sub])
-                            Graphics.DrawMesh(mesh, _mapping * part.Filter.transform.localToWorldMatrix, part.Materials[sub],
-                                _config.DisplayLayer, _viewCamera, sub, _properties, ShadowCastingMode.Off, false);
-                }
+            bool displayVisible = (_viewCamera.cullingMask & (1 << _config.DisplayLayer)) != 0;
+            if (displayVisible)
+            {
+                foreach (Part part in _parts)
+                    if (part.Filter && part.Renderer && part.Filter.gameObject.activeInHierarchy)
+                    {
+                        part.Renderer.GetPropertyBlock(_properties);
+                        Mesh mesh = part.Filter.sharedMesh;
+                        for (int sub = 0; sub < mesh.subMeshCount && sub < part.Materials.Length; sub++)
+                            if (part.Materials[sub])
+                                Graphics.DrawMesh(mesh, _mapping * part.Filter.transform.localToWorldMatrix, part.Materials[sub],
+                                    _config.DisplayLayer, _viewCamera, sub, _properties, ShadowCastingMode.Off, false);
+                    }
+            }
             if (_room)
             {
                 _objectMarkers ??= new ProjectionObjectMarkers();
                 _objectMarkers.Draw(_room, _mapping, _viewCamera, _capture, _config, _repairMaterial, game, View == StageView.Projection ? selected : null);
             }
-            if (layout && repair != null)
+            if (displayVisible && layout && repair != null)
                 _repairMesh.Draw(layout, repair, _config, _repairFrame, _repairMaterial, _viewCamera);
 
         }

@@ -23,7 +23,7 @@ namespace DelayNoMore.LightPath
                 Room.Surface.Rebuild();
                 if (!Room.Surface.Bounds.Contains(body.min) || !Room.Surface.Bounds.Contains(body.max) || Room.Overlaps(body, _color, false))
                 {
-                    Notify(GameText.Get("Debug.NoclipBlocked"));
+                    Notify(GameText.Get("Debug.NoclipBlocked"), success: false);
                     return;
                 }
             }

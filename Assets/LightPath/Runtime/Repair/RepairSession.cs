@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DelayNoMore.LightPath
 {
-    /** @brief 整局维修状态；跨房间共享，配置只读，初始化即按第一阶段检查严格供光。 */
+    /** @brief 整局维修状态；跨房间共享，配置只读，初始化即按选定阶段检查严格供光。 */
     public sealed class RepairSession
     {
         /** @brief 本局内容定义。 */
@@ -12,14 +12,12 @@ namespace DelayNoMore.LightPath
         private readonly int[] _directions;
         /** @brief 本局实际出射角，支持透镜连续调节。 */
         private readonly float[] _angles;
-        /** @brief 间隔随机源。 */
+        /** @brief 阶段抽取与间隔采样共用的随机源。 */
         private readonly Func<float, float, float> _random;
-        /** @brief 当前已启用的阶段，初始化固定进入索引0阶段。 */
+        /** @brief 当前阶段；开局限定关闭时从索引0开始。 */
         private int _phase;
-        /** @brief 当前轮已洗牌的阶段索引。 */
-        private readonly int[] _phaseOrder;
-        /** @brief 当前轮位置。 */
-        private int _phaseCursor;
+        /** @brief 已实际启用的开局限定阶段次数，达到配置上限后停止累计。 */
+        private int _initialPhasesUsed;
         /** @brief 下一阶段在预警前固定，不因查询而重新随机。 */
         private int _nextPhase;
         /** @brief 剩余正常观看时间，秒。 */
@@ -42,7 +40,7 @@ namespace DelayNoMore.LightPath
         public bool Warning => !_debugPower.HasValue && Powered && RemainingSeconds <= _layout.WarningSeconds;
         /** @brief 当前生效阶段。 */
         public int PhaseIndex => _phase;
-        /** @brief 下一事件阶段，由本局已确定的阶段顺序提供。 */
+        /** @brief 已预先确定的下一事件阶段。 */
         public int NextPhaseIndex => _nextPhase;
         /** @brief 创建全新会话。@param layout 已配置的布局 @param random 间隔采样函数；为空时使用 Unity 随机源 */
         public RepairSession(RepairLayout layout, Func<float, float, float> random = null)
@@ -53,9 +51,9 @@ namespace DelayNoMore.LightPath
                 throw new ArgumentException(error, nameof(layout));
             _layout = layout;
             _random = random ?? UnityEngine.Random.Range;
-            _phaseOrder = new int[layout.Phases.Length];
-            ShufflePhases(-1);
-            _phase = 0;
+            bool limited = layout.RandomPhaseOrder && layout.InitialPhaseCount > 0;
+            _phase = limited ? SelectPhase(true) : 0;
+            _initialPhasesUsed = limited ? 1 : 0;
             PrepareNextPhase();
             _directions = new int[layout.Devices.Length];
             _angles = new float[layout.Devices.Length];
@@ -76,6 +74,7 @@ namespace DelayNoMore.LightPath
             if (RemainingSeconds > 0)
                 return;
             _phase = NextPhaseIndex;
+            if (_layout.RandomPhaseOrder && _initialPhasesUsed < _layout.InitialPhaseCount) _initialPhasesUsed++;
             PrepareNextPhase();
             Recalculate();
             if (Powered)
@@ -141,37 +140,38 @@ namespace DelayNoMore.LightPath
         {
             RemainingSeconds = Mathf.Clamp(_random(_layout.Interval.x, _layout.Interval.y), _layout.Interval.x, _layout.Interval.y);
         }
-        /** @brief 准备下一目标，每轮全部出现一次，轮界避免立即重复。 */
+        /** @brief 预先固定下一目标；随机模式按相对权重独立抽取，允许连续相同阶段。 */
         private void PrepareNextPhase()
         {
             if (!_layout.RandomPhaseOrder)
             {
-                _nextPhase = (_phase + 1) % _phaseOrder.Length;
+                _nextPhase = (_phase + 1) % _layout.Phases.Length;
                 return;
             }
-            _phaseCursor++;
-            if (_phaseCursor >= _phaseOrder.Length) ShufflePhases(_phase);
-            _nextPhase = _phaseOrder[_phaseCursor];
+            _nextPhase = SelectPhase(_initialPhasesUsed < _layout.InitialPhaseCount);
         }
-        /** @brief 首轮保留0为首项，其余阶段Fisher-Yates洗牌，后续整轮洗牌且不写回SO。@param previous 上一轮末阶段，首次为负数 */
-        private void ShufflePhases(int previous)
+        /** @brief 按权重抽取指定阶段池，0权重不参与。@param limited 是否只使用开局允许阶段 @return 阶段索引 */
+        private int SelectPhase(bool limited)
         {
-            for (int i = 0; i < _phaseOrder.Length; i++) _phaseOrder[i] = i;
-            if (_layout.RandomPhaseOrder)
+            double total = 0;
+            foreach (RepairLayout.Phase phase in _layout.Phases)
+                if (!limited || phase.AllowInitially) total += phase.Weight;
+            float sample = _random(0, 1);
+            double remaining = (float.IsNaN(sample) ? 0 : Mathf.Clamp01(sample)) * total;
+            int selected = 0;
+            for (int i = 0; i < _layout.Phases.Length; i++)
             {
-                int firstIndex = previous < 0 ? 1 : 0;
-                for (int i = _phaseOrder.Length - 1; i > firstIndex; i--)
+                if (limited && !_layout.Phases[i].AllowInitially) continue;
+                float weight = _layout.Phases[i].Weight;
+                if (weight <= 0) continue;
+                selected = i;
+                if (remaining < weight)
                 {
-                    float value = _random(firstIndex, i + 1);
-                    int choice = float.IsNaN(value) ? firstIndex : Mathf.Clamp(Mathf.FloorToInt(value), firstIndex, i);
-                    int saved = _phaseOrder[i]; _phaseOrder[i] = _phaseOrder[choice]; _phaseOrder[choice] = saved;
+                    return selected;
                 }
-                if (_phaseOrder.Length > 1 && _phaseOrder[0] == previous)
-                {
-                    int saved = _phaseOrder[0]; _phaseOrder[0] = _phaseOrder[1]; _phaseOrder[1] = saved;
-                }
+                remaining -= weight;
             }
-            _phaseCursor = 0;
+            return selected;
         }
     }
 }

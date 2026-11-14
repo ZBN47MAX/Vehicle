@@ -108,6 +108,8 @@ namespace DelayNoMore.LightPath
         private readonly HashSet<string> _completed = new HashSet<string>();
         /** @brief 正常通关状态。 */
         private bool _won;
+        /** @brief 启用本次采集时记录的硬件与运行环境。 */
+        private string _environment;
         /** @brief 本记录文件标识。 */
         public string Id => _stem;
         /** @brief 临时文件绝对路径；未正常退出的文件保持pending名称。 */
@@ -267,6 +269,14 @@ namespace DelayNoMore.LightPath
             if (!_performance.TryGetValue(room, out Performance value)) _performance[room] = value = new Performance();
             return value;
         }
+        /** @brief 将本次环境同时保存在报告与事件中，只接收第一次有效快照。@param now 当前单调时钟秒数 @param environment 硬件及运行参数 */
+        public void SetEnvironment(double now, string environment)
+        {
+            if (_ended || !string.IsNullOrEmpty(_environment) || string.IsNullOrWhiteSpace(environment)) return;
+            _environment = environment;
+            Write(now, "硬件与运行环境", "", "本次采集基线", environment, 0, 0);
+            Flush(now);
+        }
         /** @brief 将已接收事件刷至本次临时文件。 @param now 当前单调时钟秒数 */
         public void Flush(double now)
         {
@@ -346,6 +356,8 @@ namespace DelayNoMore.LightPath
             text.AppendLine("只记录本次启用后的数据；中途启用前的状态为基线，不补造历史。游玩包括投影调整、维修、断光等待；暂停与转场另计。实际操作时长仅表示存在有效输入，不等于思考时长。Debug干预保留在事件明细和指标中。重开不会重置本报告。\n");
             if (!string.IsNullOrEmpty(LastError)) text.AppendLine("**写盘曾失败，CSV可能不完整：** " + Cell(LastError) + "\n");
             text.AppendLine("故障诊断若在本次Debug授权期间启用，见同编号 `.diagnostic.log`。异常结束时直接读取 `.diagnostic.pending.log` 和 `.pending.csv`；pending不等于已确认崩溃，日志仅保留成功写入的数据。\n");
+            if (!string.IsNullOrEmpty(_environment))
+                text.AppendLine("## 硬件与运行环境\n\n```text\n" + _environment + "\n```\n");
             text.AppendLine("## 房间汇总\n\n| 房间 | 访问次数 | 总停留秒 | 游玩秒 | 暂停秒 | 操作秒 | 首次进入至首次通过秒 |\n|---|---:|---:|---:|---:|---:|---:|");
             foreach (var group in _visits.GroupBy(visit => visit.Room))
                 text.AppendLine($"| {Cell(group.Key)} | {group.Count()} | {Number(group.Sum(v => v.End - v.Start))} | {Number(group.Sum(v => v.Play))} | {Number(group.Sum(v => v.Pause))} | {Number(group.Sum(v => v.Active))} | {(_firstPass.TryGetValue(group.Key, out double passed) ? Number(passed - group.First().Start) : "未观察到通过")} |");

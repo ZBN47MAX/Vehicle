@@ -98,7 +98,7 @@ MonoBehaviour:
     TextKey: 
     Name: "\u51FA\u53E312"
     Type: 4
-    Position: {x: -7.28125, y: -5.625}
+    Position: {x: -7.3317056, y: -5.3694854}
     Direction: 0
     Allowed: 255
     AngleRange: {x: -30, y: 30}
@@ -107,11 +107,11 @@ MonoBehaviour:
     TextKey: 
     Name: "\u53D1\u5C04\u900F\u955C13"
     Type: 1
-    Position: {x: -0.65625, y: -4.59375}
+    Position: {x: -1.0495595, y: -4.852311}
     Direction: 4
     Allowed: 255
     AngleRange: {x: -30, y: 30}
-    InitialAngle: -30
+    InitialAngle: -1.9
   - Id: 53c5cdeb-6a00-4d68-8f47-b699eba427b2
     TextKey: 
     Name: "\u51FA\u53E314"
@@ -180,35 +180,45 @@ MonoBehaviour:
     Name: "\u9636\u6BB5"
     Targets:
     - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
+    Weight: 2
   - TextKey: 
     Name: "\u9636\u6BB5"
     Targets:
     - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
     - 6822fd89-1171-4a3d-8b35-c5b786b3a104
+    Weight: 2
   - TextKey: 
     Name: "\u9636\u6BB5"
     Targets:
     - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
     - 6822fd89-1171-4a3d-8b35-c5b786b3a104
+    Weight: 2
   - TextKey: 
     Name: "\u9636\u6BB5"
     Targets:
     - 53c5cdeb-6a00-4d68-8f47-b699eba427b2
     - ded822b8-80a1-4f66-b2ef-e8982d13e0cb
     - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
+    Weight: 1
   - TextKey: 
     Name: "\u9636\u6BB5"
     Targets:
     - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
     - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
     - 53c5cdeb-6a00-4d68-8f47-b699eba427b2
+    Weight: 2
   - TextKey: 
     Name: "\u9636\u6BB5"
     Targets:
     - 25ec35db-0c14-4b5b-9ab8-1f7361a02bf3
     - b8ef932c-9282-4e2c-bfe1-ac3506f4761d
     - 8f0c3ec1-4bfa-44b4-96b2-bb20995117e0
+    Weight: 1
   RandomPhaseOrder: 1
+  FirstBeamColor: {r: 0.1, g: 0.7, b: 1, a: 1}
+  SecondBeamColor: {r: 1, g: 0.2, b: 0.7, a: 1}
+  MergedBeamColor: {r: 1, g: 1, b: 1, a: 1}
+  UnexpectedExitColor: {r: 1, g: 0.15, b: 0.1, a: 1}
   Interval: {x: 45, y: 90}
   WarningSeconds: 5
   Area:

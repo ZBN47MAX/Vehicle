@@ -26,7 +26,7 @@ namespace DelayNoMore.LightPath
                         _checkpoint = checkpoint;
                         _checkpointRoom = _roomIndex;
                         checkpoint.SetActivated(true);
-                        Notify(GameText.Get("LightGameCheckpoints.CollectCheckpoints.001"));
+                        Notify(GameText.Get("LightGameCheckpoints.CollectCheckpoints.001"), success: true);
                     }
                 }
                 else

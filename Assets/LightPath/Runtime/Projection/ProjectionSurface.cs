@@ -21,6 +21,7 @@ namespace DelayNoMore.LightPath
         public void BindConfig(LightGameConfig config)
         {
             _config = config;
+            _presentationReady = false;
             Invalidate();
         }
         /** @brief 获取幕布世界矩形。 */
@@ -91,6 +92,8 @@ namespace DelayNoMore.LightPath
         private bool _preview;
         /** @brief 供光状态。 */
         private bool _powered = true;
+        /** @brief 当前批次是否已应用最近的显示与碰撞状态。 */
+        private bool _presentationReady;
         /** @brief 获取区域。 */
         public IReadOnlyList<ProjectionRegion> Regions => _regions;
         /** @brief 获取模型集合。 */
@@ -132,6 +135,7 @@ namespace DelayNoMore.LightPath
             _origin = origin;
             _sources = sources;
             _material = material;
+            _presentationReady = false;
         }
         /** @brief 投影点到幕布。 @param point 世界点 @return 世界XY点 */
         public Vector3 ProjectPoint(Vector3 point)
@@ -309,9 +313,18 @@ namespace DelayNoMore.LightPath
                 if (_candidates.Count > 0 && !TryBuildContourChunk(chunk))
                 {
                     float cell = _config.CellSize;
-                    for (float y = chunk.Bounds.yMin; y < chunk.Bounds.yMax - .00001f; y += cell)
-                        for (float x = chunk.Bounds.xMin; x < chunk.Bounds.xMax - .00001f; x += cell)
-                            BuildCell(chunk, Rect.MinMaxRect(x, y, Mathf.Min(x + cell, chunk.Bounds.xMax), Mathf.Min(y + cell, chunk.Bounds.yMax)), 0);
+                    int columns = Mathf.CeilToInt(chunk.Bounds.width / cell);
+                    int rows = Mathf.CeilToInt(chunk.Bounds.height / cell);
+                    for (int row = 0; row < rows; row++)
+                        for (int column = 0; column < columns; column++)
+                        {
+                            float x = chunk.Bounds.xMin + column * cell;
+                            float y = chunk.Bounds.yMin + row * cell;
+                            float right = Mathf.Min(chunk.Bounds.xMin + (column + 1) * cell, chunk.Bounds.xMax);
+                            float top = Mathf.Min(chunk.Bounds.yMin + (row + 1) * cell, chunk.Bounds.yMax);
+                            if (right > x && top > y)
+                                BuildCell(chunk, Rect.MinMaxRect(x, y, right, top), 0);
+                        }
                 }
                 LastSampleCount += _samples.Count;
                 MergeRectangles(chunk);
@@ -521,6 +534,7 @@ namespace DelayNoMore.LightPath
         /** @brief 根据标签合并显示对象，保留精确分区多边形。 @param chunk 块 */
         private void BuildBatches(Chunk chunk)
         {
+            _presentationReady = false;
             GameObject oldRoot = chunk.Root;
             foreach (GameObject batch in chunk.Batches)
             {
@@ -607,6 +621,7 @@ namespace DelayNoMore.LightPath
         /** @brief 更新颜色显示，不重建几何。 @param selected 全局色 @param preview 预览 @param powered 供光 */
         public void Refresh(int selected, bool preview, bool powered)
         {
+            bool samePresentation = _presentationReady && _selected == selected && _preview == preview && _powered == powered;
             if (_properties == null)
                 _properties = new MaterialPropertyBlock();
             _selected = selected;
@@ -619,14 +634,19 @@ namespace DelayNoMore.LightPath
                 ProjectionRegion region = pair.Value;
                 bool hidden = region.Colored && _config.Matches(region.Color, selected);
                 Renderer renderer = pair.Key.GetComponent<Renderer>();
-                renderer.enabled = powered && (!hidden || preview);
-                pair.Key.GetComponent<Collider2D>().enabled = powered && !hidden;
+                bool visible = powered && (!hidden || preview);
+                if (renderer.enabled != visible) renderer.enabled = visible;
+                Collider2D collider = pair.Key.GetComponent<Collider2D>();
+                bool collidable = powered && !hidden;
+                if (collider.enabled != collidable) collider.enabled = collidable;
+                if (samePresentation) continue;
                 Color color = region.Colored ? _config.DisplayColor(region.Color) : new Color(.06f, .07f, .09f);
                 if (hidden && preview)
                     color = Color.Lerp(color, Color.white, .45f);
                 _properties.SetColor("_BaseColor", color);
                 renderer.SetPropertyBlock(_properties);
             }
+            _presentationReady = true;
         }
         /** @brief 检查角色与有效/隐藏区域。 @param body 角色 @param selected 全局色 @param hiddenOnly 仅隐藏区域 @return 是否相交 */
         public bool Overlaps(Bounds body, int selected, bool hiddenOnly)

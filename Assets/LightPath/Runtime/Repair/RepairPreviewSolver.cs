@@ -31,7 +31,15 @@ namespace DelayNoMore.LightPath
     public static class RepairPreviewSolver
     {
         /** @brief 光线段。 */
-        public struct Segment { public Vector2 From; public Vector2 To; }
+        public struct Segment
+        {
+            /** @brief 光段起点。 */
+            public Vector2 From;
+            /** @brief 光段终点。 */
+            public Vector2 To;
+            /** @brief 光源在Devices中的索引，负数表示多个不同光源合流。 */
+            public int SourceIndex;
+        }
         /** @brief 本次光路结果。 */
         public sealed class Result
         {
@@ -99,10 +107,11 @@ namespace DelayNoMore.LightPath
         public static Result TraceAngles(RepairLayout layout, float[] angles)
         {
             var result = new Result();
-            var queue = new Queue<(int node, float direction)>();
-            var visited = new HashSet<(int, float)>();
+            var queue = new Queue<(int node, float direction, int source)>();
+            var visited = new HashSet<(int, float, int)>();
+            var segmentIndices = new Dictionary<(int, float), int>();
             for (int i = 0; i < layout.Devices.Length; i++)
-                if (layout.Devices[i].Type == RepairLayout.Kind.Source) queue.Enqueue((i, angles == null ? layout.Devices[i].OutputAngle : angles[i]));
+                if (layout.Devices[i].Type == RepairLayout.Kind.Source) queue.Enqueue((i, angles == null ? layout.Devices[i].OutputAngle : angles[i], i));
             while (queue.Count > 0 && result.Segments.Count < 1024)
             {
                 var ray = queue.Dequeue();
@@ -123,15 +132,30 @@ namespace DelayNoMore.LightPath
                     if (HitNode(start, direction, layout.Devices[i].Position, layout.NodeRadius, out float along) && along < distance)
                     { hit = i; distance = along; }
                 }
-                result.Segments.Add(new Segment { From = start, To = start + direction * Mathf.Max(0, distance) });
+                var segmentKey = (ray.node, ray.direction);
+                if (segmentIndices.TryGetValue(segmentKey, out int segmentIndex))
+                {
+                    Segment segment = result.Segments[segmentIndex];
+                    if (segment.SourceIndex != ray.source)
+                    {
+                        segment.SourceIndex = -1;
+                        result.Segments[segmentIndex] = segment;
+                        result.Repeated = true;
+                    }
+                }
+                else
+                {
+                    segmentIndices.Add(segmentKey, result.Segments.Count);
+                    result.Segments.Add(new Segment { From = start, To = start + direction * Mathf.Max(0, distance), SourceIndex = ray.source });
+                }
                 if (hit < 0) continue;
                 RepairLayout.Device device = layout.Devices[hit];
                 float facing = angles == null ? device.OutputAngle : angles[hit];
                 if (device.Type == RepairLayout.Kind.Exit) { result.Lit.Add(device.Id); continue; }
                 if (device.Type == RepairLayout.Kind.Source) continue;
                 float output = Mathf.Repeat(facing, 360);
-                queue.Enqueue((hit, output));
-                if (device.Type == RepairLayout.Kind.Splitter) queue.Enqueue((hit, Mathf.Repeat(output + 45, 360)));
+                queue.Enqueue((hit, output, ray.source));
+                if (device.Type == RepairLayout.Kind.Splitter) queue.Enqueue((hit, Mathf.Repeat(output + 45, 360), ray.source));
             }
             return result;
         }

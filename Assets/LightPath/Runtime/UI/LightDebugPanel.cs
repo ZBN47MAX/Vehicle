@@ -118,6 +118,17 @@ namespace DelayNoMore.LightPath
             _recordingToggle.navigation = new Navigation { mode = Navigation.Mode.None };
             _recordingToggle.SetIsOnWithoutNotify(_game.DebugRecording);
             _recordingToggle.onValueChanged.AddListener(value => { _game.DebugSetRecording(value); Refresh(); });
+            var notice = new GameObject("RecordingDisclosure", typeof(RectTransform), typeof(TextMeshProUGUI)).GetComponent<TextMeshProUGUI>();
+            notice.transform.SetParent(parent, false);
+            notice.rectTransform.anchorMin = notice.rectTransform.anchorMax = notice.rectTransform.pivot = new Vector2(0, 1);
+            notice.rectTransform.anchoredPosition = new Vector2(12, -544);
+            notice.rectTransform.sizeDelta = new Vector2(356, 52);
+            GameText.ApplyFont(notice);
+            notice.fontSize = 16;
+            notice.alignment = TextAlignmentOptions.TopLeft;
+            notice.color = new Color(.85f, .9f, .95f);
+            notice.raycastTarget = false;
+            notice.text = GameText.Get("Debug.Tools.RecordDisclosure");
         }
         /** @brief 构造独立的可点击调试区。 */
         private void CreateTools()
@@ -131,7 +142,7 @@ namespace DelayNoMore.LightPath
             rect.anchorMin = rect.anchorMax = new Vector2(1, 1);
             rect.pivot = Vector2.one;
             rect.anchoredPosition = new Vector2(-20, -20);
-            rect.sizeDelta = new Vector2(380, 552);
+            rect.sizeDelta = new Vector2(380, 608);
             _tools.GetComponent<Image>().color = new Color(.05f, .08f, .11f, .98f);
             for (int i = 0; i < 10; i++)
             {

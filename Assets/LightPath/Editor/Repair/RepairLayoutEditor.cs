@@ -127,21 +127,28 @@ namespace DelayNoMore.LightPath.Editor
             Handles.color = Color.gray;
             Handles.DrawWireCube(top + bounds.size * _zoom / 2, bounds.size * _zoom);
             RepairPreviewSolver.Result result = RepairPreviewSolver.TraceAngles(_layout, _trial);
-            Handles.color = Color.yellow;
-            foreach (var segment in result.Segments) Handles.DrawAAPolyLine(2, Point(segment.From, area), Point(segment.To, area));
+            foreach (var segment in result.Segments)
+            {
+                Handles.color = _layout.BeamColor(segment.SourceIndex);
+                Handles.DrawAAPolyLine(2, Point(segment.From, area), Point(segment.To, area));
+            }
             Event e = Event.current;
             for (int i = 0; i < _layout.Devices.Length; i++)
             {
                 RepairLayout.Device device = _layout.Devices[i];
                 Vector2 p = Point(device.Position, area);
                 Rect hit = new Rect(p - Vector2.one * (_layout.NodeRadius * _zoom), Vector2.one * (_layout.NodeRadius * _zoom * 2));
-                EditorGUI.DrawRect(hit, i == _selected ? Color.cyan : result.Lit.Contains(device.Id) ? Color.green : Color.gray);
+                bool required = _layout.Phases.Length > 0 && _layout.Phases[Mathf.Clamp(_phase, 0, _layout.Phases.Length - 1)].Targets.Contains(device.Id);
+                EditorGUI.DrawRect(hit, required ? Color.yellow : i == _selected ? Color.cyan : Color.gray);
+                Rect fill = hit;
+                fill.min += Vector2.one * 2;
+                fill.max -= Vector2.one * 2;
+                EditorGUI.DrawRect(fill, _layout.NodeColor(device, result, required));
                 float direction = _trial == null ? device.OutputAngle : _trial[i];
                 float angle = direction * Mathf.Deg2Rad;
                 if (i == _selected) DrawDirections(device, p);
                 Handles.color = Color.white;
                 Handles.DrawAAPolyLine(3, p, p + new Vector2(Mathf.Cos(angle), -Mathf.Sin(angle)) * 19);
-                bool required = _layout.Phases.Length > 0 && _layout.Phases[Mathf.Clamp(_phase, 0, _layout.Phases.Length - 1)].Targets.Contains(device.Id);
                 GUI.Label(new Rect(p.x + 16, p.y - 12, 180, 22), device.Name + (required ? " [目标]" : ""));
                 if (e.type == EventType.MouseDown && e.button == 0 && (hit.Contains(e.mousePosition) || RepairPreviewSolver.AngleLineDistance(e.mousePosition, p, -direction, 19) <= 8))
                 {
@@ -214,7 +221,12 @@ namespace DelayNoMore.LightPath.Editor
             GUILayout.Label("整局维修规则", EditorStyles.boldLabel);
             EditorGUI.BeginChangeCheck();
             Vector2 interval = EditorGUILayout.Vector2Field("事件间隔秒数 最短/最长", _layout.Interval);
-            bool randomOrder = EditorGUILayout.Toggle("阶段随机循环（每轮不重复）", _layout.RandomPhaseOrder);
+            bool randomOrder = EditorGUILayout.Toggle("阶段按权重随机抽取", _layout.RandomPhaseOrder);
+            int initialCount = EditorGUILayout.IntField("开局限定次数（含开局）", _layout.InitialPhaseCount);
+            Color firstBeam = EditorGUILayout.ColorField("光线1颜色", _layout.FirstBeamColor);
+            Color secondBeam = EditorGUILayout.ColorField("光线2颜色", _layout.SecondBeamColor);
+            Color mergedBeam = EditorGUILayout.ColorField("合流输出颜色", _layout.MergedBeamColor);
+            Color unexpectedExit = EditorGUILayout.ColorField("额外出口误亮颜色", _layout.UnexpectedExitColor);
             float warning = EditorGUILayout.FloatField("预警秒数", _layout.WarningSeconds);
             Rect bounds = EditorGUILayout.RectField("操作范围", _layout.Area);
             float sensitivity = EditorGUILayout.Slider("透镜绕心拖动灵敏度", _layout.LensDragSensitivity, .05f, 1f);
@@ -223,6 +235,11 @@ namespace DelayNoMore.LightPath.Editor
             {
                 Edit(); _layout.LensDragSensitivity = Mathf.Clamp(sensitivity, .05f, 1f); _layout.WarningSeconds = Mathf.Max(.1f, warning);
                 _layout.RandomPhaseOrder = randomOrder;
+                _layout.InitialPhaseCount = Mathf.Max(0, initialCount);
+                _layout.FirstBeamColor = firstBeam;
+                _layout.SecondBeamColor = secondBeam;
+                _layout.MergedBeamColor = mergedBeam;
+                _layout.UnexpectedExitColor = unexpectedExit;
                 _layout.Interval = new Vector2(Mathf.Max(_layout.WarningSeconds + .1f, interval.x), Mathf.Max(_layout.WarningSeconds + .1f, interval.x, interval.y));
                 bounds.width = Mathf.Max(1, bounds.width); bounds.height = Mathf.Max(1, bounds.height); _layout.Area = bounds; _layout.NodeRadius = Mathf.Max(.01f, radius);
             }
@@ -233,6 +250,11 @@ namespace DelayNoMore.LightPath.Editor
                 RepairLayout.Phase phase = _layout.Phases[_phase];
                 string name = EditorGUILayout.TextField("阶段名称", phase.Name);
                 if (name != phase.Name) { Edit(); phase.Name = name; }
+                float weight = EditorGUILayout.FloatField("随机抽取权重", phase.Weight);
+                if (weight != phase.Weight) { Edit(); phase.Weight = weight; }
+                bool initially = EditorGUILayout.Toggle("开局限定期间允许出现", phase.AllowInitially);
+                if (initially != phase.AllowInitially) { Edit(); phase.AllowInitially = initially; }
+                EditorGUILayout.HelpBox("随机模式按权重抽取，可连续重复。开局限定次数包含开局，仅从勾选且权重大于0的阶段抽取，之后使用全部正权重阶段。次数0时开局固定阶段0。关闭随机时按索引循环。", MessageType.Info);
                 foreach (var exit in _layout.Devices.Where(x => x.Type == RepairLayout.Kind.Exit))
                 {
                     bool before = phase.Targets.Contains(exit.Id);

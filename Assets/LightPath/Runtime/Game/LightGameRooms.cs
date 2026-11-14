@@ -297,7 +297,7 @@ namespace DelayNoMore.LightPath
         private void RejectPortal(string key)
         {
             RecordTelemetry("传送失败", _telemetryPortal, GameText.Get(key));
-            Notify(GameText.Get(key));
+            Notify(GameText.Get(key), success: false);
         }
         /** @brief 保持入口的相对位置，只在穿越方向留出角色空间。@param from 原房间 @param to 目标房间 @param position 角色位置 @param body 角色碰撞范围 @param direction 穿越方向 @return 目标角色位置 */
         public static Vector2 BoundaryLanding(Rect from, Rect to, Vector2 position, Bounds body, Vector2 direction)
@@ -331,6 +331,7 @@ namespace DelayNoMore.LightPath
                 yield break;
             LightRoom old = Room;
             LightRoom next = _rooms[target];
+            PlaytestRecording.Diagnostic("房间转场", "准备 " + TelemetryRoom(_roomIndex) + " -> " + TelemetryRoom(target));
             Vector3 originalPosition = next.transform.position;
             Vector3 cameraStart = _camera.transform.position;
             float width = _camera.orthographicSize * 2 * _camera.aspect;
@@ -357,6 +358,7 @@ namespace DelayNoMore.LightPath
             }
             next.Surface.SetFocus(landing);
             next.Surface.Rebuild();
+            PlaytestRecording.Diagnostic("房间转场", "目标投影已重建 " + TelemetryRoom(target));
             next.Refresh(_config, _color, false, false, 0);
             Bounds body = _body.bounds;
             body.center += (Vector3)(landing - _player.position);
@@ -365,7 +367,8 @@ namespace DelayNoMore.LightPath
                 next.gameObject.SetActive(false);
                 next.transform.position = originalPosition;
                 RecordTelemetry("房间切换失败", direction == Vector2.zero ? _telemetryPortal : "房间边界", "目标=" + TelemetryRoom(target) + "；供光、落点碰撞或门状态不满足");
-                Notify(GameText.Get("LightGameRooms.ChangeRoom.005"));
+                Notify(GameText.Get("LightGameRooms.ChangeRoom.005"), success: false);
+                PlaytestRecording.Diagnostic("房间转场", "落点或供光检查未通过 " + TelemetryRoom(target));
                 yield break;
             }
             _visited[target] = true;
@@ -401,6 +404,7 @@ namespace DelayNoMore.LightPath
             _transitioning = false;
             Physics2D.SyncTransforms();
             ApplyState();
+            PlaytestRecording.Diagnostic("房间转场", "提交完成 " + TelemetryRoom(target));
         }
     }
 }

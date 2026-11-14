@@ -53,7 +53,7 @@ namespace DelayNoMore.LightPath
                 _repairDrag = index >= 0 && _repairLayout.Devices[index].Type == RepairLayout.Kind.Lens ? index : -1;
                 if (_repairDrag < 0) _repair.Rotate(index);
                 else _lensDrag.Begin(point, valid);
-                if (!wasPowered && _repair.Powered) Notify(GameText.Get("LightGameRepair.EditRepair.002"));
+                if (!wasPowered && _repair.Powered) Notify(GameText.Get("LightGameRepair.EditRepair.002"), success: true);
                 return;
             }
             if (!Action("Drag").IsPressed()) _repairDrag = -1;
@@ -66,21 +66,21 @@ namespace DelayNoMore.LightPath
                 TelemetryOperation(_repairLayout.Devices[_repairDrag].Id, "透镜调角", Mathf.Abs(Mathf.DeltaAngle(previousAngle, _repair.Angle(_repairDrag))));
             }
             if (!wasPowered && _repair.Powered)
-                Notify(GameText.Get("LightGameRepair.EditRepair.002"));
+                Notify(GameText.Get("LightGameRepair.EditRepair.002"), success: true);
         }
         /** @brief 生成维修状态与下一阶段预警。@return 状态说明 */
         private string RepairStatus()
         {
             if (_repair.DebugPowerForced)
-                return GameText.Get(_repair.Powered ? "Debug.PowerForcedOn" : "Debug.PowerForcedOff");
+                return GameText.Feedback(GameText.Get(_repair.Powered ? "Debug.PowerForcedOn" : "Debug.PowerForcedOff"), _repair.Powered);
             if (!_repair.Powered)
-                return GameText.Get("LightGameRepair.RepairStatus.003") + _repairLayout.Phases[_repair.PhaseIndex].DisplayName + GameText.Get("LightGameRepair.RepairStatus.004");
+                return GameText.Feedback(GameText.Get("LightGameRepair.RepairStatus.003") + _repairLayout.Phases[_repair.PhaseIndex].DisplayName + GameText.Get("LightGameRepair.RepairStatus.004"), false);
             string next = _repairLayout.Phases[_repair.NextPhaseIndex].DisplayName;
             string targets = "";
             foreach (RepairLayout.Device device in _repairLayout.Devices)
                 if (_repair.IsTarget(device.Id, true))
                     targets += (targets.Length == 0 ? "" : "、") + device.DisplayName;
-            return (_repair.Warning ? GameText.Get("LightGameRepair.RepairStatus.005") : GameText.Get("LightGameRepair.RepairStatus.006")) + GameText.Get("LightGameRepair.RepairStatus.007", _repair.RemainingSeconds, next, targets);
+            return GameText.Feedback((_repair.Warning ? GameText.Get("LightGameRepair.RepairStatus.005") : GameText.Get("LightGameRepair.RepairStatus.006")) + GameText.Get("LightGameRepair.RepairStatus.007", _repair.RemainingSeconds, next, targets), !_repair.Warning);
         }
         /** @brief 松开或离开维修状态时释放调角。 */
         private void ReleaseRepairDrag()

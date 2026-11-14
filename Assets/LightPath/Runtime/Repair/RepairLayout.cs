@@ -46,13 +46,27 @@ namespace DelayNoMore.LightPath
             public string Name = GameText.Get("RepairLayout.Name.002");
             /** @brief 必须同时点亮的出口标识。 */
             public string[] Targets = new string[0];
+            /** @brief 随机模式下的相对抽取权重；0表示不参与后续抽取，初始化仍固定阶段0。 */
+            [Min(0)] public float Weight = 1f;
+            /** @brief 是否允许在开局限定次数内抽到本阶段。 */
+            public bool AllowInitially;
         }
         /** @brief 机关列表。 */
         public Device[] Devices = new Device[0];
         /** @brief 循环阶段。 */
         public Phase[] Phases = new Phase[0];
-        /** @brief 每轮洗牌遍历所有阶段，再开始下一轮。 */
+        /** @brief 按各阶段权重独立抽取下一阶段；关闭时按索引循环。 */
         public bool RandomPhaseOrder = true;
+        /** @brief 开局限定抽取的阶段次数，包含开局阶段；0关闭限定，随机模式生效。 */
+        [Min(0)] public int InitialPhaseCount;
+        /** @brief 第一光源的光线颜色。 */
+        public Color FirstBeamColor = new Color(.1f, .7f, 1f);
+        /** @brief 第二及后续光源的光线颜色。 */
+        public Color SecondBeamColor = new Color(1f, .2f, .7f);
+        /** @brief 不同光源在节点合流后的出射光线颜色。 */
+        public Color MergedBeamColor = Color.white;
+        /** @brief 当前目标以外的出口被点亮时的颜色。 */
+        public Color UnexpectedExitColor = new Color(1f, .15f, .1f);
         /** @brief 事件间隔范围，正常供光观看时间秒数。 */
         public Vector2 Interval = new Vector2(40, 70);
         /** @brief 预警秒数。 */
@@ -114,6 +128,8 @@ namespace DelayNoMore.LightPath
                 error = GameText.Get("RepairLayout.TryValidate.010");
                 return false;
             }
+            double totalWeight = 0;
+            double initialWeight = 0;
             foreach (Phase phase in Phases)
             {
                 if (phase == null || phase.Targets == null || phase.Targets.Length == 0)
@@ -121,6 +137,13 @@ namespace DelayNoMore.LightPath
                     error = GameText.Get("RepairLayout.TryValidate.011");
                     return false;
                 }
+                if (!Finite(phase.Weight) || phase.Weight < 0)
+                {
+                    error = GameText.Get("RepairLayout.Weight.Invalid");
+                    return false;
+                }
+                totalWeight += phase.Weight;
+                if (phase.AllowInitially) initialWeight += phase.Weight;
                 foreach (string target in phase.Targets)
                     if (string.IsNullOrEmpty(target) || !exits.Contains(target))
                     {
@@ -128,7 +151,40 @@ namespace DelayNoMore.LightPath
                         return false;
                     }
             }
+            if (RandomPhaseOrder && totalWeight <= 0)
+            {
+                error = GameText.Get("RepairLayout.Weight.AllZero");
+                return false;
+            }
+            if (InitialPhaseCount < 0)
+            {
+                error = GameText.Get("RepairLayout.Initial.InvalidCount");
+                return false;
+            }
+            if (RandomPhaseOrder && InitialPhaseCount > 0 && initialWeight <= 0)
+            {
+                error = GameText.Get("RepairLayout.Initial.NoPhase");
+                return false;
+            }
             return true;
+        }
+        /** @brief 查询光源或合流的表现色。@param sourceIndex 光源索引，负数表示合流 @return 光线颜色 */
+        public Color BeamColor(int sourceIndex)
+        {
+            if (sourceIndex < 0) return MergedBeamColor;
+            for (int i = 0; i < Devices.Length; i++)
+                if (Devices[i].Type == Kind.Source)
+                    return sourceIndex == i ? FirstBeamColor : SecondBeamColor;
+            return FirstBeamColor;
+        }
+        /** @brief 根据当前目标与光路计算节点填充色。@param device 节点 @param result 光路结果 @param target 是否为当前目标 @return 节点填充颜色 */
+        public Color NodeColor(Device device, RepairPreviewSolver.Result result, bool target)
+        {
+            if (device.Type == Kind.Exit && result.Lit.Contains(device.Id))
+                return target ? Color.green : UnexpectedExitColor;
+            if (device.Type == Kind.Source)
+                return BeamColor(Array.IndexOf(Devices, device));
+            return Color.cyan;
         }
         /** @brief 判断数值是否有限。@param value 待检查数值 @return 是否有限 */
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
